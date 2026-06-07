@@ -1,16 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:jobodia_frontend/app/bindings/initial_binding.dart';
+import 'package:jobodia_frontend/app/routes/app_pages.dart';
+import 'package:jobodia_frontend/app/routes/app_routes.dart';
+import 'package:jobodia_frontend/app/theme/app_theme.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const JobodiaApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+/// App entry widget. GetMaterialApp enables GetX navigation and bindings.
+class JobodiaApp extends StatelessWidget {
+  const JobodiaApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: Center(child: Text("Hello"))),
+    return GetMaterialApp(
+      title: 'Jobodia',
+      debugShowCheckedModeBanner: false,
+      initialBinding: InitialBinding(),
+      initialRoute: AppRoutes.login,
+      getPages: AppPages.pages,
+      theme: AppTheme.light,
     );
   }
 }
