@@ -16,15 +16,21 @@ class AuthController extends GetxController {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
   final otpController = TextEditingController();
+  final newPasswordController = TextEditingController();
+  final resetConfirmPasswordController = TextEditingController();
 
   // 0 = Login, 1 = Sign Up.
   final RxInt selectedAuthTab = 0.obs;
   final RxBool isLoading = false.obs;
   final RxBool isResendingOtp = false.obs;
+  final RxBool isResetPasswordLoading = false.obs;
   final RxString errorMessage = ''.obs;
+  final RxString resetPasswordErrorMessage = ''.obs;
   final RxString registeredEmail = ''.obs;
   final RxBool isPasswordVisible = false.obs;
   final RxBool isConfirmPasswordVisible = false.obs;
+  final RxBool isNewPasswordVisible = false.obs;
+  final RxBool isResetConfirmPasswordVisible = false.obs;
   final currentUser = Rxn<UserModel>();
 
   void changeAuthTab(int index) {
@@ -40,6 +46,14 @@ class AuthController extends GetxController {
 
   void toggleConfirmPasswordVisibility() {
     isConfirmPasswordVisible.toggle();
+  }
+
+  void toggleNewPasswordVisibility() {
+    isNewPasswordVisible.toggle();
+  }
+
+  void toggleResetConfirmPasswordVisibility() {
+    isResetConfirmPasswordVisible.toggle();
   }
 
   bool isValidGmail(String email) {
@@ -230,6 +244,60 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<void> resetPassword() async {
+    final newPassword = newPasswordController.text;
+    final confirmPassword = resetConfirmPasswordController.text;
+
+    if (newPassword.isEmpty) {
+      resetPasswordErrorMessage.value = 'New password is required.';
+      return;
+    }
+
+    if (confirmPassword.isEmpty) {
+      resetPasswordErrorMessage.value = 'Confirm password is required.';
+      return;
+    }
+
+    if (newPassword != confirmPassword) {
+      resetPasswordErrorMessage.value = 'Passwords do not match.';
+      return;
+    }
+
+    isResetPasswordLoading.value = true;
+    resetPasswordErrorMessage.value = '';
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    try {
+      final isSuccess = await _authRepository.fakeResetPassword(newPassword);
+      if (!isSuccess) {
+        resetPasswordErrorMessage.value = 'Unable to reset password.';
+        return;
+      }
+
+      Get.snackbar(
+        'Success',
+        'Password reset successfully. Please log in.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.primary,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 2),
+      );
+      clearResetPasswordForm();
+      Get.offAllNamed(AppRoutes.login);
+    } finally {
+      isResetPasswordLoading.value = false;
+    }
+  }
+
+  void clearResetPasswordForm() {
+    newPasswordController.clear();
+    resetConfirmPasswordController.clear();
+    resetPasswordErrorMessage.value = '';
+    isNewPasswordVisible.value = false;
+    isResetConfirmPasswordVisible.value = false;
+  }
+
   void goBackToLogin() {
     selectedAuthTab.value = 0;
     usernameController.clear();
@@ -247,6 +315,7 @@ class AuthController extends GetxController {
     passwordController.clear();
     confirmPasswordController.clear();
     otpController.clear();
+    clearResetPasswordForm();
     registeredEmail.value = '';
     errorMessage.value = '';
     selectedAuthTab.value = 0;
@@ -273,6 +342,8 @@ class AuthController extends GetxController {
     passwordController.dispose();
     confirmPasswordController.dispose();
     otpController.dispose();
+    newPasswordController.dispose();
+    resetConfirmPasswordController.dispose();
     super.onClose();
   }
 }

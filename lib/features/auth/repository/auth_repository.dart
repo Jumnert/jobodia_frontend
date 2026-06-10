@@ -31,4 +31,9 @@ class AuthRepository {
     await Future<void>.delayed(const Duration(seconds: 1));
     return email.isNotEmpty;
   }
+
+  Future<bool> fakeResetPassword(String newPassword) async {
+    await Future<void>.delayed(const Duration(seconds: 1));
+    return newPassword.isNotEmpty;
+  }
 }

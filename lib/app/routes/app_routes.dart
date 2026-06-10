@@ -5,4 +5,5 @@ abstract final class AppRoutes {
   static const jobDetail = '/job-detail';
   static const profile = '/profile';
   static const otpVerification = '/otp-verification';
+  static const resetPassword = '/reset-password';
 }
