@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 
@@ -61,6 +62,12 @@ class HomeScreen extends GetView<AuthController> {
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w600,
                 ),
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: () => Get.toNamed(AppRoutes.jobDetail),
+                icon: const Icon(Icons.work_outline_rounded),
+                label: const Text('Open Job Detail'),
               ),
             ],
           ),
