@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jobodia_frontend/features/home/view/widgets/app_bottom_navigation_bar.dart';
+import 'package:jobodia_frontend/features/home/view/widgets/app_navigation.dart';
 
 enum _BillingCycle { monthly, yearly }
 
@@ -54,6 +56,11 @@ class _PricingScreenState extends State<PricingScreen> {
             const _FaqCard(),
           ],
         ),
+      ),
+      bottomNavigationBar: AppBottomNavigationBar(
+        selectedIndex: 3,
+        onDestinationSelected: (index) =>
+            navigateMainDestination(context, index, currentIndex: 3),
       ),
     );
   }

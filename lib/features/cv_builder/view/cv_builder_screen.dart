@@ -5,6 +5,8 @@ import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/custom_button.dart';
 import 'package:jobodia_frontend/core/widgets/custom_text_field.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
+import 'package:jobodia_frontend/features/home/view/widgets/app_bottom_navigation_bar.dart';
+import 'package:jobodia_frontend/features/home/view/widgets/app_navigation.dart';
 
 class CvBuilderScreen extends GetView<CvBuilderController> {
   const CvBuilderScreen({super.key});
@@ -31,6 +33,11 @@ class CvBuilderScreen extends GetView<CvBuilderController> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: AppBottomNavigationBar(
+        selectedIndex: 1,
+        onDestinationSelected: (index) =>
+            navigateMainDestination(context, index, currentIndex: 1),
       ),
     );
   }

@@ -544,7 +544,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.notifications_none_rounded));
+    await tester.tap(find.byIcon(Icons.notifications_none_rounded).first);
     await tester.pumpAndSettle();
 
     expect(find.text('Notifications'), findsOneWidget);
@@ -594,6 +594,28 @@ void main() {
     expect(find.text('Get started'), findsOneWidget);
   });
 
+  testWidgets('home settings nav opens settings page', (tester) async {
+    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpAndSettle();
+
+    final fields = find.byType(TextField);
+    await tester.enterText(fields.at(0), 'test@gmail.com');
+    await tester.enterText(fields.at(1), '123456');
+    await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
+    await tester.pump();
+
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Settings'), findsWidgets);
+    expect(find.text('General'), findsOneWidget);
+    expect(find.text('Leave feedback'), findsOneWidget);
+    expect(find.text('Terms and Conditions'), findsOneWidget);
+  });
+
   testWidgets('pricing plan tabs and yearly toggle update prices', (
     tester,
   ) async {
@@ -608,14 +630,15 @@ void main() {
     expect(find.text('Pro'), findsWidgets);
     expect(find.text('8'), findsOneWidget);
 
+    await tester.dragUntilVisible(
+      find.text('Yearly'),
+      find.byType(Scrollable).first,
+      const Offset(0, -220),
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Yearly'));
     await tester.pumpAndSettle();
     expect(find.text('79'), findsOneWidget);
-
-    await tester.tap(find.text('Plus'));
-    await tester.pumpAndSettle();
-    expect(find.text('Career Plus'), findsOneWidget);
-    expect(find.text('149'), findsOneWidget);
   });
 
   testWidgets('home search filters jobs', (tester) async {

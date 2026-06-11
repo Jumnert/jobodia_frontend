@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/features/ai_chat/controller/ai_chat_controller.dart';
 import 'package:jobodia_frontend/features/ai_chat/model/chat_message_model.dart';
+import 'package:jobodia_frontend/features/home/view/widgets/app_bottom_navigation_bar.dart';
+import 'package:jobodia_frontend/features/home/view/widgets/app_navigation.dart';
 
 class AiChatScreen extends GetView<AiChatController> {
   const AiChatScreen({super.key});
@@ -31,6 +33,11 @@ class AiChatScreen extends GetView<AiChatController> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: AppBottomNavigationBar(
+        selectedIndex: 2,
+        onDestinationSelected: (index) =>
+            navigateMainDestination(context, index, currentIndex: 2),
       ),
     );
   }
