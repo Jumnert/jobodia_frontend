@@ -5,6 +5,7 @@ import 'package:jobodia_frontend/features/ai_chat/controller/ai_chat_controller.
 import 'package:jobodia_frontend/features/ai_chat/model/chat_message_model.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/app_bottom_navigation_bar.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/app_navigation.dart';
+import 'package:jobodia_frontend/features/search/view/search_screen.dart';
 
 class AiChatScreen extends GetView<AiChatController> {
   const AiChatScreen({super.key});
@@ -15,8 +16,10 @@ class AiChatScreen extends GetView<AiChatController> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF3F3F3),
+      extendBody: true,
       endDrawer: _ChatHistoryDrawer(controller: controller),
-      body: SafeArea(
+      body: Padding(
+        padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
         child: Column(
           children: [
             const _ChatHeader(),
@@ -28,7 +31,12 @@ class AiChatScreen extends GetView<AiChatController> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(14, 8, 14, bottomPadding * 0.05),
+              padding: EdgeInsets.fromLTRB(
+                14,
+                8,
+                14,
+                94 + bottomPadding * 0.05,
+              ),
               child: _MessageComposer(controller: controller),
             ),
           ],
@@ -38,6 +46,9 @@ class AiChatScreen extends GetView<AiChatController> {
         selectedIndex: 2,
         onDestinationSelected: (index) =>
             navigateMainDestination(context, index, currentIndex: 2),
+        onSearchPressed: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute<void>(builder: (_) => const SearchScreen())),
       ),
     );
   }

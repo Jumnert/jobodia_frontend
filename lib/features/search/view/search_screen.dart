@@ -21,7 +21,9 @@ class SearchScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6F8),
-      body: SafeArea(
+      extendBody: true,
+      body: Padding(
+        padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
         child: Column(
           children: [
             Padding(
@@ -82,9 +84,10 @@ class SearchScreen extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: AppBottomNavigationBar(
-        selectedIndex: 3,
+        selectedIndex: 0,
         onDestinationSelected: (index) =>
-            navigateMainDestination(context, index, currentIndex: 3),
+            navigateMainDestination(context, index, currentIndex: -1),
+        onSearchPressed: () {},
       ),
     );
   }

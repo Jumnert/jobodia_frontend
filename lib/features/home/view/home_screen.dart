@@ -12,6 +12,7 @@ import 'package:jobodia_frontend/features/home/view/widgets/job_feed_card.dart';
 import 'package:jobodia_frontend/features/job_detail/controller/job_detail_controller.dart';
 import 'package:jobodia_frontend/features/job_detail/view/job_detail_screen.dart';
 import 'package:jobodia_frontend/features/notifications/view/notifications_screen.dart';
+import 'package:jobodia_frontend/features/search/view/search_screen.dart';
 import 'package:jobodia_frontend/features/settings/view/settings_screen.dart';
 
 /// Home feed screen shown after login succeeds.
@@ -27,7 +28,9 @@ class HomeScreen extends GetView<AuthController> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6F8),
-      body: SafeArea(
+      extendBody: true,
+      body: Padding(
+        padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
         child: Column(
           children: [
             Padding(
@@ -113,6 +116,9 @@ class HomeScreen extends GetView<AuthController> {
         selectedIndex: 0,
         onDestinationSelected: (index) =>
             navigateMainDestination(context, index, currentIndex: 0),
+        onSearchPressed: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute<void>(builder: (_) => const SearchScreen())),
       ),
     );
   }

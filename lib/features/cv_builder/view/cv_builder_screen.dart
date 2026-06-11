@@ -7,6 +7,7 @@ import 'package:jobodia_frontend/core/widgets/custom_text_field.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/app_bottom_navigation_bar.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/app_navigation.dart';
+import 'package:jobodia_frontend/features/search/view/search_screen.dart';
 
 class CvBuilderScreen extends GetView<CvBuilderController> {
   const CvBuilderScreen({super.key});
@@ -15,7 +16,9 @@ class CvBuilderScreen extends GetView<CvBuilderController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
+      extendBody: true,
+      body: Padding(
+        padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
         child: Column(
           children: [
             const _Header(),
@@ -38,6 +41,9 @@ class CvBuilderScreen extends GetView<CvBuilderController> {
         selectedIndex: 1,
         onDestinationSelected: (index) =>
             navigateMainDestination(context, index, currentIndex: 1),
+        onSearchPressed: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute<void>(builder: (_) => const SearchScreen())),
       ),
     );
   }
@@ -115,7 +121,7 @@ class _BasicInfoStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 112),
       children: [
         const Text(
           'Ready to make a CV?',
@@ -250,7 +256,7 @@ class _WorkInfoStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 112),
       children: [
         const Text(
           'Tell us about your work',
@@ -426,7 +432,7 @@ class _TemplateStep extends StatelessWidget {
     ];
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 112),
       children: [
         const Text(
           'Choose a template you like',

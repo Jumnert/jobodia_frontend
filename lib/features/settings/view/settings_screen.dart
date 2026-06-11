@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jobodia_frontend/features/home/view/widgets/app_bottom_navigation_bar.dart';
+import 'package:jobodia_frontend/features/home/view/widgets/app_navigation.dart';
 import 'package:jobodia_frontend/features/pricing/view/pricing_screen.dart';
+import 'package:jobodia_frontend/features/search/view/search_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -35,9 +38,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: SafeArea(
+      extendBody: true,
+      body: Padding(
+        padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 112),
           children: [
             Row(
               children: [
@@ -153,6 +158,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: AppBottomNavigationBar(
+        selectedIndex: 3,
+        onDestinationSelected: (index) =>
+            navigateMainDestination(context, index, currentIndex: 3),
+        onSearchPressed: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute<void>(builder: (_) => const SearchScreen())),
       ),
     );
   }

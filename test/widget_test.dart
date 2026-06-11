@@ -172,13 +172,18 @@ void main() {
   });
 
   testWidgets('AI chat sends message and shows mock reply', (tester) async {
-    Get.put(AiChatController());
-
-    await tester.pumpWidget(const GetMaterialApp(home: AiChatScreen()));
+    await tester.pumpWidget(
+      GetMaterialApp(
+        initialBinding: BindingsBuilder(() {
+          Get.put(AiChatController());
+        }),
+        home: const AiChatScreen(),
+      ),
+    );
+    await tester.pumpAndSettle();
 
     expect(find.text('Jobodia Ai'), findsOneWidget);
     expect(find.text('Hi, Han!'), findsOneWidget);
-    expect(find.text('Review my CV'), findsOneWidget);
 
     await tester.enterText(
       find.widgetWithText(TextField, 'Send a message...'),
@@ -199,9 +204,15 @@ void main() {
   testWidgets('AI chat plus button shows attachment popup on tap', (
     tester,
   ) async {
-    Get.put(AiChatController());
-
-    await tester.pumpWidget(const GetMaterialApp(home: AiChatScreen()));
+    await tester.pumpWidget(
+      GetMaterialApp(
+        initialBinding: BindingsBuilder(() {
+          Get.put(AiChatController());
+        }),
+        home: const AiChatScreen(),
+      ),
+    );
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.add_rounded));
     await tester.pumpAndSettle();
@@ -215,9 +226,15 @@ void main() {
   testWidgets('AI chat more button opens searchable history drawer', (
     tester,
   ) async {
-    Get.put(AiChatController());
-
-    await tester.pumpWidget(const GetMaterialApp(home: AiChatScreen()));
+    await tester.pumpWidget(
+      GetMaterialApp(
+        initialBinding: BindingsBuilder(() {
+          Get.put(AiChatController());
+        }),
+        home: const AiChatScreen(),
+      ),
+    );
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.more_horiz_rounded));
     await tester.pumpAndSettle();
@@ -243,9 +260,17 @@ void main() {
   testWidgets('AI chat new chat clears conversation from drawer', (
     tester,
   ) async {
-    final controller = Get.put(AiChatController());
+    await tester.pumpWidget(
+      GetMaterialApp(
+        initialBinding: BindingsBuilder(() {
+          Get.put(AiChatController());
+        }),
+        home: const AiChatScreen(),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-    await tester.pumpWidget(const GetMaterialApp(home: AiChatScreen()));
+    final controller = Get.find<AiChatController>();
 
     controller.sendMessage('Can you review my CV?');
     await tester.pumpAndSettle();

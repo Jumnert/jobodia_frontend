@@ -5,7 +5,6 @@ import 'package:jobodia_frontend/features/ai_chat/view/ai_chat_screen.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
 import 'package:jobodia_frontend/features/cv_builder/view/cv_builder_screen.dart';
 import 'package:jobodia_frontend/features/home/view/home_screen.dart';
-import 'package:jobodia_frontend/features/search/view/search_screen.dart';
 import 'package:jobodia_frontend/features/settings/view/settings_screen.dart';
 
 void navigateMainDestination(
@@ -33,9 +32,9 @@ void navigateMainDestination(
       }
       page = const AiChatScreen();
     case 3:
-      page = const SearchScreen();
-    default:
       page = const SettingsScreen();
+    default:
+      page = const HomeScreen();
   }
 
   Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
