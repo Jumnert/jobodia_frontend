@@ -12,6 +12,7 @@ import 'package:jobodia_frontend/features/cv_builder/view/cv_builder_screen.dart
 import 'package:jobodia_frontend/features/home/view/home_screen.dart';
 import 'package:jobodia_frontend/features/job_detail/controller/job_detail_controller.dart';
 import 'package:jobodia_frontend/features/job_detail/view/job_detail_screen.dart';
+import 'package:jobodia_frontend/features/pricing/view/pricing_screen.dart';
 import 'package:jobodia_frontend/features/profile/controller/profile_controller.dart';
 import 'package:jobodia_frontend/features/profile/view/profile_screen.dart';
 import 'package:jobodia_frontend/features/report/view/screens/report_screen.dart';
@@ -49,6 +50,7 @@ abstract final class AppPages {
         () => Get.lazyPut<AiChatController>(AiChatController.new),
       ),
     ),
+    GetPage(name: AppRoutes.pricing, page: () => const PricingScreen()),
     GetPage(
       name: AppRoutes.jobDetail,
       page: () => const JobDetailScreen(),

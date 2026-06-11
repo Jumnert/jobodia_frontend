@@ -4,6 +4,7 @@ abstract final class AppRoutes {
   static const home = '/home';
   static const cvBuilder = '/cv-builder';
   static const aiChat = '/ai-chat';
+  static const pricing = '/pricing';
   static const jobDetail = '/job-detail';
   static const profile = '/profile';
   static const otpVerification = '/otp-verification';

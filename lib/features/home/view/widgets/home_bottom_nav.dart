@@ -4,6 +4,7 @@ import 'package:jobodia_frontend/features/ai_chat/controller/ai_chat_controller.
 import 'package:jobodia_frontend/features/ai_chat/view/ai_chat_screen.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
 import 'package:jobodia_frontend/features/cv_builder/view/cv_builder_screen.dart';
+import 'package:jobodia_frontend/features/pricing/view/pricing_screen.dart';
 
 class HomeBottomNav extends StatelessWidget {
   const HomeBottomNav({super.key});
@@ -63,7 +64,14 @@ class HomeBottomNav extends StatelessWidget {
                     },
                     icon: const Icon(Icons.chat_bubble_outline),
                   ),
-                  const Icon(Icons.star_border_rounded),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const PricingScreen(),
+                      ),
+                    ),
+                    icon: const Icon(Icons.star_border_rounded),
+                  ),
                   const CircleAvatar(
                     radius: 18,
                     backgroundColor: Color(0xFF2F4250),

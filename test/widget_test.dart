@@ -10,6 +10,7 @@ import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_contr
 import 'package:jobodia_frontend/features/cv_builder/view/cv_builder_screen.dart';
 import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/job_feed_card.dart';
+import 'package:jobodia_frontend/features/pricing/view/pricing_screen.dart';
 import 'package:jobodia_frontend/main.dart';
 
 void main() {
@@ -548,6 +549,52 @@ void main() {
 
     expect(find.text('Ready to make a CV?'), findsOneWidget);
     expect(find.text('Step 1'), findsOneWidget);
+  });
+
+  testWidgets('home star nav opens pricing plans', (tester) async {
+    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpAndSettle();
+
+    final fields = find.byType(TextField);
+    await tester.enterText(fields.at(0), 'test@gmail.com');
+    await tester.enterText(fields.at(1), '123456');
+    await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
+    await tester.pump();
+
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.star_border_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Pricing Plan'), findsOneWidget);
+    expect(find.text('Access Premium\nFeatures on Every Plan'), findsOneWidget);
+    expect(find.text('Starter'), findsOneWidget);
+    expect(find.text('Get started'), findsOneWidget);
+  });
+
+  testWidgets('pricing plan tabs and yearly toggle update prices', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const GetMaterialApp(home: PricingScreen()));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Starter'), findsOneWidget);
+    expect(find.text('0'), findsOneWidget);
+
+    await tester.tap(find.text('Pro'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pro'), findsWidgets);
+    expect(find.text('8'), findsOneWidget);
+
+    await tester.tap(find.text('Yearly'));
+    await tester.pumpAndSettle();
+    expect(find.text('79'), findsOneWidget);
+
+    await tester.tap(find.text('Plus'));
+    await tester.pumpAndSettle();
+    expect(find.text('Career Plus'), findsOneWidget);
+    expect(find.text('149'), findsOneWidget);
   });
 
   testWidgets('home search filters jobs', (tester) async {
