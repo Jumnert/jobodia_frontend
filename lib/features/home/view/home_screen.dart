@@ -17,7 +17,9 @@ import 'package:jobodia_frontend/features/settings/view/settings_screen.dart';
 
 /// Home feed screen shown after login succeeds.
 class HomeScreen extends GetView<AuthController> {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.showBottomNav = true});
+
+  final bool? showBottomNav;
 
   @override
   Widget build(BuildContext context) {
@@ -112,14 +114,16 @@ class HomeScreen extends GetView<AuthController> {
           ],
         ),
       ),
-      bottomNavigationBar: AppBottomNavigationBar(
-        selectedIndex: 0,
-        onDestinationSelected: (index) =>
-            navigateMainDestination(context, index, currentIndex: 0),
-        onSearchPressed: () => Navigator.of(
-          context,
-        ).push(MaterialPageRoute<void>(builder: (_) => const SearchScreen())),
-      ),
+      bottomNavigationBar: (showBottomNav ?? true)
+          ? AppBottomNavigationBar(
+              selectedIndex: 0,
+              onDestinationSelected: (index) =>
+                  navigateMainDestination(context, index, currentIndex: 0),
+              onSearchPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const SearchScreen()),
+              ),
+            )
+          : null,
     );
   }
 }

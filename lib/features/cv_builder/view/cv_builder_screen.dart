@@ -10,7 +10,9 @@ import 'package:jobodia_frontend/features/home/view/widgets/app_navigation.dart'
 import 'package:jobodia_frontend/features/search/view/search_screen.dart';
 
 class CvBuilderScreen extends GetView<CvBuilderController> {
-  const CvBuilderScreen({super.key});
+  const CvBuilderScreen({super.key, this.showBottomNav = true});
+
+  final bool? showBottomNav;
 
   @override
   Widget build(BuildContext context) {
@@ -37,14 +39,16 @@ class CvBuilderScreen extends GetView<CvBuilderController> {
           ],
         ),
       ),
-      bottomNavigationBar: AppBottomNavigationBar(
-        selectedIndex: 1,
-        onDestinationSelected: (index) =>
-            navigateMainDestination(context, index, currentIndex: 1),
-        onSearchPressed: () => Navigator.of(
-          context,
-        ).push(MaterialPageRoute<void>(builder: (_) => const SearchScreen())),
-      ),
+      bottomNavigationBar: (showBottomNav ?? true)
+          ? AppBottomNavigationBar(
+              selectedIndex: 1,
+              onDestinationSelected: (index) =>
+                  navigateMainDestination(context, index, currentIndex: 1),
+              onSearchPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const SearchScreen()),
+              ),
+            )
+          : null,
     );
   }
 }

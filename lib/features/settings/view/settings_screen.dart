@@ -6,7 +6,9 @@ import 'package:jobodia_frontend/features/pricing/view/pricing_screen.dart';
 import 'package:jobodia_frontend/features/search/view/search_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({super.key, this.showBottomNav = true});
+
+  final bool? showBottomNav;
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -159,14 +161,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: AppBottomNavigationBar(
-        selectedIndex: 3,
-        onDestinationSelected: (index) =>
-            navigateMainDestination(context, index, currentIndex: 3),
-        onSearchPressed: () => Navigator.of(
-          context,
-        ).push(MaterialPageRoute<void>(builder: (_) => const SearchScreen())),
-      ),
+      bottomNavigationBar: (widget.showBottomNav ?? true)
+          ? AppBottomNavigationBar(
+              selectedIndex: 3,
+              onDestinationSelected: (index) =>
+                  navigateMainDestination(context, index, currentIndex: 3),
+              onSearchPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const SearchScreen()),
+              ),
+            )
+          : null,
     );
   }
 

@@ -37,5 +37,11 @@ void navigateMainDestination(
       page = const HomeScreen();
   }
 
-  Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
+  Navigator.of(context).pushReplacement(
+    PageRouteBuilder<void>(
+      pageBuilder: (_, _, _) => page,
+      transitionDuration: Duration.zero,
+      reverseTransitionDuration: Duration.zero,
+    ),
+  );
 }

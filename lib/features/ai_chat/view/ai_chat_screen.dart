@@ -8,7 +8,9 @@ import 'package:jobodia_frontend/features/home/view/widgets/app_navigation.dart'
 import 'package:jobodia_frontend/features/search/view/search_screen.dart';
 
 class AiChatScreen extends GetView<AiChatController> {
-  const AiChatScreen({super.key});
+  const AiChatScreen({super.key, this.showBottomNav = true});
+
+  final bool? showBottomNav;
 
   @override
   Widget build(BuildContext context) {
@@ -42,14 +44,16 @@ class AiChatScreen extends GetView<AiChatController> {
           ],
         ),
       ),
-      bottomNavigationBar: AppBottomNavigationBar(
-        selectedIndex: 2,
-        onDestinationSelected: (index) =>
-            navigateMainDestination(context, index, currentIndex: 2),
-        onSearchPressed: () => Navigator.of(
-          context,
-        ).push(MaterialPageRoute<void>(builder: (_) => const SearchScreen())),
-      ),
+      bottomNavigationBar: (showBottomNav ?? true)
+          ? AppBottomNavigationBar(
+              selectedIndex: 2,
+              onDestinationSelected: (index) =>
+                  navigateMainDestination(context, index, currentIndex: 2),
+              onSearchPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const SearchScreen()),
+              ),
+            )
+          : null,
     );
   }
 }
