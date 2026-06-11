@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/features/about/view/screens/about_us_screen.dart';
+import 'package:jobodia_frontend/features/ai_chat/controller/ai_chat_controller.dart';
+import 'package:jobodia_frontend/features/ai_chat/view/ai_chat_screen.dart';
 import 'package:jobodia_frontend/features/about/view/screens/privacy_policy_screen.dart';
 import 'package:jobodia_frontend/features/auth/view/login_screen.dart';
 import 'package:jobodia_frontend/features/auth/view/otp_verification_screen.dart';
@@ -31,6 +33,13 @@ abstract final class AppPages {
     ),
     GetPage(name: AppRoutes.report, page: () => const ReportScreen()),
     GetPage(name: AppRoutes.home, page: () => const HomeScreen()),
+    GetPage(
+      name: AppRoutes.aiChat,
+      page: () => const AiChatScreen(),
+      binding: BindingsBuilder(
+        () => Get.lazyPut<AiChatController>(AiChatController.new),
+      ),
+    ),
     GetPage(
       name: AppRoutes.jobDetail,
       page: () => const JobDetailScreen(),

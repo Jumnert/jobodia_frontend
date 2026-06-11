@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 import 'package:jobodia_frontend/features/auth/repository/auth_repository.dart';
+import 'package:jobodia_frontend/features/ai_chat/controller/ai_chat_controller.dart';
+import 'package:jobodia_frontend/features/ai_chat/view/ai_chat_screen.dart';
 import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/job_feed_card.dart';
 import 'package:jobodia_frontend/main.dart';
@@ -164,6 +166,95 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('AI chat sends message and shows mock reply', (tester) async {
+    Get.put(AiChatController());
+
+    await tester.pumpWidget(const GetMaterialApp(home: AiChatScreen()));
+
+    expect(find.text('Jobodia Ai'), findsOneWidget);
+    expect(find.text('Hi, Han!'), findsOneWidget);
+    expect(find.text('Review my CV'), findsOneWidget);
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Send a message...'),
+      'Can you review my CV?',
+    );
+    await tester.tap(find.byIcon(Icons.send_outlined));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Can you review my CV?'), findsOneWidget);
+    expect(
+      find.text(
+        "Absolutely! Please upload your CV and I'll analyze it for you.",
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('AI chat plus button shows attachment popup on tap', (
+    tester,
+  ) async {
+    Get.put(AiChatController());
+
+    await tester.pumpWidget(const GetMaterialApp(home: AiChatScreen()));
+
+    await tester.tap(find.byIcon(Icons.add_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Camera'), findsOneWidget);
+    expect(find.text('Photo Library'), findsOneWidget);
+    expect(find.text('File'), findsOneWidget);
+    expect(find.text('NotebookLM'), findsOneWidget);
+  });
+
+  testWidgets('AI chat more button opens searchable history drawer', (
+    tester,
+  ) async {
+    Get.put(AiChatController());
+
+    await tester.pumpWidget(const GetMaterialApp(home: AiChatScreen()));
+
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Chat history'), findsOneWidget);
+    expect(find.text('New chat'), findsOneWidget);
+    expect(find.text('Review my product designer CV'), findsOneWidget);
+
+    await tester.drag(find.byType(ListView).last, const Offset(0, -700));
+    await tester.pumpAndSettle();
+    expect(find.text('Improve resume bullet points'), findsOneWidget);
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Search chats'),
+      'remote',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Find remote Flutter jobs'), findsOneWidget);
+    expect(find.text('Review my product designer CV'), findsNothing);
+  });
+
+  testWidgets('AI chat new chat clears conversation from drawer', (
+    tester,
+  ) async {
+    final controller = Get.put(AiChatController());
+
+    await tester.pumpWidget(const GetMaterialApp(home: AiChatScreen()));
+
+    controller.sendMessage('Can you review my CV?');
+    await tester.pumpAndSettle();
+    expect(find.text('Can you review my CV?'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('New chat'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hi, Han!'), findsOneWidget);
+    expect(find.text('Can you review my CV?'), findsNothing);
   });
 
   testWidgets('sign-up username field allows letters only', (tester) async {
@@ -338,6 +429,26 @@ void main() {
     expect(find.text('Welcome, Test User'), findsOneWidget);
     expect(find.text('test@gmail.com'), findsOneWidget);
     expect(find.text('Candidate'), findsOneWidget);
+  });
+
+  testWidgets('home chat nav opens AI chat screen', (tester) async {
+    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpAndSettle();
+
+    final fields = find.byType(TextField);
+    await tester.enterText(fields.at(0), 'test@gmail.com');
+    await tester.enterText(fields.at(1), '123456');
+    await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
+    await tester.pump();
+
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.chat_bubble_outline));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Jobodia Ai'), findsOneWidget);
+    expect(find.text('How can I help you today?'), findsOneWidget);
   });
 
   testWidgets('home search filters jobs', (tester) async {

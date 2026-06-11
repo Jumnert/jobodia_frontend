@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:jobodia_frontend/features/ai_chat/controller/ai_chat_controller.dart';
+import 'package:jobodia_frontend/features/ai_chat/view/ai_chat_screen.dart';
 
 class HomeBottomNav extends StatelessWidget {
   const HomeBottomNav({super.key});
@@ -28,12 +31,25 @@ class HomeBottomNav extends StatelessWidget {
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: const [
-                  Icon(Icons.home_outlined),
-                  Icon(Icons.layers_outlined),
-                  Icon(Icons.chat_bubble_outline),
-                  Icon(Icons.star_border_rounded),
-                  CircleAvatar(
+                children: [
+                  const Icon(Icons.home_outlined),
+                  const Icon(Icons.layers_outlined),
+                  IconButton(
+                    onPressed: () {
+                      if (!Get.isRegistered<AiChatController>()) {
+                        Get.put(AiChatController());
+                      }
+
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const AiChatScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.chat_bubble_outline),
+                  ),
+                  const Icon(Icons.star_border_rounded),
+                  const CircleAvatar(
                     radius: 18,
                     backgroundColor: Color(0xFF2F4250),
                     child: Icon(

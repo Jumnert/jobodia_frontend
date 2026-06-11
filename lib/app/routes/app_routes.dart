@@ -2,6 +2,7 @@
 abstract final class AppRoutes {
   static const login = '/login';
   static const home = '/home';
+  static const aiChat = '/ai-chat';
   static const jobDetail = '/job-detail';
   static const profile = '/profile';
   static const otpVerification = '/otp-verification';
