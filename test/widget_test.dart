@@ -59,6 +59,54 @@ void main() {
     expect(find.text('Forgot Password?'), findsNothing);
   });
 
+  testWidgets('reset password mismatch stays on reset screen', (tester) async {
+    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Forgot Password?'));
+    await tester.pumpAndSettle();
+
+    final fields = find.byType(TextField);
+    await tester.enterText(fields.at(0), 'password');
+    await tester.enterText(fields.at(1), 'different');
+    await tester.tap(find.widgetWithText(FilledButton, 'Reset Password'));
+    await tester.pump();
+
+    expect(find.text('Reset Your Password'), findsOneWidget);
+    expect(find.text('Passwords do not match.'), findsOneWidget);
+
+    Get.back<void>();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Start Your Journey'), findsOneWidget);
+    expect(find.text('Passwords do not match.'), findsNothing);
+  });
+
+  testWidgets('matching reset passwords return to login', (tester) async {
+    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Forgot Password?'));
+    await tester.pumpAndSettle();
+
+    final fields = find.byType(TextField);
+    await tester.enterText(fields.at(0), 'new-password');
+    await tester.enterText(fields.at(1), 'new-password');
+    await tester.tap(find.widgetWithText(FilledButton, 'Reset Password'));
+    await tester.pump();
+
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Start Your Journey'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Log in'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+  });
+
   test('AuthController validates username and Gmail values', () {
     final controller = AuthController(const AuthRepository());
 

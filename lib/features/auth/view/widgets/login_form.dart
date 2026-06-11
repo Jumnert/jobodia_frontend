@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/custom_button.dart';
 import 'package:jobodia_frontend/core/widgets/custom_text_field.dart';
@@ -44,11 +45,10 @@ class LoginForm extends GetView<AuthController> {
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
-            onPressed: () => Get.snackbar(
-              'Forgot Password?',
-              'Password recovery will be connected later.',
-              snackPosition: SnackPosition.BOTTOM,
-            ),
+            onPressed: () {
+              controller.clearResetPasswordForm();
+              Get.toNamed(AppRoutes.resetPassword);
+            },
             style: TextButton.styleFrom(
               foregroundColor: AppColors.textSecondary,
               padding: const EdgeInsets.only(left: 12),
@@ -89,6 +89,35 @@ class LoginForm extends GetView<AuthController> {
         ),
         const SizedBox(height: 26),
         const _DemoAccountCard(),
+        const SizedBox(height: 12),
+        const _TemporaryTestNavigation(),
+      ],
+    );
+  }
+}
+
+class _TemporaryTestNavigation extends StatelessWidget {
+  const _TemporaryTestNavigation();
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 4,
+      runSpacing: 2,
+      children: [
+        TextButton(
+          onPressed: () => Get.toNamed(AppRoutes.aboutUs),
+          child: const Text('About Us'),
+        ),
+        TextButton(
+          onPressed: () => Get.toNamed(AppRoutes.privacyPolicy),
+          child: const Text('Privacy & Policy'),
+        ),
+        TextButton(
+          onPressed: () => Get.toNamed(AppRoutes.report),
+          child: const Text('Report'),
+        ),
       ],
     );
   }
