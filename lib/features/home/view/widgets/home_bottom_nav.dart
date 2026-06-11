@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/features/ai_chat/controller/ai_chat_controller.dart';
 import 'package:jobodia_frontend/features/ai_chat/view/ai_chat_screen.dart';
+import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
+import 'package:jobodia_frontend/features/cv_builder/view/cv_builder_screen.dart';
 
 class HomeBottomNav extends StatelessWidget {
   const HomeBottomNav({super.key});
@@ -33,7 +35,20 @@ class HomeBottomNav extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   const Icon(Icons.home_outlined),
-                  const Icon(Icons.layers_outlined),
+                  IconButton(
+                    onPressed: () {
+                      if (!Get.isRegistered<CvBuilderController>()) {
+                        Get.put(CvBuilderController());
+                      }
+
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const CvBuilderScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.layers_outlined),
+                  ),
                   IconButton(
                     onPressed: () {
                       if (!Get.isRegistered<AiChatController>()) {

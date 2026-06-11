@@ -6,6 +6,8 @@ import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 import 'package:jobodia_frontend/features/auth/repository/auth_repository.dart';
 import 'package:jobodia_frontend/features/ai_chat/controller/ai_chat_controller.dart';
 import 'package:jobodia_frontend/features/ai_chat/view/ai_chat_screen.dart';
+import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
+import 'package:jobodia_frontend/features/cv_builder/view/cv_builder_screen.dart';
 import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/job_feed_card.dart';
 import 'package:jobodia_frontend/main.dart';
@@ -257,6 +259,83 @@ void main() {
     expect(find.text('Can you review my CV?'), findsNothing);
   });
 
+  testWidgets('CV builder advances through steps and template selection', (
+    tester,
+  ) async {
+    final cvController = Get.put(CvBuilderController());
+    cvController.showGeneratedSnackBar = false;
+
+    await tester.pumpWidget(const GetMaterialApp(home: CvBuilderScreen()));
+
+    expect(find.text('Ready to make a CV?'), findsOneWidget);
+    expect(find.text('Step 1'), findsOneWidget);
+    expect(find.text('Upload headshot'), findsOneWidget);
+
+    await tester.tap(find.text('Choose'));
+    await tester.pumpAndSettle();
+
+    expect(cvController.hasHeadshot.value, isTrue);
+    expect(find.text('Headshot selected'), findsOneWidget);
+
+    cvController.fullNameController.text = 'Han Jobodia';
+    cvController.emailController.text = 'han@gmail.com';
+    cvController.phoneController.text = '12345678';
+    cvController.locationController.text = 'Phnom Penh';
+    await tester.pump();
+    cvController.nextStep();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tell us about your work'), findsOneWidget);
+    expect(find.text('Work experience'), findsOneWidget);
+    expect(find.text('Experience 1'), findsOneWidget);
+
+    cvController.setWorkStartDate(
+      cvController.workExperiences.first,
+      DateTime(2023),
+    );
+    await tester.pumpAndSettle();
+    expect(cvController.workExperiences.first.startController.text, 'Jan 2023');
+
+    expect(find.text('Add work experience'), findsOneWidget);
+    cvController.addWorkExperience();
+    cvController.addWorkExperience();
+    await tester.pumpAndSettle();
+
+    expect(cvController.workExperiences.length, 3);
+    expect(cvController.canAddWorkExperience, isFalse);
+
+    await tester.scrollUntilVisible(
+      find.text('Education 1'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Education 1'), findsOneWidget);
+    expect(find.text('Add education'), findsOneWidget);
+    cvController.addEducation();
+    cvController.addEducation();
+    await tester.pumpAndSettle();
+
+    expect(cvController.educations.length, 3);
+    expect(cvController.canAddEducation, isFalse);
+
+    cvController.skillController.text = 'Flutter';
+    cvController.addSkill();
+    await tester.pumpAndSettle();
+
+    expect(cvController.skills, contains('Flutter'));
+
+    cvController.nextStep();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Choose a template you like'), findsOneWidget);
+    await tester.tap(find.text('Balanced'));
+    await tester.pumpAndSettle();
+    cvController.nextStep();
+    await tester.pump();
+
+    expect(cvController.isGenerated.value, isTrue);
+  });
+
   testWidgets('sign-up username field allows letters only', (tester) async {
     await tester.pumpWidget(const JobodiaApp());
     await tester.pumpAndSettle();
@@ -449,6 +528,26 @@ void main() {
 
     expect(find.text('Jobodia Ai'), findsOneWidget);
     expect(find.text('How can I help you today?'), findsOneWidget);
+  });
+
+  testWidgets('home layers nav opens CV builder', (tester) async {
+    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpAndSettle();
+
+    final fields = find.byType(TextField);
+    await tester.enterText(fields.at(0), 'test@gmail.com');
+    await tester.enterText(fields.at(1), '123456');
+    await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
+    await tester.pump();
+
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.layers_outlined));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ready to make a CV?'), findsOneWidget);
+    expect(find.text('Step 1'), findsOneWidget);
   });
 
   testWidgets('home search filters jobs', (tester) async {

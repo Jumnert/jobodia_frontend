@@ -7,6 +7,8 @@ import 'package:jobodia_frontend/features/about/view/screens/privacy_policy_scre
 import 'package:jobodia_frontend/features/auth/view/login_screen.dart';
 import 'package:jobodia_frontend/features/auth/view/otp_verification_screen.dart';
 import 'package:jobodia_frontend/features/auth/view/reset_password_screen.dart';
+import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
+import 'package:jobodia_frontend/features/cv_builder/view/cv_builder_screen.dart';
 import 'package:jobodia_frontend/features/home/view/home_screen.dart';
 import 'package:jobodia_frontend/features/job_detail/controller/job_detail_controller.dart';
 import 'package:jobodia_frontend/features/job_detail/view/job_detail_screen.dart';
@@ -33,6 +35,13 @@ abstract final class AppPages {
     ),
     GetPage(name: AppRoutes.report, page: () => const ReportScreen()),
     GetPage(name: AppRoutes.home, page: () => const HomeScreen()),
+    GetPage(
+      name: AppRoutes.cvBuilder,
+      page: () => const CvBuilderScreen(),
+      binding: BindingsBuilder(
+        () => Get.lazyPut<CvBuilderController>(CvBuilderController.new),
+      ),
+    ),
     GetPage(
       name: AppRoutes.aiChat,
       page: () => const AiChatScreen(),
