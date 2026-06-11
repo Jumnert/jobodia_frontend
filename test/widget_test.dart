@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 import 'package:jobodia_frontend/features/auth/repository/auth_repository.dart';
+import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
+import 'package:jobodia_frontend/features/home/view/widgets/job_feed_card.dart';
 import 'package:jobodia_frontend/main.dart';
 
 void main() {
@@ -120,6 +123,47 @@ void main() {
     expect(controller.isValidUsername('Muharen Dev'), isFalse);
 
     controller.onClose();
+  });
+
+  test('HomeController filters by salary and exposes internship level', () {
+    final controller = HomeController();
+
+    expect(controller.levels, contains('Internship'));
+
+    controller.updateSalaryRange(6000, 7200);
+
+    expect(
+      controller.filteredJobs.map((job) => job.title),
+      contains('UX Researcher'),
+    );
+    expect(
+      controller.filteredJobs.map((job) => job.title),
+      isNot(contains('UI Designer - Fintech App')),
+    );
+
+    controller.onClose();
+  });
+
+  testWidgets('job feed card fits compact context menu preview height', (
+    tester,
+  ) async {
+    final job = HomeController().jobs.first;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 360,
+              height: 246,
+              child: JobFeedCard(job: job),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('sign-up username field allows letters only', (tester) async {
@@ -294,5 +338,86 @@ void main() {
     expect(find.text('Welcome, Test User'), findsOneWidget);
     expect(find.text('test@gmail.com'), findsOneWidget);
     expect(find.text('Candidate'), findsOneWidget);
+  });
+
+  testWidgets('home search filters jobs', (tester) async {
+    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpAndSettle();
+
+    final fields = find.byType(TextField);
+    await tester.enterText(fields.at(0), 'test@gmail.com');
+    await tester.enterText(fields.at(1), '123456');
+    await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
+    await tester.pump();
+
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.widgetWithText(TextField, 'Search jobs'), 'UX');
+    await tester.pump();
+
+    expect(find.text('UX Researcher'), findsOneWidget);
+    expect(find.text('Product Designer - SaaS'), findsNothing);
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Search jobs'),
+      'xyz',
+    );
+    await tester.pump();
+
+    expect(find.text('No jobs match your search.'), findsOneWidget);
+  });
+
+  testWidgets('home filter filters jobs by location', (tester) async {
+    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpAndSettle();
+
+    final fields = find.byType(TextField);
+    await tester.enterText(fields.at(0), 'test@gmail.com');
+    await tester.enterText(fields.at(1), '123456');
+    await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
+    await tester.pump();
+
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.filter_alt_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Internship'), findsOneWidget);
+    expect(find.text('Salary range'), findsOneWidget);
+
+    await tester.tap(find.text('Remote'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Show jobs'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Frontend Engineer'), findsOneWidget);
+    expect(find.text('UX Researcher'), findsNothing);
+  });
+
+  testWidgets('job cards include context menu actions', (tester) async {
+    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpAndSettle();
+
+    final fields = find.byType(TextField);
+    await tester.enterText(fields.at(0), 'test@gmail.com');
+    await tester.enterText(fields.at(1), '123456');
+    await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
+    await tester.pump();
+
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+
+    final contextMenu = tester.widget<CupertinoContextMenu>(
+      find.byType(CupertinoContextMenu).first,
+    );
+    final labels = contextMenu.actions
+        .map(
+          (action) =>
+              ((action as CupertinoContextMenuAction).child as Text).data,
+        )
+        .toList();
+
+    expect(labels, containsAll(['Report', 'Fave', 'Share', 'Not interested']));
   });
 }

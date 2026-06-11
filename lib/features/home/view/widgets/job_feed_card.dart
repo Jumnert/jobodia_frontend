@@ -8,133 +8,164 @@ class JobFeedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFF0F0F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                job.company,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF6D6D6D),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(width: 6),
-              const Icon(
-                Icons.verified_rounded,
-                color: Color(0xFF4E79E7),
-                size: 15,
-              ),
-              const Spacer(),
-              const Icon(
-                Icons.bookmark_border_rounded,
-                size: 18,
-                color: Color(0xFF8A8A8A),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact =
+            constraints.hasBoundedHeight && constraints.maxHeight <= 260;
+        final visibleTags = job.tags.take(isCompact ? 2 : 3).toList();
+        final hiddenTagCount = job.tags.length - visibleTags.length;
+
+        return Container(
+          padding: EdgeInsets.all(isCompact ? 12 : 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFF0F0F0)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            job.title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _MetaPill(
-                icon: Icons.wifi_rounded,
-                label: job.level,
-                color: const Color(0xFFF4EFFF),
-              ),
-              const SizedBox(width: 8),
-              _MetaPill(
-                icon: Icons.location_on_rounded,
-                label: job.location,
-                color: const Color(0xFFEAF4FF),
-              ),
-              const SizedBox(width: 8),
-              _MetaPill(
-                icon: Icons.access_time_rounded,
-                label: job.timeAgo,
-                color: const Color(0xFFF1F2FF),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            job.description,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Color(0xFF7B7B7B),
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: job.tags
-                .map(
-                  (tag) => Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF6F6F6),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+              Row(
+                children: [
+                  Expanded(
                     child: Text(
-                      tag,
+                      job.company,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 13,
                         color: Color(0xFF6D6D6D),
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                )
-                .toList(),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
+                  const SizedBox(width: 6),
+                  const Icon(
+                    Icons.verified_rounded,
+                    color: Color(0xFF4E79E7),
+                    size: 15,
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(
+                    Icons.bookmark_border_rounded,
+                    size: 18,
+                    color: Color(0xFF8A8A8A),
+                  ),
+                ],
+              ),
+              SizedBox(height: isCompact ? 8 : 12),
               Text(
-                job.salary,
+                job.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 15,
+                  fontSize: 16,
                   fontWeight: FontWeight.w800,
+                  color: Colors.black,
                 ),
               ),
-              const Spacer(),
+              SizedBox(height: isCompact ? 6 : 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                children: [
+                  _MetaPill(
+                    icon: Icons.wifi_rounded,
+                    label: job.level,
+                    color: const Color(0xFFF4EFFF),
+                  ),
+                  _MetaPill(
+                    icon: Icons.location_on_rounded,
+                    label: job.location,
+                    color: const Color(0xFFEAF4FF),
+                  ),
+                  _MetaPill(
+                    icon: Icons.access_time_rounded,
+                    label: job.timeAgo,
+                    color: const Color(0xFFF1F2FF),
+                  ),
+                ],
+              ),
+              SizedBox(height: isCompact ? 6 : 10),
               Text(
-                job.proposals,
-                style: const TextStyle(fontSize: 13, color: Color(0xFF8A8A8A)),
+                job.description,
+                maxLines: isCompact ? 1 : 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF7B7B7B),
+                  height: 1.2,
+                ),
+              ),
+              SizedBox(height: isCompact ? 6 : 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                children: [
+                  ...visibleTags.map((tag) => _TagChip(label: tag)),
+                  if (hiddenTagCount > 0) _TagChip(label: '+$hiddenTagCount'),
+                ],
+              ),
+              SizedBox(height: isCompact ? 8 : 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      job.salary,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      job.proposals,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF8A8A8A),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        );
+      },
+    );
+  }
+}
+
+class _TagChip extends StatelessWidget {
+  const _TagChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF6F6F6),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 12, color: Color(0xFF6D6D6D)),
       ),
     );
   }
