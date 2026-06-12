@@ -68,7 +68,7 @@ class _PricingScreenState extends State<PricingScreen> {
         description: 'Start your job search with core tools and a clean CV.',
         cta: 'Get started',
         icon: Icons.rocket_launch_outlined,
-        delivery: 'Ready today',
+        delivery: 'Currently In Use',
         features: const [
           'Browse recommended jobs',
           'Save up to 5 jobs',
