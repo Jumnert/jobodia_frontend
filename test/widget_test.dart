@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 import 'package:jobodia_frontend/features/auth/repository/auth_repository.dart';
 import 'package:jobodia_frontend/features/ai_chat/controller/ai_chat_controller.dart';
@@ -22,7 +23,7 @@ void main() {
   tearDown(Get.reset);
 
   testWidgets('shows login screen', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     expect(find.text('Jobodia'), findsOneWidget);
@@ -32,7 +33,7 @@ void main() {
   });
 
   testWidgets('login validates empty email', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
@@ -42,7 +43,7 @@ void main() {
   });
 
   testWidgets('login validates Gmail format', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     final fields = find.byType(TextField);
@@ -55,7 +56,7 @@ void main() {
   });
 
   testWidgets('switches to sign-up form', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Sign up'));
@@ -68,7 +69,7 @@ void main() {
   });
 
   testWidgets('reset password mismatch stays on reset screen', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Forgot Password?'));
@@ -91,7 +92,7 @@ void main() {
   });
 
   testWidgets('matching reset passwords return to login', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Forgot Password?'));
@@ -363,7 +364,7 @@ void main() {
   });
 
   testWidgets('sign-up username field allows letters only', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Sign up'));
@@ -380,7 +381,7 @@ void main() {
   });
 
   testWidgets('sign-up validates Gmail format', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Sign up'));
@@ -400,7 +401,7 @@ void main() {
   });
 
   testWidgets('sign-up validates matching passwords', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Sign up'));
@@ -420,7 +421,7 @@ void main() {
   });
 
   Future<void> signUpAndOpenOtp(WidgetTester tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Sign up'));
@@ -498,7 +499,7 @@ void main() {
   });
 
   testWidgets('wrong credentials show error', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     final fields = find.byType(TextField);
@@ -517,7 +518,7 @@ void main() {
   });
 
   testWidgets('fake login navigates home', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     final fields = find.byType(TextField);
@@ -537,7 +538,7 @@ void main() {
   });
 
   testWidgets('home chat nav opens AI chat screen', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     final fields = find.byType(TextField);
@@ -557,7 +558,7 @@ void main() {
   });
 
   testWidgets('home notification bell opens notifications', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     final fields = find.byType(TextField);
@@ -578,7 +579,7 @@ void main() {
   });
 
   testWidgets('home layers nav opens CV builder', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     final fields = find.byType(TextField);
@@ -598,7 +599,7 @@ void main() {
   });
 
   testWidgets('settings pricing tile opens pricing plans', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     final fields = find.byType(TextField);
@@ -622,7 +623,7 @@ void main() {
   });
 
   testWidgets('home settings nav opens settings page', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     final fields = find.byType(TextField);
@@ -679,7 +680,7 @@ void main() {
   });
 
   testWidgets('home search filters jobs', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     final fields = find.byType(TextField);
@@ -710,7 +711,7 @@ void main() {
   });
 
   testWidgets('home filter filters jobs by location', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     final fields = find.byType(TextField);
@@ -740,7 +741,7 @@ void main() {
   });
 
   testWidgets('job cards include context menu actions', (tester) async {
-    await tester.pumpWidget(const JobodiaApp());
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
     await tester.pumpAndSettle();
 
     final fields = find.byType(TextField);
