@@ -10,7 +10,7 @@ class JobFeedModel {
     required this.description,
     required this.tags,
     required this.salary,
-    required this.proposals,
+    required this.distance,
   });
 
   final String company;
@@ -23,5 +23,7 @@ class JobFeedModel {
   final String description;
   final List<String> tags;
   final String salary;
-  final String proposals;
+
+  /// Distance of the job from the seeker's current location, e.g. "3.5 km away".
+  final String distance;
 }

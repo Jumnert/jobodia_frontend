@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 class HomeSearchBar extends StatefulWidget {
   const HomeSearchBar({
@@ -52,14 +53,10 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
     return Row(
       children: [
         Expanded(
-          child: Container(
+          child: GlassContainer(
             height: 46,
             padding: const EdgeInsets.symmetric(horizontal: 14),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE6E6E6)),
-            ),
+            shape: const LiquidRoundedSuperellipse(borderRadius: 12),
             child: Row(
               children: [
                 const Icon(Icons.search_rounded, color: Color(0xFF8C8C8C)),

@@ -106,7 +106,10 @@ class HomeScreen extends GetView<AuthController> {
                   itemCount: jobs.length,
                   itemBuilder: (context, index) => Padding(
                     padding: const EdgeInsets.only(bottom: 14),
-                    child: _JobFeedContextMenu(job: jobs[index]),
+                    child: _JobFeedContextMenu(
+                      job: jobs[index],
+                      colorIndex: index,
+                    ),
                   ),
                 );
               }),
@@ -129,9 +132,10 @@ class HomeScreen extends GetView<AuthController> {
 }
 
 class _JobFeedContextMenu extends StatelessWidget {
-  const _JobFeedContextMenu({required this.job});
+  const _JobFeedContextMenu({required this.job, required this.colorIndex});
 
   final JobFeedModel job;
+  final int colorIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -172,7 +176,7 @@ class _JobFeedContextMenu extends StatelessWidget {
                       Get.lazyPut<JobDetailController>(JobDetailController.new),
                 ),
               ),
-              child: JobFeedCard(job: job),
+              child: JobFeedCard(job: job, colorIndex: colorIndex),
             ),
           ),
         );
