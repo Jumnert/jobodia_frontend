@@ -6,6 +6,7 @@ import 'package:jobodia_frontend/app/routes/app_pages.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/app/theme/app_theme.dart';
 import 'package:jobodia_frontend/features/onboarding/controllers/onboarding_controller.dart';
+import 'package:jobodia_frontend/features/settings/controller/theme_controller.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 Future<void> main() async {
@@ -40,8 +41,17 @@ class JobodiaApp extends StatelessWidget {
       getPages: AppPages.pages,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.light,
+      themeMode: _resolveThemeMode(),
     );
+  }
+
+  ThemeMode _resolveThemeMode() {
+    try {
+      final isDark = GetStorage().read<bool>(ThemeController.themeKey);
+      return isDark == true ? ThemeMode.dark : ThemeMode.light;
+    } on Object {
+      return ThemeMode.light;
+    }
   }
 
   String _resolveInitialRoute() {

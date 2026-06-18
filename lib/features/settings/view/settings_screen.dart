@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jobodia_frontend/features/home/view/widgets/app_bottom_navigation_bar.dart';
-import 'package:jobodia_frontend/features/home/view/widgets/app_navigation.dart';
 import 'package:jobodia_frontend/features/pricing/view/pricing_screen.dart';
-import 'package:jobodia_frontend/features/search/view/search_screen.dart';
+import 'package:jobodia_frontend/features/settings/controller/theme_controller.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key, this.showBottomNav = true});
@@ -15,13 +13,11 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  late bool _darkMode;
+  final ThemeController _themeController = Get.find<ThemeController>();
 
-  @override
-  void initState() {
-    super.initState();
-    _darkMode = Get.isDarkMode;
-  }
+  bool _biometricEnabled = false;
+  bool _passcodeEnabled = false;
+  int? _passcodeLength;
 
   @override
   Widget build(BuildContext context) {
@@ -87,9 +83,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.dark_mode_outlined,
                   title: 'Switch themes',
                   foregroundColor: foregroundColor,
-                  trailing: Switch.adaptive(
-                    value: _darkMode,
-                    onChanged: _toggleTheme,
+                  trailing: Obx(
+                    () => Switch.adaptive(
+                      value: _themeController.isDarkMode.value,
+                      onChanged: _themeController.toggleTheme,
+                    ),
                   ),
                 ),
                 _SettingsTile(
@@ -114,6 +112,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     MaterialPageRoute<void>(
                       builder: (_) => const PricingScreen(),
                     ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            _SectionTitle('Security', color: sectionColor),
+            const SizedBox(height: 8),
+            _SettingsGroup(
+              color: groupColor,
+              borderColor: borderColor,
+              children: [
+                _SettingsTile(
+                  icon: Icons.fingerprint_rounded,
+                  title: 'Biometric Authentication',
+                  subtitle: 'Unlock with Fingerprint or Face ID.',
+                  foregroundColor: foregroundColor,
+                  mutedColor: isDark
+                      ? const Color(0xFFA5ABB1)
+                      : const Color(0xFF84888D),
+                  trailing: Switch.adaptive(
+                    value: _biometricEnabled,
+                    onChanged: _toggleBiometric,
+                  ),
+                ),
+                _SettingsTile(
+                  icon: Icons.password_rounded,
+                  title: 'Passcode Lock',
+                  subtitle: _passcodeEnabled && _passcodeLength != null
+                      ? '$_passcodeLength-digit PIN enabled.'
+                      : 'Secure the app with a 4 or 6-digit PIN.',
+                  foregroundColor: foregroundColor,
+                  mutedColor: isDark
+                      ? const Color(0xFFA5ABB1)
+                      : const Color(0xFF84888D),
+                  trailing: Switch.adaptive(
+                    value: _passcodeEnabled,
+                    onChanged: _togglePasscode,
                   ),
                 ),
               ],
@@ -161,16 +196,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: (widget.showBottomNav ?? true)
-          ? AppBottomNavigationBar(
-              selectedIndex: 3,
-              onDestinationSelected: (index) =>
-                  navigateMainDestination(context, index, currentIndex: 3),
-              onSearchPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const SearchScreen()),
-              ),
-            )
-          : null,
     );
   }
 
@@ -183,9 +208,85 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _toggleTheme(bool value) {
-    setState(() => _darkMode = value);
-    Get.changeThemeMode(value ? ThemeMode.dark : ThemeMode.light);
+  void _toggleBiometric(bool value) {
+    setState(() => _biometricEnabled = value);
+    _showMockSnack(
+      value ? 'Biometric unlock enabled' : 'Biometric unlock disabled',
+    );
+  }
+
+  Future<void> _togglePasscode(bool value) async {
+    if (!value) {
+      setState(() {
+        _passcodeEnabled = false;
+        _passcodeLength = null;
+      });
+      _showMockSnack('Passcode lock disabled');
+      return;
+    }
+
+    final length = await _showPasscodeLengthSheet();
+    if (length == null) {
+      return;
+    }
+
+    setState(() {
+      _passcodeEnabled = true;
+      _passcodeLength = length;
+    });
+    _showMockSnack('$length-digit passcode set');
+  }
+
+  /// Lets the user pick a 4 or 6-digit PIN length. Returns null if dismissed.
+  Future<int?> _showPasscodeLengthSheet() {
+    return showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        final isDark = Theme.of(sheetContext).brightness == Brightness.dark;
+        final foregroundColor = isDark ? Colors.white : Colors.black;
+
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Set Passcode',
+                  style: TextStyle(
+                    color: foregroundColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Choose a PIN length to lock the app.',
+                  style: TextStyle(
+                    color: foregroundColor.withValues(alpha: 0.6),
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _PasscodeLengthOption(
+                  label: '4-digit PIN',
+                  foregroundColor: foregroundColor,
+                  onTap: () => Navigator.of(sheetContext).pop(4),
+                ),
+                const SizedBox(height: 10),
+                _PasscodeLengthOption(
+                  label: '6-digit PIN',
+                  foregroundColor: foregroundColor,
+                  onTap: () => Navigator.of(sheetContext).pop(6),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -305,6 +406,58 @@ class _SettingsTile extends StatelessWidget {
                 color: Color(0xFF00856F),
                 size: 22,
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PasscodeLengthOption extends StatelessWidget {
+  const _PasscodeLengthOption({
+    required this.label,
+    required this.foregroundColor,
+    required this.onTap,
+  });
+
+  final String label;
+  final Color foregroundColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: foregroundColor.withValues(alpha: 0.14)),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.pin_rounded,
+              size: 20,
+              color: foregroundColor.withValues(alpha: 0.76),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: foregroundColor,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 22,
+              color: foregroundColor.withValues(alpha: 0.5),
+            ),
           ],
         ),
       ),

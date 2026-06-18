@@ -13,4 +13,13 @@ abstract final class AppColors {
   static const textSecondary = Color(0xFF68717A);
   static const hint = Color(0xFFB9BEC3);
   static const error = Color(0xFFD93B3B);
+
+  /// Gradient pairings for job feed cards. Cards cycle through these by index
+  /// so each card gets a distinct, high-contrast background for white text.
+  static const cardGradients = <List<Color>>[
+    [Color(0xFF2B5DF0), Color(0xFF7C3AED)], // Deep Blue → Purple
+    [Color(0xFF0EA5A4), Color(0xFF10B981)], // Teal → Emerald
+    [Color(0xFFFF7E45), Color(0xFFFF5A6E)], // Sunset Orange → Coral
+    [Color(0xFF6D5BF8), Color(0xFFB14CF0)], // Indigo → Violet
+  ];
 }
