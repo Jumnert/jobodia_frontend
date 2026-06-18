@@ -13,6 +13,7 @@ import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/job_feed_card.dart';
 import 'package:jobodia_frontend/features/pricing/view/pricing_screen.dart';
 import 'package:jobodia_frontend/main.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 void main() {
   setUp(() {
@@ -187,7 +188,10 @@ void main() {
     expect(find.text('Hi, Han!'), findsOneWidget);
 
     await tester.enterText(
-      find.widgetWithText(TextField, 'Send a message...'),
+      find.descendant(
+        of: find.byType(GlassTextField),
+        matching: find.byType(EditableText),
+      ),
       'Can you review my CV?',
     );
     await tester.tap(find.byIcon(Icons.send_outlined));
@@ -641,12 +645,17 @@ void main() {
     expect(find.text('Settings'), findsWidgets);
     expect(find.text('General'), findsOneWidget);
     expect(find.text('Leave feedback'), findsOneWidget);
-    expect(find.text('Terms and Conditions'), findsOneWidget);
+    expect(find.text('Security'), findsOneWidget);
+    expect(find.text('Biometric Authentication'), findsOneWidget);
+    expect(find.text('Passcode Lock'), findsOneWidget);
 
+    // The theme switch is the first switch on the page (General section).
     await tester.tap(
-      find.byWidgetPredicate(
-        (widget) => widget is Switch || widget is CupertinoSwitch,
-      ),
+      find
+          .byWidgetPredicate(
+            (widget) => widget is Switch || widget is CupertinoSwitch,
+          )
+          .first,
     );
     await tester.pumpAndSettle();
 

@@ -6,6 +6,7 @@ import 'package:jobodia_frontend/features/ai_chat/model/chat_message_model.dart'
 import 'package:jobodia_frontend/features/home/view/widgets/app_bottom_navigation_bar.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/app_navigation.dart';
 import 'package:jobodia_frontend/features/search/view/search_screen.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 class AiChatScreen extends GetView<AiChatController> {
   const AiChatScreen({super.key, this.showBottomNav = true});
@@ -33,12 +34,7 @@ class AiChatScreen extends GetView<AiChatController> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(
-                14,
-                8,
-                14,
-                94 + bottomPadding * 0.05,
-              ),
+              padding: EdgeInsets.fromLTRB(14, 8, 14, 132 + bottomPadding),
               child: _MessageComposer(controller: controller),
             ),
           ],
@@ -407,42 +403,27 @@ class _MessageComposer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _RoundIconButton(
-          icon: Icons.add_rounded,
-          onTap: () => _showAttachmentMenu(context),
+        GlassIconButton(
+          icon: const Icon(Icons.add_rounded, color: Colors.black, size: 26),
+          onPressed: () => _showAttachmentMenu(context),
+          size: 46,
         ),
         const SizedBox(width: 14),
         Expanded(
-          child: Container(
-            height: 46,
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: controller.messageController,
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'Send a message...',
-                      hintStyle: TextStyle(color: Colors.black, fontSize: 13),
-                    ),
-                    textInputAction: TextInputAction.send,
-                    onSubmitted: controller.sendMessage,
-                  ),
-                ),
-                const Icon(Icons.mic_none_rounded, size: 24),
-              ],
-            ),
+          child: GlassTextField(
+            controller: controller.messageController,
+            placeholder: 'Send a message...',
+            textInputAction: TextInputAction.send,
+            onSubmitted: controller.sendMessage,
+            suffixIcon: const Icon(Icons.mic_none_rounded, size: 24),
+            shape: const LiquidRoundedSuperellipse(borderRadius: 999),
           ),
         ),
         const SizedBox(width: 14),
-        _RoundIconButton(
-          icon: Icons.send_outlined,
-          onTap: controller.sendMessage,
+        GlassIconButton(
+          icon: const Icon(Icons.send_outlined, color: Colors.black, size: 24),
+          onPressed: controller.sendMessage,
+          size: 46,
         ),
       ],
     );
@@ -486,30 +467,6 @@ class _MessageComposer extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RoundIconButton extends StatelessWidget {
-  const _RoundIconButton({required this.icon, required this.onTap});
-
-  final IconData icon;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: SizedBox(
-          width: 46,
-          height: 46,
-          child: Icon(icon, color: Colors.black, size: 26),
         ),
       ),
     );

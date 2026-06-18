@@ -22,7 +22,7 @@ class HomeController extends GetxController {
           'Design intuitive user experiences for SaaS products, from wireframes to high-fidelity UI. Work closely with product and engineering teams to ship polished interfaces.',
       tags: ['Figma', 'SaaS Design', 'Web Design', 'Mockup'],
       salary: '\$3,500 - \$5,200',
-      proposals: '9 proposals',
+      distance: '3.5 km away',
     ),
     JobFeedModel(
       company: 'Finverse',
@@ -36,7 +36,7 @@ class HomeController extends GetxController {
           'Design intuitive user experiences for fintech applications, from wireframes to high-fidelity UI. Work closely with product and engineering teams to ship polished interfaces.',
       tags: ['UI Design', 'Mobile UI', 'Finance', 'Branding'],
       salary: '\$2,800 - \$4,300',
-      proposals: '3 proposals',
+      distance: '1.2 km away',
     ),
     JobFeedModel(
       company: 'GovTech USA',
@@ -50,7 +50,7 @@ class HomeController extends GetxController {
           'Shape digital services used by citizens. Collaborate with policy teams, designers, and engineers to improve core government workflows.',
       tags: ['Research', 'Service Design', 'Accessibility'],
       salary: '\$5,100 - \$7,200',
-      proposals: '6 proposals',
+      distance: '8.7 km away',
     ),
     JobFeedModel(
       company: 'Metro Digital',
@@ -64,7 +64,7 @@ class HomeController extends GetxController {
           'Build responsive job marketplace features, refine interactions, and keep the UI fast and dependable across devices.',
       tags: ['Flutter', 'React', 'UI Systems'],
       salary: '\$4,200 - \$6,000',
-      proposals: '11 proposals',
+      distance: 'Fully remote',
     ),
   ];
 
@@ -105,7 +105,7 @@ class HomeController extends GetxController {
         job.location,
         job.description,
         job.salary,
-        job.proposals,
+        job.distance,
         ...job.tags,
       ].join(' ').toLowerCase();
 

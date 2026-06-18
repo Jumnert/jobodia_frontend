@@ -68,9 +68,9 @@ class AppBottomNavigationBar extends StatelessWidget {
               label: 'Chat',
             ),
             GlassBottomBarTab(
-              icon: Icon(Icons.settings_suggest_outlined),
-              activeIcon: Icon(Icons.settings_suggest_rounded),
-              label: 'Setting',
+              icon: Icon(Icons.record_voice_over_outlined),
+              activeIcon: Icon(Icons.record_voice_over_rounded),
+              label: 'Interview',
             ),
           ],
         ),

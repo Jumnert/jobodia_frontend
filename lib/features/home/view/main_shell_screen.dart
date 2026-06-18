@@ -6,8 +6,8 @@ import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_contr
 import 'package:jobodia_frontend/features/cv_builder/view/cv_builder_screen.dart';
 import 'package:jobodia_frontend/features/home/view/home_screen.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/app_bottom_navigation_bar.dart';
+import 'package:jobodia_frontend/features/interview/view/interview_screen.dart';
 import 'package:jobodia_frontend/features/search/view/search_screen.dart';
-import 'package:jobodia_frontend/features/settings/view/settings_screen.dart';
 
 class MainShellScreen extends StatefulWidget {
   const MainShellScreen({super.key});
@@ -40,7 +40,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
           HomeScreen(showBottomNav: false),
           CvBuilderScreen(showBottomNav: false),
           AiChatScreen(showBottomNav: false),
-          SettingsScreen(showBottomNav: false),
+          InterviewScreen(showBottomNav: false),
         ],
       ),
       bottomNavigationBar: AppBottomNavigationBar(

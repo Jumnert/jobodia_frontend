@@ -75,7 +75,7 @@ class SearchScreen extends StatelessWidget {
                   itemCount: jobs.length,
                   itemBuilder: (context, index) => Padding(
                     padding: const EdgeInsets.only(bottom: 14),
-                    child: _SearchJobCard(job: jobs[index]),
+                    child: _SearchJobCard(job: jobs[index], colorIndex: index),
                   ),
                 );
               }),
@@ -246,9 +246,10 @@ class SearchScreen extends StatelessWidget {
 }
 
 class _SearchJobCard extends StatelessWidget {
-  const _SearchJobCard({required this.job});
+  const _SearchJobCard({required this.job, required this.colorIndex});
 
   final JobFeedModel job;
+  final int colorIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -284,7 +285,7 @@ class _SearchJobCard extends StatelessWidget {
             () => Get.lazyPut<JobDetailController>(JobDetailController.new),
           ),
         ),
-        child: JobFeedCard(job: job),
+        child: JobFeedCard(job: job, colorIndex: colorIndex),
       ),
     );
   }
