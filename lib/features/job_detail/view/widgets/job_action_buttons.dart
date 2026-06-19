@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 class JobActionButtons extends StatelessWidget {
   const JobActionButtons({required this.onApply, super.key});
@@ -7,14 +8,15 @@ class JobActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Row(
       children: [
         Expanded(
           child: OutlinedButton(
             onPressed: () {},
             style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.black,
-              side: const BorderSide(color: Color(0xFFE0E0E0)),
+              foregroundColor: palette.textPrimary,
+              side: BorderSide(color: palette.border),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
               ),
@@ -38,20 +40,24 @@ class JobActionButtons extends StatelessWidget {
               child: Ink(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(5),
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    stops: [0, 0.65, 1],
-                    colors: [Colors.black, Colors.black, Color(0xFF5A5A5A)],
+                    stops: const [0, 0.65, 1],
+                    colors: [
+                      palette.textPrimary,
+                      palette.textPrimary,
+                      palette.textSecondary,
+                    ],
                   ),
                 ),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Center(
                     child: Text(
                       'Apply for this job',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: palette.scaffold,
                         fontWeight: FontWeight.w800,
                       ),
                     ),

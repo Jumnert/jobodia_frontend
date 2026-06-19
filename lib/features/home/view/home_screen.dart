@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
 import 'package:jobodia_frontend/features/home/model/job_feed_model.dart';
@@ -24,12 +25,13 @@ class HomeScreen extends GetView<AuthController> {
   @override
   Widget build(BuildContext context) {
     final user = controller.currentUser.value;
+    final palette = context.palette;
     final homeController = Get.isRegistered<HomeController>()
         ? Get.find<HomeController>()
         : Get.put(HomeController());
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F8),
+      backgroundColor: palette.scaffold,
       extendBody: true,
       body: Padding(
         padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
@@ -66,9 +68,13 @@ class HomeScreen extends GetView<AuthController> {
                     ),
                   ),
                   const SizedBox(height: 18),
-                  const Text(
+                  Text(
                     'Jobs you might like',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                    style: TextStyle(
+                      color: palette.textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Obx(
@@ -86,14 +92,14 @@ class HomeScreen extends GetView<AuthController> {
                 final jobs = homeController.filteredJobs;
 
                 if (jobs.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(32, 0, 32, 24),
+                      padding: const EdgeInsets.fromLTRB(32, 0, 32, 24),
                       child: Text(
                         'No jobs match your search.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Color(0xFF707070),
+                          color: palette.textSecondary,
                           fontSize: 14,
                         ),
                       ),

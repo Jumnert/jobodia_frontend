@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 class AppBottomNavigationBar extends StatelessWidget {
@@ -16,6 +17,7 @@ class AppBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final palette = context.palette;
 
     return Transform.translate(
       offset: const Offset(0, 8),
@@ -28,8 +30,8 @@ class AppBottomNavigationBar extends StatelessWidget {
           searchConfig: GlassSearchBarConfig(
             hintText: 'Search',
             onSearchToggle: (_) => onSearchPressed(),
-            searchIconColor: Colors.black87,
-            searchIcon: const Icon(Icons.search_rounded, color: Colors.black87),
+            searchIconColor: palette.iconPrimary,
+            searchIcon: Icon(Icons.search_rounded, color: palette.iconPrimary),
             autoFocusOnExpand: false,
             showsCancelButton: false,
           ),
@@ -38,9 +40,9 @@ class AppBottomNavigationBar extends StatelessWidget {
           barHeight: 64,
           iconSize: 23,
           labelFontSize: 11,
-          selectedIconColor: Colors.black,
-          unselectedIconColor: const Color(0xFF575B60),
-          indicatorColor: Colors.black.withValues(alpha: 0.10),
+          selectedIconColor: palette.iconPrimary,
+          unselectedIconColor: palette.iconMuted,
+          indicatorColor: palette.textPrimary.withValues(alpha: 0.10),
           quality: GlassQuality.premium,
           settings: const LiquidGlassSettings(
             glassColor: Color(0x26FFFFFF),

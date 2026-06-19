@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 class HomeSearchBar extends StatefulWidget {
@@ -50,6 +51,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Row(
       children: [
         Expanded(
@@ -59,47 +61,44 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
             shape: const LiquidRoundedSuperellipse(borderRadius: 12),
             child: Row(
               children: [
-                const Icon(Icons.search_rounded, color: Color(0xFF8C8C8C)),
+                Icon(Icons.search_rounded, color: palette.iconMuted),
                 const SizedBox(width: 10),
                 Expanded(
                   child: TextField(
                     controller: _controller,
                     onChanged: widget.onChanged,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       border: InputBorder.none,
                       hintText: 'Search jobs',
                       hintStyle: TextStyle(
-                        color: Color(0xFF8C8C8C),
+                        color: palette.iconMuted,
                         fontSize: 14,
                       ),
                     ),
-                    style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: palette.textPrimary, fontSize: 14),
                     textInputAction: TextInputAction.search,
                   ),
                 ),
                 if (widget.value.isNotEmpty)
                   IconButton(
                     visualDensity: VisualDensity.compact,
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.close_rounded,
                       size: 18,
-                      color: Color(0xFF8C8C8C),
+                      color: palette.iconMuted,
                     ),
                     onPressed: widget.onClear,
                   )
-                else ...const [
+                else ...[
                   Icon(
                     Icons.shortcut_rounded,
                     size: 18,
-                    color: Color(0xFF8C8C8C),
+                    color: palette.iconMuted,
                   ),
-                  SizedBox(width: 4),
+                  const SizedBox(width: 4),
                   Text(
                     'K',
-                    style: TextStyle(color: Color(0xFF8C8C8C), fontSize: 12),
+                    style: TextStyle(color: palette.iconMuted, fontSize: 12),
                   ),
                 ],
               ],
@@ -108,7 +107,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
         ),
         const SizedBox(width: 10),
         Material(
-          color: Colors.black,
+          color: palette.textPrimary,
           borderRadius: BorderRadius.circular(999),
           child: InkWell(
             borderRadius: BorderRadius.circular(999),
@@ -116,10 +115,13 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                const SizedBox(
+                SizedBox(
                   width: 46,
                   height: 46,
-                  child: Icon(Icons.filter_alt_rounded, color: Colors.white),
+                  child: Icon(
+                    Icons.filter_alt_rounded,
+                    color: palette.scaffold,
+                  ),
                 ),
                 if (widget.hasActiveFilters)
                   Positioned(

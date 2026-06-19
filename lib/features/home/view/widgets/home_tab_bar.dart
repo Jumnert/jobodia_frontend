@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 class HomeTabBar extends StatelessWidget {
   const HomeTabBar({
@@ -12,6 +13,7 @@ class HomeTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     const labels = ['All Jobs', 'Best Matches', 'Saved Jobs'];
     return Row(
       children: List.generate(
@@ -26,8 +28,8 @@ class HomeTabBar extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: selectedIndex == index
-                        ? Colors.black
-                        : const Color(0xFF9A9A9A),
+                        ? palette.textPrimary
+                        : palette.textTertiary,
                     fontSize: 14,
                     fontWeight: selectedIndex == index
                         ? FontWeight.w700
@@ -40,7 +42,7 @@ class HomeTabBar extends StatelessWidget {
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
                     color: selectedIndex == index
-                        ? Colors.black
+                        ? palette.textPrimary
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(2),
                   ),

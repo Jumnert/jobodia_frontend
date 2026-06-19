@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 class ProfileIdentityHeader extends StatelessWidget {
   const ProfileIdentityHeader({
@@ -14,6 +15,7 @@ class ProfileIdentityHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -22,14 +24,14 @@ class ProfileIdentityHeader extends StatelessWidget {
           height: 96,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 4),
+            border: Border.all(color: palette.surface, width: 4),
           ),
           child: ClipOval(
             child: Image.network(
               avatarUrl,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) => Container(
-                color: const Color(0xFFE9EEF4),
+                color: palette.surfaceMuted,
                 child: const Icon(Icons.person_rounded, size: 50),
               ),
             ),
@@ -43,8 +45,8 @@ class ProfileIdentityHeader extends StatelessWidget {
             children: [
               Text(
                 name,
-                style: const TextStyle(
-                  color: Colors.black,
+                style: TextStyle(
+                  color: palette.textPrimary,
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
                   height: 1,
@@ -53,7 +55,7 @@ class ProfileIdentityHeader extends StatelessWidget {
               const SizedBox(height: 5),
               Text(
                 role,
-                style: const TextStyle(color: Color(0xFF8D8D8D), fontSize: 13),
+                style: TextStyle(color: palette.textSecondary, fontSize: 13),
               ),
             ],
           ),

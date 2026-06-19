@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/ai_chat/controller/ai_chat_controller.dart';
 import 'package:jobodia_frontend/features/ai_chat/model/chat_message_model.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/app_bottom_navigation_bar.dart';
@@ -18,7 +19,7 @@ class AiChatScreen extends GetView<AiChatController> {
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F3F3),
+      backgroundColor: context.palette.scaffold,
       extendBody: true,
       endDrawer: _ChatHistoryDrawer(controller: controller),
       body: Padding(
@@ -91,39 +92,45 @@ class _ChatHistoryDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Drawer(
-      backgroundColor: Colors.white,
+      backgroundColor: palette.surface,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Chat history',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+                style: TextStyle(
+                  color: palette.textPrimary,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const SizedBox(height: 16),
               Container(
                 height: 46,
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF3F3F3),
+                  color: palette.surfaceMuted,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.search_rounded, color: Color(0xFF7A7A7A)),
+                    Icon(Icons.search_rounded, color: palette.iconMuted),
                     const SizedBox(width: 10),
                     Expanded(
                       child: TextField(
                         controller: controller.historySearchController,
                         onChanged: controller.updateHistorySearch,
-                        decoration: const InputDecoration(
+                        style: TextStyle(color: palette.textPrimary),
+                        decoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: 'Search chats',
                           hintStyle: TextStyle(
-                            color: Color(0xFF7A7A7A),
+                            color: palette.iconMuted,
                             fontSize: 14,
                           ),
                         ),
@@ -145,10 +152,10 @@ class _ChatHistoryDrawer extends StatelessWidget {
                   final history = controller.filteredChatHistory;
 
                   if (history.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Text(
                         'No chats found.',
-                        style: TextStyle(color: Color(0xFF7A7A7A)),
+                        style: TextStyle(color: palette.textSecondary),
                       ),
                     );
                   }
@@ -179,20 +186,21 @@ class _NewChatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return InkWell(
       borderRadius: BorderRadius.circular(10),
       onTap: onTap,
-      child: const SizedBox(
+      child: SizedBox(
         height: 42,
         child: Row(
           children: [
-            SizedBox(width: 4),
-            Icon(Icons.add_comment_outlined, color: Color(0xFF5F5F5F)),
-            SizedBox(width: 12),
+            const SizedBox(width: 4),
+            Icon(Icons.add_comment_outlined, color: palette.textSecondary),
+            const SizedBox(width: 12),
             Text(
               'New chat',
               style: TextStyle(
-                color: Color(0xFF5F5F5F),
+                color: palette.textSecondary,
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
               ),
@@ -225,8 +233,8 @@ class _HistoryTile extends StatelessWidget {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Color(0xFF777777),
+                style: TextStyle(
+                  color: context.palette.textSecondary,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -247,6 +255,7 @@ class _EmptyChatState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final items = [
       (Icons.article_outlined, controller.suggestions[0]),
       (Icons.work_outline_rounded, controller.suggestions[1]),
@@ -261,20 +270,20 @@ class _EmptyChatState extends StatelessWidget {
         const SizedBox(height: 12),
         const Center(child: _BotAvatar(size: 96)),
         const SizedBox(height: 42),
-        const Text(
+        Text(
           'Hi, Han!',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Color(0xFF303036),
+            color: palette.textPrimary,
             fontSize: 25,
             fontWeight: FontWeight.w800,
           ),
         ),
         const SizedBox(height: 2),
-        const Text(
+        Text(
           'How can I help you today?',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Color(0xFF303036), fontSize: 18),
+          style: TextStyle(color: palette.textPrimary, fontSize: 18),
         ),
         const SizedBox(height: 64),
         ...items.map(
@@ -305,8 +314,9 @@ class _SuggestionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Material(
-      color: Colors.white,
+      color: palette.surface,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
@@ -316,13 +326,13 @@ class _SuggestionTile extends StatelessWidget {
           child: Row(
             children: [
               const SizedBox(width: 20),
-              Icon(icon, size: 27, color: Colors.black),
+              Icon(icon, size: 27, color: palette.iconPrimary),
               const SizedBox(width: 18),
               Expanded(
                 child: Text(
                   label,
-                  style: const TextStyle(
-                    color: Colors.black,
+                  style: TextStyle(
+                    color: palette.textPrimary,
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -360,18 +370,23 @@ class _MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final bubble = Container(
       constraints: BoxConstraints(
         maxWidth: MediaQuery.sizeOf(context).width * 0.56,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: palette.surface,
         borderRadius: BorderRadius.circular(18),
       ),
       child: Text(
         message.text,
-        style: const TextStyle(color: Colors.black, fontSize: 13, height: 1.18),
+        style: TextStyle(
+          color: palette.textPrimary,
+          fontSize: 13,
+          height: 1.18,
+        ),
       ),
     );
 
@@ -401,10 +416,11 @@ class _MessageComposer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Row(
       children: [
         GlassIconButton(
-          icon: const Icon(Icons.add_rounded, color: Colors.black, size: 26),
+          icon: Icon(Icons.add_rounded, color: palette.iconPrimary, size: 26),
           onPressed: () => _showAttachmentMenu(context),
           size: 46,
         ),
@@ -421,7 +437,7 @@ class _MessageComposer extends StatelessWidget {
         ),
         const SizedBox(width: 14),
         GlassIconButton(
-          icon: const Icon(Icons.send_outlined, color: Colors.black, size: 24),
+          icon: Icon(Icons.send_outlined, color: palette.iconPrimary, size: 24),
           onPressed: controller.sendMessage,
           size: 46,
         ),

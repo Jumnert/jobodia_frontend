@@ -13,9 +13,10 @@ class ProfileScreen extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     final profile = controller.profile;
+    final palette = context.palette;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE9E9E9),
+      backgroundColor: palette.scaffold,
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 430),
@@ -45,9 +46,9 @@ class ProfileScreen extends GetView<ProfileController> {
                           constraints: BoxConstraints(
                             minHeight: MediaQuery.sizeOf(context).height - 205,
                           ),
-                          decoration: const BoxDecoration(
-                            color: AppColors.surface,
-                            borderRadius: BorderRadius.vertical(
+                          decoration: BoxDecoration(
+                            color: palette.surface,
+                            borderRadius: const BorderRadius.vertical(
                               top: Radius.circular(26),
                             ),
                           ),

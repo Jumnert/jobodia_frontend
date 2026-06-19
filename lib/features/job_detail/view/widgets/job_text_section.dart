@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 class JobTextSection extends StatelessWidget {
   const JobTextSection({
@@ -18,13 +19,14 @@ class JobTextSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: const TextStyle(
-            color: Colors.black,
+          style: TextStyle(
+            color: palette.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.w800,
           ),
@@ -34,8 +36,8 @@ class JobTextSection extends StatelessWidget {
           body,
           maxLines: maxLines,
           overflow: maxLines == null ? null : TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: Color(0xFF8B8B8B),
+          style: TextStyle(
+            color: palette.textSecondary,
             fontSize: 15.5,
             height: 1.12,
             fontWeight: FontWeight.w400,
@@ -47,8 +49,8 @@ class JobTextSection extends StatelessWidget {
             onTap: onActionPressed,
             child: Text(
               actionLabel!,
-              style: const TextStyle(
-                color: Colors.black,
+              style: TextStyle(
+                color: palette.textPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
               ),

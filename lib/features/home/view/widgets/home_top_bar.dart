@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/profile/controller/profile_controller.dart';
 import 'package:jobodia_frontend/features/profile/view/profile_screen.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
@@ -20,6 +21,7 @@ class HomeTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -27,7 +29,7 @@ class HomeTopBar extends StatelessWidget {
           child: RichText(
             text: TextSpan(
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Colors.black,
+                color: palette.textPrimary,
                 fontWeight: FontWeight.w800,
                 height: 1.1,
               ),
@@ -40,15 +42,15 @@ class HomeTopBar extends StatelessWidget {
         ),
         GlassIconButton(
           onPressed: onNotifications,
-          icon: const Icon(
+          icon: Icon(
             Icons.notifications_none_rounded,
-            color: Colors.black,
+            color: palette.iconPrimary,
           ),
         ),
         const SizedBox(width: 8),
         GlassIconButton(
           onPressed: onSettings,
-          icon: const Icon(Icons.settings_outlined, color: Colors.black),
+          icon: Icon(Icons.settings_outlined, color: palette.iconPrimary),
         ),
         const SizedBox(width: 8),
         GestureDetector(
@@ -64,8 +66,8 @@ class HomeTopBar extends StatelessWidget {
             padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFFD7DDE3), width: 2),
-              color: const Color(0xFFF3F5F7),
+              border: Border.all(color: palette.border, width: 2),
+              color: palette.surfaceMuted,
             ),
             child: ClipOval(
               child: avatarUrl == null

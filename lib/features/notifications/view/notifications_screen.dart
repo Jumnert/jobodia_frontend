@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
@@ -7,9 +8,10 @@ class NotificationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final notifications = _notifications();
+    final palette = context.palette;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F8),
+      backgroundColor: palette.scaffold,
       body: SafeArea(
         child: Column(
           children: [
@@ -46,9 +48,9 @@ class NotificationsScreen extends StatelessWidget {
                   return Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: palette.surface,
                       borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: const Color(0xFFE7E9EC)),
+                      border: Border.all(color: palette.border),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,13 +58,13 @@ class NotificationsScreen extends StatelessWidget {
                         Container(
                           width: 42,
                           height: 42,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFF3F5F7),
+                          decoration: BoxDecoration(
+                            color: palette.surfaceMuted,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             notification.icon,
-                            color: Colors.black,
+                            color: palette.iconPrimary,
                             size: 22,
                           ),
                         ),
@@ -76,7 +78,8 @@ class NotificationsScreen extends StatelessWidget {
                                   Expanded(
                                     child: Text(
                                       notification.title,
-                                      style: const TextStyle(
+                                      style: TextStyle(
+                                        color: palette.textPrimary,
                                         fontSize: 15,
                                         fontWeight: FontWeight.w800,
                                       ),
@@ -86,8 +89,8 @@ class NotificationsScreen extends StatelessWidget {
                                     Container(
                                       width: 8,
                                       height: 8,
-                                      decoration: const BoxDecoration(
-                                        color: Colors.black,
+                                      decoration: BoxDecoration(
+                                        color: palette.textPrimary,
                                         shape: BoxShape.circle,
                                       ),
                                     ),
@@ -96,8 +99,8 @@ class NotificationsScreen extends StatelessWidget {
                               const SizedBox(height: 4),
                               Text(
                                 notification.body,
-                                style: const TextStyle(
-                                  color: Color(0xFF70757B),
+                                style: TextStyle(
+                                  color: palette.textSecondary,
                                   fontSize: 13,
                                   height: 1.35,
                                 ),
@@ -105,8 +108,8 @@ class NotificationsScreen extends StatelessWidget {
                               const SizedBox(height: 8),
                               Text(
                                 notification.time,
-                                style: const TextStyle(
-                                  color: Color(0xFF9A9FA4),
+                                style: TextStyle(
+                                  color: palette.textTertiary,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                 ),

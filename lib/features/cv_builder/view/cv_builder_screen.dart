@@ -17,7 +17,7 @@ class CvBuilderScreen extends GetView<CvBuilderController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.palette.scaffold,
       extendBody: true,
       body: Padding(
         padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
@@ -81,6 +81,7 @@ class _Header extends StatelessWidget {
           const SizedBox(height: 8),
           Obx(() {
             final step = Get.find<CvBuilderController>().stepIndex.value;
+            final palette = context.palette;
             return Row(
               children: List.generate(
                 3,
@@ -90,8 +91,8 @@ class _Header extends StatelessWidget {
                     margin: EdgeInsets.only(right: index == 2 ? 0 : 10),
                     decoration: BoxDecoration(
                       color: index <= step
-                          ? Colors.black
-                          : const Color(0xFFD9D9D9),
+                          ? palette.textPrimary
+                          : palette.border,
                       borderRadius: BorderRadius.circular(99),
                     ),
                   ),
@@ -104,8 +105,8 @@ class _Header extends StatelessWidget {
             final step = Get.find<CvBuilderController>().stepIndex.value;
             return Text(
               'Step ${step + 1}',
-              style: const TextStyle(
-                color: Color(0xFF9A9A9A),
+              style: TextStyle(
+                color: context.palette.textTertiary,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -124,6 +125,7 @@ class _BasicInfoStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 112),
       children: [
@@ -132,9 +134,13 @@ class _BasicInfoStep extends StatelessWidget {
           style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 8),
-        const Text(
+        Text(
           'Start with the basic details so the CV can match your profile.',
-          style: TextStyle(fontSize: 15, color: Color(0xFF777777), height: 1.4),
+          style: TextStyle(
+            fontSize: 15,
+            color: palette.textSecondary,
+            height: 1.4,
+          ),
         ),
         const SizedBox(height: 20),
         const _InfoIconLine(
@@ -187,28 +193,29 @@ class _HeadshotUploadTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Obx(
       () => Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: const Color(0xFFF6F6F6),
+          color: palette.surfaceMuted,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0xFFE8E8E8)),
+          border: Border.all(color: palette.border),
         ),
         child: Row(
           children: [
             CircleAvatar(
               radius: 34,
               backgroundColor: controller.hasHeadshot.value
-                  ? Colors.black
-                  : Colors.white,
+                  ? palette.textPrimary
+                  : palette.surface,
               child: Icon(
                 controller.hasHeadshot.value
                     ? Icons.person_rounded
                     : Icons.add_a_photo_outlined,
                 color: controller.hasHeadshot.value
-                    ? Colors.white
-                    : const Color(0xFF777777),
+                    ? palette.surface
+                    : palette.iconMuted,
                 size: 28,
               ),
             ),
@@ -221,16 +228,17 @@ class _HeadshotUploadTile extends StatelessWidget {
                     controller.hasHeadshot.value
                         ? 'Headshot selected'
                         : 'Upload headshot',
-                    style: const TextStyle(
+                    style: TextStyle(
+                      color: palette.textPrimary,
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
+                  Text(
                     'Add a clear professional photo for templates that include a profile image.',
                     style: TextStyle(
-                      color: Color(0xFF777777),
+                      color: palette.textSecondary,
                       fontSize: 13,
                       height: 1.3,
                     ),
@@ -259,6 +267,7 @@ class _WorkInfoStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 112),
       children: [
@@ -267,9 +276,13 @@ class _WorkInfoStep extends StatelessWidget {
           style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 8),
-        const Text(
+        Text(
           'Build this like a LinkedIn profile. Add clear roles, schools, dates, skills, and achievements so AI can shape a strong CV.',
-          style: TextStyle(fontSize: 15, color: Color(0xFF777777), height: 1.4),
+          style: TextStyle(
+            fontSize: 15,
+            color: palette.textSecondary,
+            height: 1.4,
+          ),
         ),
         const SizedBox(height: 20),
         CustomTextField(
@@ -357,8 +370,8 @@ class _WorkInfoStep extends StatelessWidget {
                   child: FilledButton(
                     onPressed: controller.addSkill,
                     style: FilledButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
+                      backgroundColor: palette.textPrimary,
+                      foregroundColor: palette.scaffold,
                       padding: EdgeInsets.zero,
                       shape: const CircleBorder(),
                     ),
@@ -370,9 +383,12 @@ class _WorkInfoStep extends StatelessWidget {
             const SizedBox(height: 12),
             Obx(
               () => controller.skills.isEmpty
-                  ? const Text(
+                  ? Text(
                       'No skills added yet.',
-                      style: TextStyle(color: Color(0xFF8A8A8A), fontSize: 13),
+                      style: TextStyle(
+                        color: palette.textSecondary,
+                        fontSize: 13,
+                      ),
                     )
                   : Wrap(
                       spacing: 8,
@@ -382,7 +398,7 @@ class _WorkInfoStep extends StatelessWidget {
                             (skill) => InputChip(
                               label: Text(skill),
                               onDeleted: () => controller.removeSkill(skill),
-                              backgroundColor: const Color(0xFFF2F2F2),
+                              backgroundColor: palette.surfaceMuted,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(999),
                                 side: BorderSide.none,
@@ -443,9 +459,13 @@ class _TemplateStep extends StatelessWidget {
           style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 8),
-        const Text(
+        Text(
           'You can change it later anytime.',
-          style: TextStyle(fontSize: 15, color: Color(0xFF777777), height: 1.4),
+          style: TextStyle(
+            fontSize: 15,
+            color: context.palette.textSecondary,
+            height: 1.4,
+          ),
         ),
         const SizedBox(height: 22),
         SizedBox(
@@ -461,12 +481,12 @@ class _TemplateStep extends StatelessWidget {
                   width: 180,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.palette.surface,
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(
                       color: controller.selectedTemplateIndex.value == index
-                          ? Colors.black
-                          : const Color(0xFFD8D8D8),
+                          ? context.palette.textPrimary
+                          : context.palette.border,
                       width: controller.selectedTemplateIndex.value == index
                           ? 1.8
                           : 1,
@@ -483,7 +503,8 @@ class _TemplateStep extends StatelessWidget {
                       const SizedBox(height: 10),
                       Text(
                         templates[index].title,
-                        style: const TextStyle(
+                        style: TextStyle(
+                          color: context.palette.textPrimary,
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                         ),
@@ -491,8 +512,8 @@ class _TemplateStep extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         templates[index].subtitle,
-                        style: const TextStyle(
-                          color: Color(0xFF777777),
+                        style: TextStyle(
+                          color: context.palette.textSecondary,
                           fontSize: 12,
                         ),
                       ),
@@ -509,7 +530,7 @@ class _TemplateStep extends StatelessWidget {
         Text(
           'AI will create your professional CV',
           textAlign: TextAlign.center,
-          style: const TextStyle(color: Color(0xFF9A9A9A), fontSize: 14),
+          style: TextStyle(color: context.palette.textTertiary, fontSize: 14),
         ),
         const SizedBox(height: 8),
         TextButton(
@@ -536,8 +557,8 @@ class _InfoIconLine extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(
-              color: Color(0xFF777777),
+            style: TextStyle(
+              color: context.palette.textSecondary,
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
@@ -577,12 +598,13 @@ class _ProfileSectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: palette.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE8E8E8)),
+        border: Border.all(color: palette.border),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.035),
@@ -600,11 +622,11 @@ class _ProfileSectionCard extends StatelessWidget {
               Container(
                 width: 38,
                 height: 38,
-                decoration: const BoxDecoration(
-                  color: Colors.black,
+                decoration: BoxDecoration(
+                  color: palette.textPrimary,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: Colors.white, size: 20),
+                child: Icon(icon, color: palette.surface, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -613,7 +635,8 @@ class _ProfileSectionCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
+                        color: palette.textPrimary,
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
                       ),
@@ -621,8 +644,8 @@ class _ProfileSectionCard extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       subtitle,
-                      style: const TextStyle(
-                        color: Color(0xFF7A7A7A),
+                      style: TextStyle(
+                        color: palette.textSecondary,
                         fontSize: 13,
                         height: 1.3,
                       ),
@@ -785,13 +808,14 @@ class _RepeatableEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFBFBFB),
+        color: palette.surfaceMuted,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFEDEDED)),
+        border: Border.all(color: palette.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -801,7 +825,8 @@ class _RepeatableEntryCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
+                    color: palette.textPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
                   ),
@@ -836,14 +861,15 @@ class _AddEntryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Row(
       children: [
         Expanded(
           child: OutlinedButton.icon(
             onPressed: onPressed,
             style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.black,
-              side: const BorderSide(color: Colors.black),
+              foregroundColor: palette.textPrimary,
+              side: BorderSide(color: palette.textPrimary),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(999),
               ),
@@ -856,7 +882,7 @@ class _AddEntryButton extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           note,
-          style: const TextStyle(color: Color(0xFF8A8A8A), fontSize: 12),
+          style: TextStyle(color: palette.textSecondary, fontSize: 12),
         ),
       ],
     );
@@ -957,26 +983,28 @@ class _CompactInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF3A3A3A),
+            color: palette.textSecondary,
           ),
         ),
         const SizedBox(height: 6),
         TextField(
           controller: controller,
           onSubmitted: onSubmitted,
+          style: TextStyle(color: palette.textPrimary),
           decoration: InputDecoration(
             hintText: hintText,
             filled: true,
-            fillColor: const Color(0xFFF6F6F6),
-            hintStyle: const TextStyle(color: Color(0xFF9A9A9A), fontSize: 13),
+            fillColor: palette.surfaceMuted,
+            hintStyle: TextStyle(color: palette.textTertiary, fontSize: 13),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 13,
@@ -1000,15 +1028,17 @@ class _MultiLineField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return TextField(
       controller: controller,
       minLines: 3,
       maxLines: 5,
+      style: TextStyle(color: palette.textPrimary),
       decoration: InputDecoration(
         hintText: hintText,
         filled: true,
-        fillColor: const Color(0xFFF6F6F6),
-        hintStyle: const TextStyle(color: Color(0xFF9A9A9A), fontSize: 14),
+        fillColor: palette.surfaceMuted,
+        hintStyle: TextStyle(color: palette.textTertiary, fontSize: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide.none,

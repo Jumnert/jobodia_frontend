@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
 import 'package:jobodia_frontend/features/home/model/job_feed_model.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/app_bottom_navigation_bar.dart';
@@ -15,12 +16,13 @@ class SearchScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final homeController = Get.isRegistered<HomeController>()
         ? Get.find<HomeController>()
         : Get.put(HomeController());
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F8),
+      backgroundColor: palette.scaffold,
       extendBody: true,
       body: Padding(
         padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
@@ -31,9 +33,13 @@ class SearchScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Search',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
+                    style: TextStyle(
+                      color: palette.textPrimary,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                   const SizedBox(height: 14),
                   Obx(
@@ -55,14 +61,14 @@ class SearchScreen extends StatelessWidget {
                 final jobs = homeController.filteredJobs;
 
                 if (jobs.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(32, 0, 32, 24),
+                      padding: const EdgeInsets.fromLTRB(32, 0, 32, 24),
                       child: Text(
                         'No jobs match your search.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Color(0xFF707070),
+                          color: palette.textSecondary,
                           fontSize: 14,
                         ),
                       ),
@@ -93,10 +99,11 @@ class SearchScreen extends StatelessWidget {
   }
 
   void _showFilterSheet(BuildContext context, HomeController homeController) {
+    final palette = context.palette;
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: palette.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
@@ -111,9 +118,10 @@ class SearchScreen extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Text(
+                      Text(
                         'Filter jobs',
                         style: TextStyle(
+                          color: palette.textPrimary,
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
                         ),
@@ -126,9 +134,13 @@ class SearchScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 18),
-                  const Text(
+                  Text(
                     'Experience',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                      color: palette.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Wrap(
@@ -146,9 +158,13 @@ class SearchScreen extends StatelessWidget {
                         .toList(),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
+                  Text(
                     'Location',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                      color: palette.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Wrap(
@@ -170,9 +186,10 @@ class SearchScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   Row(
                     children: [
-                      const Text(
+                      Text(
                         'Salary range',
                         style: TextStyle(
+                          color: palette.textPrimary,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
@@ -180,8 +197,8 @@ class SearchScreen extends StatelessWidget {
                       const Spacer(),
                       Text(
                         '${_formatSalary(homeController.minSalaryFilter.value)} - ${_formatSalary(homeController.maxSalaryFilter.value)}',
-                        style: const TextStyle(
-                          color: Color(0xFF707070),
+                        style: TextStyle(
+                          color: palette.textSecondary,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -200,8 +217,8 @@ class SearchScreen extends StatelessWidget {
                         (homeController.maxAvailableSalary -
                             homeController.minAvailableSalary) ~/
                         100,
-                    activeColor: Colors.black,
-                    inactiveColor: const Color(0xFFE3E3E3),
+                    activeColor: palette.textPrimary,
+                    inactiveColor: palette.border,
                     labels: RangeLabels(
                       _formatSalary(homeController.minSalaryFilter.value),
                       _formatSalary(homeController.maxSalaryFilter.value),
@@ -216,8 +233,8 @@ class SearchScreen extends StatelessWidget {
                     width: double.infinity,
                     child: FilledButton(
                       style: FilledButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white,
+                        backgroundColor: palette.textPrimary,
+                        foregroundColor: palette.scaffold,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(999),
                         ),
@@ -304,18 +321,21 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return ChoiceChip(
       label: Text(label),
       selected: selected,
       onSelected: (_) => onTap(),
-      selectedColor: Colors.black,
-      backgroundColor: const Color(0xFFF3F3F3),
+      selectedColor: palette.textPrimary,
+      backgroundColor: palette.surfaceMuted,
       labelStyle: TextStyle(
-        color: selected ? Colors.white : Colors.black,
+        color: selected ? palette.scaffold : palette.textPrimary,
         fontWeight: FontWeight.w600,
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-      side: BorderSide(color: selected ? Colors.black : Colors.transparent),
+      side: BorderSide(
+        color: selected ? palette.textPrimary : Colors.transparent,
+      ),
     );
   }
 }

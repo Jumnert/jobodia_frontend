@@ -16,16 +16,17 @@ class JobDetailScreen extends GetView<JobDetailController> {
   @override
   Widget build(BuildContext context) {
     final job = controller.job;
+    final palette = context.palette;
     const logoSize = 106.0;
     const logoOverlap = 56.0;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE9E9E9),
+      backgroundColor: palette.scaffold,
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
           child: Container(
-            color: AppColors.surface,
+            color: palette.surface,
             child: CustomScrollView(
               slivers: [
                 SliverPadding(

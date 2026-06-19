@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 enum _BillingCycle { monthly, yearly }
 
@@ -21,7 +22,7 @@ class _PricingScreenState extends State<PricingScreen> {
     final selectedPlan = plans[_selectedPlanIndex];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.palette.scaffold,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(18, 8, 18, 22),
@@ -209,23 +210,24 @@ class _FeatureTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
       height: 78,
       decoration: BoxDecoration(
-        color: const Color(0xFFF4F5F7),
+        color: palette.surfaceMuted,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE6E8EB)),
+        border: Border.all(color: palette.border),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(feature.icon, color: Colors.black, size: 22),
+          Icon(feature.icon, color: palette.iconPrimary, size: 22),
           const SizedBox(height: 8),
           Text(
             feature.label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Color(0xFF404347),
+            style: TextStyle(
+              color: palette.textSecondary,
               fontSize: 11,
               fontWeight: FontWeight.w700,
             ),
@@ -249,13 +251,14 @@ class _PlanTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Align(
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: const Color(0xFFF1F2F4),
+          color: palette.surfaceMuted,
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: const Color(0xFFE0E4E7)),
+          border: Border.all(color: palette.border),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -271,7 +274,7 @@ class _PlanTabs extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: selectedIndex == index
-                      ? Colors.black
+                      ? palette.textPrimary
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(999),
                 ),
@@ -279,8 +282,8 @@ class _PlanTabs extends StatelessWidget {
                   plans[index].tabLabel,
                   style: TextStyle(
                     color: selectedIndex == index
-                        ? Colors.white
-                        : const Color(0xFF44484C),
+                        ? palette.scaffold
+                        : palette.textSecondary,
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                   ),
@@ -468,30 +471,31 @@ class _BenefitPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F9FA),
+        color: palette.surfaceMuted,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE7EAED)),
+        border: Border.all(color: palette.border),
       ),
       child: Column(
         children: [
           ...plan.features.map((feature) => _FeatureRow(text: feature)),
-          const Divider(color: Color(0xFFE8EBEE), height: 18),
+          Divider(color: palette.divider, height: 18),
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.arrow_outward_rounded,
-                color: Colors.black,
+                color: palette.iconPrimary,
                 size: 15,
               ),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'For custom requests',
                   style: TextStyle(
-                    color: Colors.black,
+                    color: palette.textPrimary,
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                   ),
@@ -533,8 +537,8 @@ class _FeatureRow extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
-                color: Color(0xFF4B4F53),
+              style: TextStyle(
+                color: context.palette.textSecondary,
                 fontSize: 12,
                 height: 1.35,
               ),
@@ -584,19 +588,24 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: palette.surface,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFFE7E9EC)),
+        border: Border.all(color: palette.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w900),
+            style: TextStyle(
+              color: palette.textPrimary,
+              fontSize: 19,
+              fontWeight: FontWeight.w900,
+            ),
           ),
           const SizedBox(height: 14),
           child,
@@ -614,6 +623,7 @@ class _FaqItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Column(
@@ -621,13 +631,17 @@ class _FaqItem extends StatelessWidget {
         children: [
           Text(
             question,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+            style: TextStyle(
+              color: palette.textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             answer,
-            style: const TextStyle(
-              color: Color(0xFF777777),
+            style: TextStyle(
+              color: palette.textSecondary,
               fontSize: 13,
               height: 1.35,
             ),
