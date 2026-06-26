@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jobodia_frontend/features/notifications/controller/notifications_controller.dart';
 
 import 'notifications_controller_test.mocks.dart';
@@ -14,6 +15,7 @@ void main() {
   setUp(() {
     Get.testMode = true;
     mockStorage = MockGetStorage();
+    FlutterSecureStorage.setMockInitialValues({});
 
     when(mockStorage.read<List>('readNotificationIds')).thenReturn(null);
     when(mockStorage.write(any, any)).thenAnswer((_) async => true);
