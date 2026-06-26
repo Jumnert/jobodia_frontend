@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/profile/model/profile_model.dart';
 
 class ExperienceTimeline extends StatelessWidget {
@@ -11,10 +12,10 @@ class ExperienceTimeline extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Experience',
           style: TextStyle(
-            color: Colors.black,
+            color: context.palette.textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.w800,
           ),
@@ -43,6 +44,7 @@ class _ExperienceTimelineItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,7 +60,7 @@ class _ExperienceTimelineItem extends StatelessWidget {
                       width: 4,
                       margin: const EdgeInsets.symmetric(vertical: 6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE0E0E0),
+                        color: palette.divider,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -75,8 +77,8 @@ class _ExperienceTimelineItem extends StatelessWidget {
                 children: [
                   Text(
                     experience.title,
-                    style: const TextStyle(
-                      color: Colors.black,
+                    style: TextStyle(
+                      color: palette.textPrimary,
                       fontSize: 14.5,
                       fontWeight: FontWeight.w800,
                       height: 1,
@@ -85,8 +87,8 @@ class _ExperienceTimelineItem extends StatelessWidget {
                   const SizedBox(height: 3),
                   Text(
                     experience.duration,
-                    style: const TextStyle(
-                      color: Color(0xFF9B9B9B),
+                    style: TextStyle(
+                      color: palette.textTertiary,
                       fontSize: 12.5,
                       height: 1,
                     ),
@@ -94,8 +96,8 @@ class _ExperienceTimelineItem extends StatelessWidget {
                   const SizedBox(height: 7),
                   Text(
                     experience.description,
-                    style: const TextStyle(
-                      color: Color(0xFF858585),
+                    style: TextStyle(
+                      color: palette.textSecondary,
                       fontSize: 13,
                       height: 1.1,
                     ),
@@ -117,6 +119,7 @@ class _ExperienceLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     if (imageUrl == null) {
       return SizedBox(
         width: 36,
@@ -125,8 +128,8 @@ class _ExperienceLogo extends StatelessWidget {
           child: Container(
             width: 8,
             height: 8,
-            decoration: const BoxDecoration(
-              color: Color(0xFFB0B0B0),
+            decoration: BoxDecoration(
+              color: palette.iconMuted,
               shape: BoxShape.circle,
             ),
           ),
@@ -138,14 +141,23 @@ class _ExperienceLogo extends StatelessWidget {
       width: 36,
       height: 36,
       decoration: BoxDecoration(
-        color: const Color(0xFFEAF2FA),
+        color: palette.surfaceMuted,
         shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xFFD5DDE5), width: 1),
+        border: Border.all(color: palette.border, width: 1),
       ),
       clipBehavior: Clip.antiAlias,
       child: Image.network(
         imageUrl!,
         fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) => progress == null
+            ? child
+            : const Center(
+                child: SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(strokeWidth: 1.5),
+                ),
+              ),
         errorBuilder: (context, error, stackTrace) =>
             const Icon(Icons.business_rounded, size: 20),
       ),

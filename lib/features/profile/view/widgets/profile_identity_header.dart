@@ -19,20 +19,31 @@ class ProfileIdentityHeader extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Container(
-          width: 96,
-          height: 96,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: palette.surface, width: 4),
-          ),
-          child: ClipOval(
-            child: Image.network(
-              avatarUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                color: palette.surfaceMuted,
-                child: const Icon(Icons.person_rounded, size: 50),
+        Hero(
+          tag: 'user-avatar',
+          child: Container(
+            width: 96,
+            height: 96,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: palette.surface, width: 4),
+            ),
+            child: ClipOval(
+              child: Image.network(
+                avatarUrl,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, progress) => progress == null
+                    ? child
+                    : Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: palette.textSecondary,
+                        ),
+                      ),
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: palette.surfaceMuted,
+                  child: const Icon(Icons.person_rounded, size: 50),
+                ),
               ),
             ),
           ),

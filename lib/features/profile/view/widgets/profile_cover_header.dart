@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jobodia_frontend/features/home/view/home_screen.dart';
 import 'package:jobodia_frontend/features/job_detail/view/widgets/job_detail_icon_button.dart';
 
 class ProfileCoverHeader extends StatelessWidget {
@@ -28,6 +27,14 @@ class ProfileCoverHeader extends StatelessWidget {
           Image.network(
             imageUrl,
             fit: BoxFit.cover,
+            loadingBuilder: (context, child, progress) => progress == null
+                ? child
+                : Container(
+                    color: const Color(0xFFD8E6EF),
+                    child: const Center(
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
             errorBuilder: (context, error, stackTrace) => Container(
               color: const Color(0xFFD8E6EF),
               child: const Icon(Icons.business_rounded, size: 64),
@@ -69,10 +76,11 @@ class ProfileCoverHeader extends StatelessWidget {
     );
   }
 
-  Future<void> _goBack(BuildContext context) async {
-    final didPop = await Navigator.of(context).maybePop();
-    if (!didPop) {
-      Get.offAll(() => const HomeScreen());
+  void _goBack(BuildContext context) {
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else {
+      Get.offAllNamed('/home');
     }
   }
 }

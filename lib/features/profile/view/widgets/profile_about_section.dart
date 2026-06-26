@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 class ProfileAboutSection extends StatelessWidget {
   const ProfileAboutSection({
@@ -14,13 +15,14 @@ class ProfileAboutSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'About me',
           style: TextStyle(
-            color: Colors.black,
+            color: palette.textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.w800,
           ),
@@ -36,10 +38,10 @@ class ProfileAboutSection extends StatelessWidget {
                   baseline: TextBaseline.alphabetic,
                   child: GestureDetector(
                     onTap: onReadMore,
-                    child: const Text(
+                    child: Text(
                       '...show more',
                       style: TextStyle(
-                        color: Colors.black,
+                        color: palette.textPrimary,
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                       ),
@@ -50,8 +52,8 @@ class ProfileAboutSection extends StatelessWidget {
           ),
           maxLines: isExpanded ? null : 4,
           overflow: isExpanded ? TextOverflow.visible : TextOverflow.clip,
-          style: const TextStyle(
-            color: Color(0xFF858585),
+          style: TextStyle(
+            color: palette.textSecondary,
             fontSize: 13,
             height: 1.1,
           ),
@@ -60,9 +62,13 @@ class ProfileAboutSection extends StatelessWidget {
           const SizedBox(height: 4),
           GestureDetector(
             onTap: onReadMore,
-            child: const Text(
+            child: Text(
               'Show less',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                color: palette.textPrimary,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
