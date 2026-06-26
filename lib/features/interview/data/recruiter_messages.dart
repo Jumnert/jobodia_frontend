@@ -9,6 +9,19 @@ class RecruiterMessage {
   final String title;
   final String category;
   final String body;
+
+  Map<String, dynamic> toJson() => {
+    'title': title,
+    'category': category,
+    'body': body,
+  };
+
+  factory RecruiterMessage.fromJson(Map<String, dynamic> json) =>
+      RecruiterMessage(
+        title: json['title'] as String,
+        category: json['category'] as String,
+        body: json['body'] as String,
+      );
 }
 
 const List<RecruiterMessage> recruiterMessages = [

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/interview/data/recruiter_messages.dart';
 
 /// Resource section with professional message templates job seekers can copy.
@@ -9,21 +10,10 @@ class RecruiterMessagesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDark
-        ? const Color(0xFF101214)
-        : const Color(0xFFF5F6F8);
-    final foregroundColor = isDark ? Colors.white : Colors.black;
-    final mutedColor = isDark
-        ? const Color(0xFFA5ABB1)
-        : const Color(0xFF6F7378);
-    final cardColor = isDark ? const Color(0xFF1A1D20) : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF2A2E33)
-        : const Color(0xFFEDEDED);
+    final palette = context.palette;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: palette.scaffold,
       body: SafeArea(
         child: Column(
           children: [
@@ -31,10 +21,11 @@ class RecruiterMessagesScreen extends StatelessWidget {
               children: [
                 IconButton(
                   onPressed: Get.back,
+                  tooltip: 'Back',
                   icon: Icon(
                     Icons.chevron_left_rounded,
                     size: 30,
-                    color: foregroundColor,
+                    color: palette.iconPrimary,
                   ),
                 ),
                 Expanded(
@@ -42,7 +33,7 @@ class RecruiterMessagesScreen extends StatelessWidget {
                     'Chat to Recruiter',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: foregroundColor,
+                      color: palette.textPrimary,
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                     ),
@@ -52,35 +43,69 @@ class RecruiterMessagesScreen extends StatelessWidget {
               ],
             ),
             Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
-                itemCount: recruiterMessages.length + 1,
-                separatorBuilder: (_, _) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Text(
-                        'Tap the copy icon to grab a ready-to-send template, '
-                        'then fill in the bracketed details.',
-                        style: TextStyle(
-                          color: mutedColor,
-                          fontSize: 13,
-                          height: 1.35,
-                        ),
+              child: recruiterMessages.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.chat_bubble_outline_rounded,
+                            size: 56,
+                            color: palette.iconMuted,
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            'No recruiter messages',
+                            style: TextStyle(
+                              color: palette.textPrimary,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Message templates will appear here.',
+                            style: TextStyle(
+                              color: palette.textSecondary,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
                       ),
-                    );
-                  }
-                  final message = recruiterMessages[index - 1];
-                  return _MessageCard(
-                    message: message,
-                    cardColor: cardColor,
-                    borderColor: borderColor,
-                    foregroundColor: foregroundColor,
-                    mutedColor: mutedColor,
-                  );
-                },
-              ),
+                    )
+                  : RefreshIndicator(
+                      color: AppColors.primary,
+                      backgroundColor: palette.surface,
+                      onRefresh: () async {
+                        await Future<void>.delayed(
+                          const Duration(milliseconds: 600),
+                        );
+                      },
+                      child: ListView.separated(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+                        itemCount: recruiterMessages.length + 1,
+                        separatorBuilder: (_, _) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          if (index == 0) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Text(
+                                'Tap the copy icon to grab a ready-to-send '
+                                'template, then fill in the bracketed details.',
+                                style: TextStyle(
+                                  color: palette.textSecondary,
+                                  fontSize: 13,
+                                  height: 1.35,
+                                ),
+                              ),
+                            );
+                          }
+                          final message = recruiterMessages[index - 1];
+                          return _MessageCard(message: message);
+                        },
+                      ),
+                    ),
             ),
           ],
         ),
@@ -90,19 +115,9 @@ class RecruiterMessagesScreen extends StatelessWidget {
 }
 
 class _MessageCard extends StatelessWidget {
-  const _MessageCard({
-    required this.message,
-    required this.cardColor,
-    required this.borderColor,
-    required this.foregroundColor,
-    required this.mutedColor,
-  });
+  const _MessageCard({required this.message});
 
   final RecruiterMessage message;
-  final Color cardColor;
-  final Color borderColor;
-  final Color foregroundColor;
-  final Color mutedColor;
 
   Future<void> _copy() async {
     await Clipboard.setData(ClipboardData(text: message.body));
@@ -117,12 +132,13 @@ class _MessageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 12, 16),
       decoration: BoxDecoration(
-        color: cardColor,
+        color: palette.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor),
+        border: Border.all(color: palette.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,7 +153,7 @@ class _MessageCard extends StatelessWidget {
                     Text(
                       message.title,
                       style: TextStyle(
-                        color: foregroundColor,
+                        color: palette.textPrimary,
                         fontSize: 15.5,
                         fontWeight: FontWeight.w800,
                       ),
@@ -169,7 +185,11 @@ class _MessageCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             message.body,
-            style: TextStyle(color: mutedColor, fontSize: 13.5, height: 1.5),
+            style: TextStyle(
+              color: palette.textSecondary,
+              fontSize: 13.5,
+              height: 1.5,
+            ),
           ),
         ],
       ),
