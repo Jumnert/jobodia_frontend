@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
+const _tabLabels = ['All Jobs', 'Best Matches', 'Saved Jobs'];
+
 class HomeTabBar extends StatelessWidget {
   const HomeTabBar({
     required this.selectedIndex,
@@ -14,17 +16,16 @@ class HomeTabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    const labels = ['All Jobs', 'Best Matches', 'Saved Jobs'];
     return Row(
       children: List.generate(
-        labels.length,
+        _tabLabels.length,
         (index) => Expanded(
           child: GestureDetector(
             onTap: () => onChanged(index),
             child: Column(
               children: [
                 Text(
-                  labels[index],
+                  _tabLabels[index],
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: selectedIndex == index

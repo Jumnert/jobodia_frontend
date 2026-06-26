@@ -3,13 +3,26 @@ import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/home/model/job_feed_model.dart';
 
 class JobFeedCard extends StatelessWidget {
-  const JobFeedCard({required this.job, this.colorIndex = 0, super.key});
+  const JobFeedCard({
+    required this.job,
+    this.colorIndex = 0,
+    this.isSaved = false,
+    this.onToggleSave,
+    super.key,
+  });
 
   final JobFeedModel job;
 
   /// Used to pick a gradient pairing from [AppColors.cardGradients] so each
   /// card in the feed gets a distinct background.
   final int colorIndex;
+
+  /// Whether this job is currently saved — drives the bookmark icon.
+  final bool isSaved;
+
+  /// Tapping the bookmark toggles saved state. When null the bookmark is shown
+  /// but inert (e.g. in contexts that don't manage saving).
+  final VoidCallback? onToggleSave;
 
   @override
   Widget build(BuildContext context) {
@@ -59,15 +72,36 @@ class JobFeedCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   const Icon(
+                    Icons.star_rounded,
+                    color: AppColors.warning,
+                    size: 14,
+                  ),
+                  const SizedBox(width: 2),
+                  const Text(
+                    '4.2', // Mock rating
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  const Icon(
                     Icons.verified_rounded,
                     color: Colors.white,
                     size: 15,
                   ),
                   const SizedBox(width: 8),
-                  Icon(
-                    Icons.bookmark_border_rounded,
-                    size: 18,
-                    color: Colors.white.withValues(alpha: 0.85),
+                  GestureDetector(
+                    onTap: onToggleSave == null ? null : () => onToggleSave!(),
+                    behavior: HitTestBehavior.opaque,
+                    child: Icon(
+                      isSaved
+                          ? Icons.bookmark_rounded
+                          : Icons.bookmark_border_rounded,
+                      size: 18,
+                      color: Colors.white.withValues(alpha: 0.85),
+                    ),
                   ),
                 ],
               ),
@@ -134,32 +168,7 @@ class JobFeedCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Flexible(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.location_on_rounded,
-                          size: 14,
-                          color: Colors.white.withValues(alpha: 0.9),
-                        ),
-                        const SizedBox(width: 3),
-                        Flexible(
-                          child: Text(
-                            job.distance,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.end,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white.withValues(alpha: 0.95),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  _MatchBadge(percent: job.matchPercent),
                 ],
               ),
             ],
@@ -215,6 +224,38 @@ class _MetaPill extends StatelessWidget {
             style: const TextStyle(fontSize: 11.5, color: Colors.white),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _MatchBadge extends StatelessWidget {
+  const _MatchBadge({required this.percent});
+
+  final int percent;
+
+  Color get _color {
+    if (percent >= 90) return AppColors.brandTeal;
+    if (percent >= 75) return AppColors.warning;
+    return const Color(0xFF9CA3AF); // grey
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: _color.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: _color.withValues(alpha: 0.55), width: 1),
+      ),
+      child: Text(
+        '$percent% match',
+        style: TextStyle(
+          color: _color,
+          fontSize: 11.5,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
