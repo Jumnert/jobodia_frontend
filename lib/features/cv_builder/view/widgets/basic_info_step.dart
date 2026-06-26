@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/custom_button.dart';
 import 'package:jobodia_frontend/core/widgets/custom_text_field.dart';

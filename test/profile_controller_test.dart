@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:jobodia_frontend/features/profile/controller/profile_controller.dart';
-import 'package:jobodia_frontend/features/profile/model/profile_model.dart';
 import 'package:jobodia_frontend/services/secure_storage_service.dart';
 
 /// Mock path_provider so GetStorage can initialize in tests.

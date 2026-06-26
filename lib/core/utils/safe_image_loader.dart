@@ -57,8 +57,7 @@ class SafeImageLoader extends StatelessWidget {
               ),
             ),
       errorBuilder:
-          errorBuilder ??
-          (_, __, ___) => const Icon(Icons.broken_image, size: 48),
+          errorBuilder ?? (_, _, _) => const Icon(Icons.broken_image, size: 48),
     );
   }
 }

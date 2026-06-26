@@ -55,7 +55,7 @@ class JobAlertsScreen extends StatelessWidget {
           child: ListView.separated(
             padding: const EdgeInsets.all(20),
             itemCount: ctrl.alerts.length + 1, // +1 for the top summary text
-            separatorBuilder: (_, __) => const SizedBox(height: 16),
+            separatorBuilder: (_, _) => const SizedBox(height: 16),
             itemBuilder: (context, index) {
               if (index == 0) {
                 return Padding(

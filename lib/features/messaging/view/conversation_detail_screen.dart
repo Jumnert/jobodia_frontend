@@ -100,7 +100,7 @@ class _ConversationDetailScreenState extends State<ConversationDetailScreen> {
                 padding: const EdgeInsets.all(20),
                 itemCount:
                     ctrl.currentMessages.length + (ctrl.isTyping.value ? 1 : 0),
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                separatorBuilder: (_, _) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   if (ctrl.isTyping.value && index == 0) {
                     return _TypingIndicator(palette: palette);

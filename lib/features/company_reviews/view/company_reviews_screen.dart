@@ -60,7 +60,7 @@ class CompanyReviewsScreen extends StatelessWidget {
                   vertical: 8,
                 ).copyWith(bottom: 100),
                 itemCount: reviews.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                separatorBuilder: (_, _) => const SizedBox(height: 16),
                 itemBuilder: (context, index) =>
                     _ReviewCard(review: reviews[index], palette: palette),
               ),

@@ -1,4 +1,3 @@
-import 'package:jobodia_frontend/features/cv_builder/model/cv_form_classes.dart';
 import 'package:jobodia_frontend/core/extensions/context_extensions.dart';
 import 'dart:async';
 

@@ -9,7 +9,6 @@ import 'package:jobodia_frontend/features/interview/controller/interview_schedul
 import 'package:jobodia_frontend/features/interview/controller/mock_interview_controller.dart';
 import 'package:jobodia_frontend/features/interview/view/flashcards_screen.dart';
 import 'package:jobodia_frontend/features/interview/view/mock_interview_screen.dart';
-import 'package:jobodia_frontend/features/interview/view/recruiter_messages_screen.dart';
 
 const _months = [
   'Jan',

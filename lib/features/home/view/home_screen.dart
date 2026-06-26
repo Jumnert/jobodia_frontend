@@ -86,7 +86,7 @@ class HomeScreen extends GetView<AuthController> {
                   return ListView.builder(
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: 3,
-                    itemBuilder: (_, __) => const SkeletonJobCard(),
+                    itemBuilder: (_, _) => const SkeletonJobCard(),
                   );
                 }
 

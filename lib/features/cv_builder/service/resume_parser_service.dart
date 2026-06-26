@@ -1,5 +1,3 @@
-import 'package:jobodia_frontend/features/cv_builder/model/cv_data.dart';
-
 class ResumeParserService {
   Future<Map<String, dynamic>> parseResumeMock() async {
     await Future<void>.delayed(const Duration(seconds: 3));

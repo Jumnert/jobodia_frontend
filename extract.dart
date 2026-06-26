@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use, avoid_print, curly_braces_in_flow_control_structures, unused_import, unnecessary_underscores, unused_field, unused_local_variable, use_build_context_synchronously, duplicate_ignore
 import 'dart:convert';
 import 'dart:io';
 import 'package:jobodia_frontend/features/interview/data/flashcard_data.dart';

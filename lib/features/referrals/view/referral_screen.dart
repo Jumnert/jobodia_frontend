@@ -190,7 +190,7 @@ class ReferralScreen extends StatelessWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: ctrl.referrals.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                separatorBuilder: (_, _) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final ref = ctrl.referrals[index];
                   return _ReferralTile(referral: ref, palette: palette);

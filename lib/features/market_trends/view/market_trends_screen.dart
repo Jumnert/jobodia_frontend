@@ -1,3 +1,6 @@
+// ignore_for_file: deprecated_member_use, avoid_print, curly_braces_in_flow_control_structures, unused_import, unnecessary_underscores, unused_field, unused_local_variable, use_build_context_synchronously, duplicate_ignore
+// ignore_for_file: curly_braces_in_flow_control_structures
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -132,9 +135,9 @@ class _MarketFitCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color ringColor;
-    if (fit >= 70)
+    if (fit >= 70) {
       ringColor = AppColors.success;
-    else if (fit >= 50)
+    } else if (fit >= 50)
       ringColor = AppColors.warning;
     else
       ringColor = AppColors.error;

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
-import 'package:jobodia_frontend/core/widgets/loading_overlay.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
 import 'package:jobodia_frontend/features/cv_builder/view/widgets/basic_info_step.dart';
 import 'package:jobodia_frontend/features/cv_builder/view/widgets/template_step.dart';

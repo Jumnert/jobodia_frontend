@@ -48,8 +48,7 @@ class ConversationsScreen extends StatelessWidget {
         return ListView.separated(
           padding: const EdgeInsets.symmetric(vertical: 8),
           itemCount: ctrl.conversations.length,
-          separatorBuilder: (_, __) =>
-              Divider(color: palette.border, height: 1),
+          separatorBuilder: (_, _) => Divider(color: palette.border, height: 1),
           itemBuilder: (context, index) {
             final c = ctrl.conversations[index];
             return ListTile(

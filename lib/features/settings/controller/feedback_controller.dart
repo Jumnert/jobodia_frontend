@@ -32,10 +32,11 @@ class FeedbackController extends GetxController {
   void onInit() {
     super.onInit();
     final stored = _storage.read<List>(_key);
-    if (stored != null)
+    if (stored != null) {
       entries.assignAll(
         stored.map((e) => FeedbackEntry.fromJson(e as Map<String, dynamic>)),
       );
+    }
   }
 
   void submit(int rating, String comment) {

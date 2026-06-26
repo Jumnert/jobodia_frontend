@@ -34,7 +34,7 @@ class CompanyAvatar extends StatelessWidget {
           width: size,
           height: size,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _InitialsCircle(
+          errorBuilder: (_, _, _) => _InitialsCircle(
             initials: initials,
             size: size,
             color: _colorFromName(companyName),
