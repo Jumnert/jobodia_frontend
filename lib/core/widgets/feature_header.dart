@@ -8,12 +8,14 @@ class FeatureHeader extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.height = 190,
+    this.onBack,
     super.key,
   });
 
   final String title;
   final String subtitle;
   final double height;
+  final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,7 @@ class FeatureHeader extends StatelessWidget {
                     width: 46,
                     height: 32,
                     child: OutlinedButton(
-                      onPressed: Get.back,
+                      onPressed: onBack ?? Get.back,
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
                         padding: EdgeInsets.zero,

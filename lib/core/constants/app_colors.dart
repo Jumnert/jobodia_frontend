@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 /// App color palette. Change these values to match final Figma colors.
 abstract final class AppColors {
+  /// Near-black text/heading color (not the brand teal — see [brandTeal]).
   static const primary = Color(0xFF202428);
   static const headerStart = Color(0xFF090A0B);
   static const headerEnd = Color(0xFF292B2D);
@@ -13,6 +14,19 @@ abstract final class AppColors {
   static const textSecondary = Color(0xFF68717A);
   static const hint = Color(0xFFB9BEC3);
   static const error = Color(0xFFD93B3B);
+
+  // ── Semantic tokens ──────────────────────────────────────────────
+  /// Teal brand accent (match badges, CV-match highlights, CTAs).
+  static const brandTeal = Color(0xFF0EA5A4);
+
+  /// Success / positive state (green).
+  static const success = Color(0xFF22C55E);
+
+  /// Warning / attention state (amber).
+  static const warning = Color(0xFFFFC857);
+
+  /// Informational state (blue).
+  static const info = Color(0xFF3B82F6);
 
   /// Gradient pairings for job feed cards. Cards cycle through these by index
   /// so each card gets a distinct, high-contrast background for white text.
@@ -42,6 +56,10 @@ class AppPalette {
     required this.divider,
     required this.iconPrimary,
     required this.iconMuted,
+    required this.success,
+    required this.warning,
+    required this.info,
+    required this.error,
   });
 
   /// Plain page background.
@@ -51,6 +69,7 @@ class AppPalette {
   final Color surface;
 
   /// Subtle filled background (chips, icon wells, inset fields).
+  /// In dark mode this also serves as the dark surface variant (surfaceDark).
   final Color surfaceMuted;
 
   /// Headings and high-emphasis body text.
@@ -74,6 +93,18 @@ class AppPalette {
   /// Muted / inactive icons.
   final Color iconMuted;
 
+  /// Success / positive state (green).
+  final Color success;
+
+  /// Warning / attention state (amber).
+  final Color warning;
+
+  /// Informational state (blue).
+  final Color info;
+
+  /// Error / destructive state (red).
+  final Color error;
+
   static const light = AppPalette(
     scaffold: Color(0xFFF5F6F8),
     surface: Colors.white,
@@ -85,6 +116,10 @@ class AppPalette {
     divider: Color(0xFFE7E9EC),
     iconPrimary: Color(0xFF101214),
     iconMuted: Color(0xFF8C8C8C),
+    success: Color(0xFF22C55E),
+    warning: Color(0xFFFFC857),
+    info: Color(0xFF3B82F6),
+    error: Color(0xFFD93B3B),
   );
 
   static const dark = AppPalette(
@@ -98,6 +133,10 @@ class AppPalette {
     divider: Color(0xFF2A2E33),
     iconPrimary: Colors.white,
     iconMuted: Color(0xFFA5ABB1),
+    success: Color(0xFF22C55E),
+    warning: Color(0xFFFFC857),
+    info: Color(0xFF3B82F6),
+    error: Color(0xFFEF4444),
   );
 }
 
