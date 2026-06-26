@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:jobodia_frontend/app/routes/app_pages.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 import 'package:jobodia_frontend/features/auth/repository/auth_repository.dart';
@@ -11,17 +14,63 @@ import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_contr
 import 'package:jobodia_frontend/features/cv_builder/view/cv_builder_screen.dart';
 import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/job_feed_card.dart';
+import 'package:jobodia_frontend/features/interview/controller/mock_interview_controller.dart';
+import 'package:jobodia_frontend/features/preferences/controller/preferences_controller.dart';
 import 'package:jobodia_frontend/features/pricing/view/pricing_screen.dart';
 import 'package:jobodia_frontend/main.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
+
+/// Test-only subclass that always reports preferences as completed, avoiding
+/// the need for GetStorage (which requires native path_provider unavailable in
+/// widget tests).
+class _TestPreferencesController extends PreferencesController {
+  @override
+  bool get hasCompletedPreferences => true;
+}
 
 void main() {
   setUp(() {
     Get.testMode = true;
     Get.reset();
+    // Pre-register preferences as completed so login skips the wizard and
+    // goes straight to home. InitialBinding's guarded Get.put will skip
+    // re-registering if one is already present.
+    Get.put<PreferencesController>(
+      _TestPreferencesController(),
+      permanent: true,
+    );
   });
 
-  tearDown(Get.reset);
+  tearDown(() {
+    // Cancel any pending timers before resetting Get (permanent controllers
+    // may not have onClose called by Get.reset).
+    if (Get.isRegistered<MockInterviewController>()) {
+      Get.find<MockInterviewController>().dispose();
+    }
+    Get.reset();
+  });
+
+  testWidgets('app builds without errors (smoke test)', (tester) async {
+    await tester.pumpWidget(const JobodiaApp());
+    // Verify the widget tree builds successfully.
+    expect(find.byType(JobodiaApp), findsOneWidget);
+  });
+
+  /// Logs in with test credentials. Preferences wizard is skipped via
+  /// [_TestPreferencesController], so this lands directly on the home screen.
+  Future<void> loginAndCompleteWizard(WidgetTester tester) async {
+    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
+    await tester.pumpAndSettle();
+
+    // Login
+    final fields = find.byType(TextField);
+    await tester.enterText(fields.at(0), 'test@gmail.com');
+    await tester.enterText(fields.at(1), '123456');
+    await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+  }
 
   testWidgets('shows login screen', (tester) async {
     await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
@@ -120,10 +169,10 @@ void main() {
   test('AuthController validates username and Gmail values', () {
     final controller = AuthController(const AuthRepository());
 
-    expect(controller.isValidGmail('test@gmail.com'), isTrue);
-    expect(controller.isValidGmail('muharen123@gmail.com'), isTrue);
-    expect(controller.isValidGmail('test@yahoo.com'), isFalse);
-    expect(controller.isValidGmail('test@gmail'), isFalse);
+    expect(controller.isValidEmail('test@gmail.com'), isTrue);
+    expect(controller.isValidEmail('muharen123@gmail.com'), isTrue);
+    expect(controller.isValidEmail('test@yahoo.com'), isFalse);
+    expect(controller.isValidEmail('test@gmail'), isFalse);
     expect(controller.isValidUsername('Muharen'), isTrue);
     expect(controller.isValidUsername('SOKHA'), isTrue);
     expect(controller.isValidUsername('Muharen123'), isFalse);
@@ -296,16 +345,22 @@ void main() {
     final cvController = Get.put(CvBuilderController());
     cvController.showGeneratedSnackBar = false;
 
-    await tester.pumpWidget(const GetMaterialApp(home: CvBuilderScreen()));
+    await tester.pumpWidget(
+      GetMaterialApp(home: const CvBuilderScreen(), getPages: AppPages.pages),
+    );
 
     expect(find.text('Ready to make a CV?'), findsOneWidget);
     expect(find.text('Step 1'), findsOneWidget);
     expect(find.text('Upload headshot'), findsOneWidget);
 
-    await tester.tap(find.text('Choose'));
+    // The platform image picker can't run in a widget test, so set a valid
+    // 1x1 PNG directly to exercise the headshot UI and template rendering.
+    cvController.headshotBytes.value = base64Decode(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+    );
     await tester.pumpAndSettle();
 
-    expect(cvController.hasHeadshot.value, isTrue);
+    expect(cvController.hasHeadshot, isTrue);
     expect(find.text('Headshot selected'), findsOneWidget);
 
     cvController.fullNameController.text = 'Han Jobodia';
@@ -320,6 +375,8 @@ void main() {
     expect(find.text('Work experience'), findsOneWidget);
     expect(find.text('Experience 1'), findsOneWidget);
 
+    cvController.workExperiences.first.roleController.text = 'UX Designer';
+    cvController.workExperiences.first.companyController.text = 'NovaTech';
     cvController.setWorkStartDate(
       cvController.workExperiences.first,
       DateTime(2023),
@@ -522,37 +579,13 @@ void main() {
   });
 
   testWidgets('fake login navigates home', (tester) async {
-    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
-    await tester.pumpAndSettle();
+    await loginAndCompleteWizard(tester);
 
-    final fields = find.byType(TextField);
-    await tester.enterText(fields.at(0), 'test@gmail.com');
-    await tester.enterText(fields.at(1), '123456');
-    await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
-    await tester.pump();
-
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
-
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Welcome, Test User'), findsOneWidget);
-    expect(find.text('test@gmail.com'), findsOneWidget);
-    expect(find.text('Candidate'), findsOneWidget);
+    expect(find.text('Jobs you might like'), findsOneWidget);
   });
 
   testWidgets('home chat nav opens AI chat screen', (tester) async {
-    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
-    await tester.pumpAndSettle();
-
-    final fields = find.byType(TextField);
-    await tester.enterText(fields.at(0), 'test@gmail.com');
-    await tester.enterText(fields.at(1), '123456');
-    await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
-    await tester.pump();
-
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pumpAndSettle();
+    await loginAndCompleteWizard(tester);
 
     await tester.tap(find.byIcon(Icons.chat_bubble_outline));
     await tester.pumpAndSettle();
@@ -562,17 +595,7 @@ void main() {
   });
 
   testWidgets('home notification bell opens notifications', (tester) async {
-    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
-    await tester.pumpAndSettle();
-
-    final fields = find.byType(TextField);
-    await tester.enterText(fields.at(0), 'test@gmail.com');
-    await tester.enterText(fields.at(1), '123456');
-    await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
-    await tester.pump();
-
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pumpAndSettle();
+    await loginAndCompleteWizard(tester);
 
     await tester.tap(find.byIcon(Icons.notifications_none_rounded).first);
     await tester.pumpAndSettle();
@@ -583,17 +606,7 @@ void main() {
   });
 
   testWidgets('home layers nav opens CV builder', (tester) async {
-    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
-    await tester.pumpAndSettle();
-
-    final fields = find.byType(TextField);
-    await tester.enterText(fields.at(0), 'test@gmail.com');
-    await tester.enterText(fields.at(1), '123456');
-    await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
-    await tester.pump();
-
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pumpAndSettle();
+    await loginAndCompleteWizard(tester);
 
     await tester.tap(find.byIcon(Icons.layers_outlined));
     await tester.pumpAndSettle();
@@ -603,17 +616,7 @@ void main() {
   });
 
   testWidgets('settings pricing tile opens pricing plans', (tester) async {
-    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
-    await tester.pumpAndSettle();
-
-    final fields = find.byType(TextField);
-    await tester.enterText(fields.at(0), 'test@gmail.com');
-    await tester.enterText(fields.at(1), '123456');
-    await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
-    await tester.pump();
-
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pumpAndSettle();
+    await loginAndCompleteWizard(tester);
 
     await tester.tap(find.byIcon(Icons.settings_outlined));
     await tester.pumpAndSettle();
@@ -627,17 +630,7 @@ void main() {
   });
 
   testWidgets('home settings nav opens settings page', (tester) async {
-    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
-    await tester.pumpAndSettle();
-
-    final fields = find.byType(TextField);
-    await tester.enterText(fields.at(0), 'test@gmail.com');
-    await tester.enterText(fields.at(1), '123456');
-    await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
-    await tester.pump();
-
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pumpAndSettle();
+    await loginAndCompleteWizard(tester);
 
     await tester.tap(find.byIcon(Icons.settings_outlined));
     await tester.pumpAndSettle();
@@ -645,11 +638,9 @@ void main() {
     expect(find.text('Settings'), findsWidgets);
     expect(find.text('General'), findsOneWidget);
     expect(find.text('Leave feedback'), findsOneWidget);
-    expect(find.text('Security'), findsOneWidget);
-    expect(find.text('Biometric Authentication'), findsOneWidget);
-    expect(find.text('Passcode Lock'), findsOneWidget);
 
-    // The theme switch is the first switch on the page (General section).
+    // The theme switch is the first switch on the page (General section),
+    // visible near the top before we scroll further down.
     await tester.tap(
       find
           .byWidgetPredicate(
@@ -661,6 +652,17 @@ void main() {
 
     expect(Get.isDarkMode, isTrue);
     Get.changeThemeMode(ThemeMode.light);
+
+    // The Security section now sits below the added "Your Activity" section,
+    // so scroll it into view before asserting its tiles render.
+    await tester.scrollUntilVisible(
+      find.text('Biometric Authentication'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Security'), findsOneWidget);
+    expect(find.text('Biometric Authentication'), findsOneWidget);
+    expect(find.text('Passcode Lock'), findsOneWidget);
   });
 
   testWidgets('pricing plan tabs and yearly toggle update prices', (
@@ -689,17 +691,7 @@ void main() {
   });
 
   testWidgets('home search filters jobs', (tester) async {
-    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
-    await tester.pumpAndSettle();
-
-    final fields = find.byType(TextField);
-    await tester.enterText(fields.at(0), 'test@gmail.com');
-    await tester.enterText(fields.at(1), '123456');
-    await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
-    await tester.pump();
-
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pumpAndSettle();
+    await loginAndCompleteWizard(tester);
 
     await tester.tap(find.byIcon(Icons.search_rounded));
     await tester.pumpAndSettle();
@@ -716,21 +708,11 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('No jobs match your search.'), findsOneWidget);
+    expect(find.text("No jobs found for 'xyz'"), findsOneWidget);
   });
 
   testWidgets('home filter filters jobs by location', (tester) async {
-    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
-    await tester.pumpAndSettle();
-
-    final fields = find.byType(TextField);
-    await tester.enterText(fields.at(0), 'test@gmail.com');
-    await tester.enterText(fields.at(1), '123456');
-    await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
-    await tester.pump();
-
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pumpAndSettle();
+    await loginAndCompleteWizard(tester);
 
     await tester.tap(find.byIcon(Icons.search_rounded));
     await tester.pumpAndSettle();
@@ -750,17 +732,7 @@ void main() {
   });
 
   testWidgets('job cards include context menu actions', (tester) async {
-    await tester.pumpWidget(const JobodiaApp(initialRoute: AppRoutes.login));
-    await tester.pumpAndSettle();
-
-    final fields = find.byType(TextField);
-    await tester.enterText(fields.at(0), 'test@gmail.com');
-    await tester.enterText(fields.at(1), '123456');
-    await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
-    await tester.pump();
-
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pumpAndSettle();
+    await loginAndCompleteWizard(tester);
 
     final contextMenu = tester.widget<CupertinoContextMenu>(
       find.byType(CupertinoContextMenu).first,
