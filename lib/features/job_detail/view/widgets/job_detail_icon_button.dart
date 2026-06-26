@@ -5,17 +5,19 @@ class JobDetailIconButton extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     this.tooltip,
+    this.backgroundColor,
     super.key,
   });
 
   final IconData icon;
   final VoidCallback onPressed;
   final String? tooltip;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.black.withValues(alpha: 0.38),
+      color: backgroundColor ?? Colors.black.withValues(alpha: 0.38),
       shape: const CircleBorder(),
       clipBehavior: Clip.antiAlias,
       child: IconButton(

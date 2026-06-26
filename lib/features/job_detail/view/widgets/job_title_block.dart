@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/features/job_detail/model/job_detail_model.dart';
 import 'package:jobodia_frontend/features/job_detail/view/widgets/company_logo.dart';
 import 'package:jobodia_frontend/features/job_detail/view/widgets/job_chip.dart';
@@ -22,13 +24,19 @@ class JobTitleBlock extends StatelessWidget {
             children: [
               Text(
                 job.title,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w800,
-                  height: 1,
-                ),
+                style:
+                    (Theme.of(context).textTheme.headlineSmall ??
+                            const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                            ))
+                        .copyWith(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w800,
+                          height: 1,
+                        ),
               ),
-              JobChip(label: job.workMode, isDark: true),
+              JobChip(label: job.workMode),
             ],
           ),
           const SizedBox(height: 2),
@@ -37,23 +45,32 @@ class JobTitleBlock extends StatelessWidget {
             style: const TextStyle(color: Color(0xFF999999), fontSize: 14),
           ),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              const CompanyLogo(
-                size: 32,
-                hasBorder: false,
-                hasShadow: false,
-                borderRadius: 5,
-              ),
-              const SizedBox(width: 10),
-              Text(
-                job.companyName,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+          GestureDetector(
+            onTap: () => Get.toNamed(
+              AppRoutes.companyProfile,
+              arguments: job.companyName,
+            ),
+            child: Row(
+              children: [
+                CompanyLogo(
+                  companyName: job.companyName,
+                  size: 32,
+                  hasBorder: false,
+                  hasShadow: false,
+                  borderRadius: 5,
                 ),
-              ),
-            ],
+                const SizedBox(width: 10),
+                Text(
+                  job.companyName,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    decoration: TextDecoration.underline,
+                    decorationColor: Color(0xFF0EA5A4),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 10),
           Wrap(

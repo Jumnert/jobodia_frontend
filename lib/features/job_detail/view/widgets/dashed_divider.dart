@@ -6,8 +6,8 @@ class DashedDivider extends StatelessWidget {
     super.key,
     this.color,
     this.height = 1,
-    this.dashWidth = 3,
-    this.gap = 3,
+    this.dashWidth = 3.0,
+    this.gap = 3.0,
   });
 
   final Color? color;

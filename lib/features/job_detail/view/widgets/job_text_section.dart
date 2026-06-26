@@ -5,7 +5,7 @@ class JobTextSection extends StatelessWidget {
   const JobTextSection({
     required this.title,
     required this.body,
-    this.maxLines,
+    this.isExpanded = false,
     this.actionLabel,
     this.onActionPressed,
     super.key,
@@ -13,13 +13,21 @@ class JobTextSection extends StatelessWidget {
 
   final String title;
   final String body;
-  final int? maxLines;
+  final bool isExpanded;
   final String? actionLabel;
   final VoidCallback? onActionPressed;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+
+    final textStyle = TextStyle(
+      color: palette.textSecondary,
+      fontSize: 15.5,
+      height: 1.4,
+      fontWeight: FontWeight.w400,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -32,16 +40,18 @@ class JobTextSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        Text(
-          body,
-          maxLines: maxLines,
-          overflow: maxLines == null ? null : TextOverflow.ellipsis,
-          style: TextStyle(
-            color: palette.textSecondary,
-            fontSize: 15.5,
-            height: 1.12,
-            fontWeight: FontWeight.w400,
+        AnimatedCrossFade(
+          duration: const Duration(milliseconds: 260),
+          crossFadeState: isExpanded
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
+          firstChild: Text(
+            body,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: textStyle,
           ),
+          secondChild: Text(body, style: textStyle),
         ),
         if (actionLabel != null && onActionPressed != null) ...[
           const SizedBox(height: 4),

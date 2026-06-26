@@ -8,6 +8,7 @@ class JobDetailHeader extends StatelessWidget {
     required this.isSaved,
     required this.onShare,
     required this.onSave,
+    this.heroTag,
     super.key,
   });
 
@@ -15,9 +16,27 @@ class JobDetailHeader extends StatelessWidget {
   final bool isSaved;
   final VoidCallback onShare;
   final VoidCallback onSave;
+  final String? heroTag;
 
   @override
   Widget build(BuildContext context) {
+    final imageWidget = Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, progress) => progress == null
+          ? child
+          : Container(
+              color: const Color(0xFFD8E6EF),
+              child: const Center(
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+      errorBuilder: (context, error, stackTrace) => Container(
+        color: const Color(0xFFD8E6EF),
+        child: const Icon(Icons.business_rounded, size: 64),
+      ),
+    );
+
     return AspectRatio(
       aspectRatio: 1.62,
       child: ClipRRect(
@@ -25,14 +44,10 @@ class JobDetailHeader extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.network(
-              imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                color: const Color(0xFFD8E6EF),
-                child: const Icon(Icons.business_rounded, size: 64),
-              ),
-            ),
+            if (heroTag != null)
+              Hero(tag: heroTag!, child: imageWidget)
+            else
+              imageWidget,
             Container(color: Colors.black.withValues(alpha: 0.16)),
             Padding(
               padding: const EdgeInsets.all(16),
