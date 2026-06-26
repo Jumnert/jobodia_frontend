@@ -4,6 +4,10 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Jobodia needs access to your photos so you can add a headshot to your CV.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Jobodia needs camera access so you can take a headshot for your CV.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

@@ -43,3 +43,32 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Claude Code memory (local AI session state — not for version control)
+.claude/
+
+# Secrets & credentials
+*.env
+*.env.*
+*.keystore
+*.jks
+*.p12
+*.p8
+*.pem
+key.properties
+google-services.json
+GoogleService-Info.plist
+secrets/
+credentials/
+
+# AI and agent related
+.claude/
+.agents/
+AGENTS.md
+claude_backup/
+prompt*
+todo*
+fix_*
+extract_*
+*.py
+

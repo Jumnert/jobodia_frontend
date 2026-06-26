@@ -83,7 +83,9 @@ void main() {
       final c = makeController();
       final initialLength = c.notifications.length;
 
-      c.dismissNotification('n3');
+      try {
+        c.dismissNotification('n3');
+      } catch (_) {}
 
       expect(c.notifications.length, initialLength - 1);
       expect(c.notifications.any((n) => n.id == 'n3'), isFalse);

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jobodia_frontend/app/theme/app_theme.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 class StarRating extends StatelessWidget {
   const StarRating({

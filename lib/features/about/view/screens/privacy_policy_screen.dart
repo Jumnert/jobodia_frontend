@@ -8,7 +8,7 @@ import 'package:jobodia_frontend/core/widgets/feature_header.dart';
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
 
-  static const _subtitle = 'enter your Email address to start password reset';
+  static const _subtitle = 'How we handle your data';
 
   @override
   Widget build(BuildContext context) {
@@ -63,26 +63,32 @@ class _PrivacyPolicyContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    final bodyStyle = TextStyle(
+      color: context.palette.textSecondary,
+      fontSize: 14,
+      height: 1.45,
+    );
+
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Privacy Policy',
           style: TextStyle(
-            color: AppColors.textPrimary,
+            color: context.palette.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text(
-          'This privacy policy applies to the daw app (hereby referred to as '
+          'This privacy policy applies to the Jobodia app (hereby referred to as '
           '"Application") for mobile devices that was created by (hereby '
           'referred to as "Service Provider") as a Commercial service. This '
           'service is intended for use "AS IS".',
-          style: _bodyStyle,
+          style: bodyStyle,
         ),
-        SizedBox(height: 18),
+        const SizedBox(height: 18),
         _PolicyQuestion(
           title:
               'What information does the Application obtain and how is it used?',
@@ -146,23 +152,24 @@ class _PolicyQuestion extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
+            style: TextStyle(
+              color: context.palette.textPrimary,
               fontSize: 14,
               height: 1.35,
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 5),
-          Text(body, style: _bodyStyle),
+          Text(
+            body,
+            style: TextStyle(
+              color: context.palette.textSecondary,
+              fontSize: 14,
+              height: 1.45,
+            ),
+          ),
         ],
       ),
     );
   }
 }
-
-const _bodyStyle = TextStyle(
-  color: AppColors.textSecondary,
-  fontSize: 14,
-  height: 1.45,
-);

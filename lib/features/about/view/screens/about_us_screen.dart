@@ -8,7 +8,7 @@ import 'package:jobodia_frontend/core/widgets/feature_header.dart';
 class AboutUsScreen extends StatelessWidget {
   const AboutUsScreen({super.key});
 
-  static const _subtitle = 'enter your Email address to start password reset';
+  static const _subtitle = 'Learn more about the team behind Jobodia';
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +63,13 @@ class _AboutUsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    final bodyStyle = TextStyle(
+      color: context.palette.textSecondary,
+      fontSize: 14,
+      height: 1.45,
+    );
+
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -75,25 +81,25 @@ class _AboutUsContent extends StatelessWidget {
           'find, evaluate, and connect with the right talent efficiently. '
           'Our mission is simple: make hiring and job searching easier, more '
           'personalized, and more effective for everyone.',
-          style: _bodyStyle,
+          style: bodyStyle,
         ),
-        SizedBox(height: 18),
-        _SectionTitle('What We Offer'),
-        SizedBox(height: 8),
+        const SizedBox(height: 18),
+        const _SectionTitle('What We Offer'),
+        const SizedBox(height: 8),
         _BulletText('AI Resume Builder for fast, professional CV creation'),
         _BulletText('Smart Job Matching based on skills and experience'),
         _BulletText('Easy Job Posting and Candidate Management for employers'),
         _BulletText(
           'Real-time communication between job seekers and recruiters',
         ),
-        SizedBox(height: 18),
-        _SectionTitle('Why Jobodia?'),
-        SizedBox(height: 8),
+        const SizedBox(height: 18),
+        const _SectionTitle('Why Jobodia?'),
+        const SizedBox(height: 8),
         Text(
           'We combine technology and simplicity to remove the stress from '
           'job searching and hiring, so you can focus on what matters most: '
           'building your future.',
-          style: _bodyStyle,
+          style: bodyStyle,
         ),
       ],
     );
@@ -109,8 +115,8 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(
-        color: AppColors.textPrimary,
+      style: TextStyle(
+        color: context.palette.textPrimary,
         fontSize: 17,
         fontWeight: FontWeight.w700,
       ),
@@ -130,28 +136,31 @@ class _BulletText extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 7),
+          Padding(
+            padding: const EdgeInsets.only(top: 7),
             child: SizedBox.square(
               dimension: 4,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: AppColors.textPrimary,
+                  color: context.palette.textPrimary,
                   shape: BoxShape.circle,
                 ),
               ),
             ),
           ),
           const SizedBox(width: 10),
-          Expanded(child: Text(text, style: _bodyStyle)),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: context.palette.textSecondary,
+                fontSize: 14,
+                height: 1.45,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 }
-
-const _bodyStyle = TextStyle(
-  color: AppColors.textSecondary,
-  fontSize: 14,
-  height: 1.45,
-);

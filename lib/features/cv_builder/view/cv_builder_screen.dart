@@ -91,7 +91,10 @@ class CvBuilderScreen extends GetView<CvBuilderController> {
                     child: Center(
                       child: Container(
                         padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(color: context.palette.surface, borderRadius: BorderRadius.circular(16)),
+                        decoration: BoxDecoration(
+                          color: context.palette.surface,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                         child: const Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
