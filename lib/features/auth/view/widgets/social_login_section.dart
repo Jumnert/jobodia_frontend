@@ -30,25 +30,31 @@ class SocialLoginSection extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: SocialLoginButton(
-                text: 'Google',
-                iconPath: 'assets/icons/google.png',
-                onTap: () => Get.snackbar(
-                  'Coming soon',
-                  'Google login coming soon',
-                  snackPosition: SnackPosition.BOTTOM,
+              child: Opacity(
+                opacity: 0.5,
+                child: SocialLoginButton(
+                  text: 'Google',
+                  iconPath: 'assets/icons/google.png',
+                  onTap: () => Get.snackbar(
+                    'Coming soon',
+                    'Google login coming soon',
+                    snackPosition: SnackPosition.BOTTOM,
+                  ),
                 ),
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: SocialLoginButton(
-                text: 'Github',
-                iconPath: 'assets/icons/github.png',
-                onTap: () => Get.snackbar(
-                  'Coming soon',
-                  'GitHub login coming soon',
-                  snackPosition: SnackPosition.BOTTOM,
+              child: Opacity(
+                opacity: 0.5,
+                child: SocialLoginButton(
+                  text: 'Github',
+                  iconPath: 'assets/icons/github.png',
+                  onTap: () => Get.snackbar(
+                    'Coming soon',
+                    'GitHub login coming soon',
+                    snackPosition: SnackPosition.BOTTOM,
+                  ),
                 ),
               ),
             ),

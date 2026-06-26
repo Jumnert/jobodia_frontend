@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -18,7 +19,7 @@ class SignUpForm extends GetView<AuthController> {
       children: [
         CustomTextField(
           label: 'Username',
-          hintText: 'Elon Musk',
+          hintText: 'John Doe',
           controller: controller.usernameController,
           prefixIcon: Icons.person_outline_rounded,
           textInputAction: TextInputAction.next,
@@ -39,11 +40,12 @@ class SignUpForm extends GetView<AuthController> {
         Obx(
           () => CustomTextField(
             label: 'Password',
-            hintText: 'Create a password',
+            hintText: 'Min 8 chars, upper + lower + number',
             controller: controller.passwordController,
             prefixIcon: Icons.key_rounded,
             obscureText: !controller.isPasswordVisible.value,
             textInputAction: TextInputAction.next,
+            maxLength: 128,
             suffixIcon: _PasswordVisibilityButton(
               isVisible: controller.isPasswordVisible.value,
               onPressed: controller.togglePasswordVisibility,
@@ -74,7 +76,12 @@ class SignUpForm extends GetView<AuthController> {
           () => CustomButton(
             label: 'Sign up',
             isLoading: controller.isLoading.value,
-            onPressed: controller.isLoading.value ? null : controller.signUp,
+            onPressed: controller.isLoading.value
+                ? null
+                : () {
+                    unawaited(HapticFeedback.lightImpact());
+                    controller.signUp();
+                  },
           ),
         ),
         const SizedBox(height: 18),

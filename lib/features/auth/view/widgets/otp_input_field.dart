@@ -129,7 +129,7 @@ class _OtpBox extends StatelessWidget {
       child: Container(
         height: 54,
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.palette.surface,
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(

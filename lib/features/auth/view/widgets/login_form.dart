@@ -1,4 +1,7 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -61,7 +64,12 @@ class LoginForm extends GetView<AuthController> {
           () => CustomButton(
             label: 'Log in',
             isLoading: controller.isLoading.value,
-            onPressed: controller.isLoading.value ? null : controller.login,
+            onPressed: controller.isLoading.value
+                ? null
+                : () {
+                    unawaited(HapticFeedback.lightImpact());
+                    controller.login();
+                  },
           ),
         ),
         const SizedBox(height: 18),
@@ -87,10 +95,10 @@ class LoginForm extends GetView<AuthController> {
             ),
           ],
         ),
-        const SizedBox(height: 26),
-        const _DemoAccountCard(),
-        const SizedBox(height: 12),
-        const _TemporaryTestNavigation(),
+        if (kDebugMode) ...[
+          const SizedBox(height: 26),
+          const _TemporaryTestNavigation(),
+        ],
       ],
     );
   }
@@ -186,34 +194,6 @@ class _AnimatedErrorMessage extends StatelessWidget {
                 ),
               ),
             ),
-    );
-  }
-}
-
-class _DemoAccountCard extends StatelessWidget {
-  const _DemoAccountCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE9EBED)),
-      ),
-      child: const Row(
-        children: [
-          Icon(Icons.info_outline_rounded, color: AppColors.textSecondary),
-          SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'Demo account: test@gmail.com / 123456',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

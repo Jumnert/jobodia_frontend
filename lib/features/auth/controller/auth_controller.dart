@@ -6,7 +6,9 @@ import 'package:jobodia_frontend/features/auth/model/user_model.dart';
 import 'package:jobodia_frontend/features/auth/repository/auth_repository.dart';
 
 /// GetX Controller used as the ViewModel for authentication screens.
-class AuthController extends GetxController {
+import 'package:jobodia_frontend/features/auth/controller/form_validation_mixin.dart';
+
+class AuthController extends GetxController with FormValidationMixin {
   AuthController(this._authRepository);
 
   final AuthRepository _authRepository;
@@ -33,6 +35,9 @@ class AuthController extends GetxController {
   final RxBool isResetConfirmPasswordVisible = false.obs;
   final currentUser = Rxn<UserModel>();
 
+  /// Whether a user is currently authenticated.
+  bool get isLoggedIn => currentUser.value != null;
+
   void changeAuthTab(int index) {
     if (isLoading.value || selectedAuthTab.value == index) return;
     selectedAuthTab.value = index;
@@ -56,16 +61,6 @@ class AuthController extends GetxController {
     isResetConfirmPasswordVisible.toggle();
   }
 
-  bool isValidGmail(String email) {
-    final gmailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@gmail\.com$');
-    return gmailRegex.hasMatch(email.trim());
-  }
-
-  bool isValidUsername(String username) {
-    final usernameRegex = RegExp(r'^[a-zA-Z]+$');
-    return usernameRegex.hasMatch(username.trim());
-  }
-
   Future<void> login() async {
     final email = emailController.text.trim();
     final password = passwordController.text;
@@ -75,13 +70,19 @@ class AuthController extends GetxController {
       return;
     }
 
-    if (!isValidGmail(email)) {
-      errorMessage.value = 'Please enter a valid Gmail address';
+    if (!isValidEmail(email)) {
+      errorMessage.value = 'Please enter a valid email address';
       return;
     }
 
     if (password.isEmpty) {
       errorMessage.value = 'Password is required.';
+      return;
+    }
+
+    final passwordError = validatePassword(password);
+    if (passwordError != null) {
+      errorMessage.value = passwordError;
       return;
     }
 
@@ -96,15 +97,17 @@ class AuthController extends GetxController {
         return;
       }
 
-      currentUser.value = const UserModel(
+      // TODO: Replace with real user data from API response
+      currentUser.value = UserModel(
         id: '1',
-        name: 'Test User',
-        email: AuthRepository.fakeEmail,
+        name: 'User',
+        email: emailController.text.trim(),
         role: 'Candidate',
-        avatarUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/5/56/Donald_Trump_official_portrait.jpg',
+        avatarUrl: null,
       );
       Get.offAllNamed(AppRoutes.home);
+    } catch (e) {
+      _showErrorSnackBar('Login failed', e.toString());
     } finally {
       isLoading.value = false;
     }
@@ -122,7 +125,8 @@ class AuthController extends GetxController {
     }
 
     if (!isValidUsername(username)) {
-      errorMessage.value = 'Username must contain only letters';
+      errorMessage.value =
+          'Username can only contain letters, digits, spaces, and hyphens';
       return;
     }
 
@@ -131,13 +135,19 @@ class AuthController extends GetxController {
       return;
     }
 
-    if (!isValidGmail(email)) {
-      errorMessage.value = 'Please enter a valid Gmail address';
+    if (!isValidEmail(email)) {
+      errorMessage.value = 'Please enter a valid email address';
       return;
     }
 
     if (password.isEmpty) {
       errorMessage.value = 'Password is required.';
+      return;
+    }
+
+    final passwordError = validatePassword(password);
+    if (passwordError != null) {
+      errorMessage.value = passwordError;
       return;
     }
 
@@ -250,6 +260,12 @@ class AuthController extends GetxController {
 
     if (newPassword.isEmpty) {
       resetPasswordErrorMessage.value = 'New password is required.';
+      return;
+    }
+
+    final passwordError = validatePassword(newPassword);
+    if (passwordError != null) {
+      resetPasswordErrorMessage.value = passwordError;
       return;
     }
 

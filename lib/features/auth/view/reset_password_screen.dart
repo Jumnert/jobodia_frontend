@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/custom_button.dart';
+import 'package:jobodia_frontend/core/widgets/gradient_header_painter.dart';
 import 'package:jobodia_frontend/core/widgets/custom_text_field.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 
@@ -88,7 +89,7 @@ class _ResetPasswordHeader extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          const CustomPaint(painter: _HeaderBackgroundPainter()),
+          const CustomPaint(painter: GradientHeaderPainter()),
           SafeArea(
             bottom: false,
             child: Padding(
@@ -153,11 +154,12 @@ class _ResetPasswordForm extends GetView<AuthController> {
         Obx(
           () => CustomTextField(
             label: 'New Password',
-            hintText: 'Enter new password',
+            hintText: 'Min 8 chars, upper + lower + number',
             controller: controller.newPasswordController,
             prefixIcon: Icons.key_rounded,
             obscureText: !controller.isNewPasswordVisible.value,
             textInputAction: TextInputAction.next,
+            maxLength: 128,
             suffixIcon: _PasswordVisibilityButton(
               isVisible: controller.isNewPasswordVisible.value,
               onPressed: controller.toggleNewPasswordVisibility,
@@ -268,40 +270,4 @@ class _PasswordVisibilityButton extends StatelessWidget {
       ),
     );
   }
-}
-
-class _HeaderBackgroundPainter extends CustomPainter {
-  const _HeaderBackgroundPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final backgroundPaint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [AppColors.headerStart, AppColors.headerEnd],
-      ).createShader(Offset.zero & size);
-
-    canvas.drawRect(Offset.zero & size, backgroundPaint);
-
-    final lightBandPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.12)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 26)
-      ..strokeWidth = 24
-      ..style = PaintingStyle.stroke;
-
-    final path = Path()
-      ..moveTo(size.width * 0.1, size.height * 1.05)
-      ..quadraticBezierTo(
-        size.width * 0.58,
-        size.height * 0.58,
-        size.width * 1.08,
-        size.height * 0.2,
-      );
-
-    canvas.drawPath(path, lightBandPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -17,7 +17,7 @@ class AuthTabSwitcher extends GetView<AuthController> {
         height: 55,
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: const Color(0xFFE2E2E2),
+          color: context.palette.surfaceMuted,
           borderRadius: BorderRadius.circular(30),
         ),
         child: Stack(

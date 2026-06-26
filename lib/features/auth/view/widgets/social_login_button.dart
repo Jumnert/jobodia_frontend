@@ -16,25 +16,17 @@ class SocialLoginButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Material(
-      color: AppColors.surface,
+      color: palette.surface,
       borderRadius: BorderRadius.circular(24),
+      elevation: 1,
+      shadowColor: Colors.black.withValues(alpha: 0.05),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(24),
-        child: Container(
+        child: SizedBox(
           height: 45,
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 12,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -43,10 +35,10 @@ class SocialLoginButton extends StatelessWidget {
                 width: 22,
                 height: 22,
                 errorBuilder: (context, error, stackTrace) {
-                  return const Icon(
+                  return Icon(
                     Icons.image_not_supported_outlined,
                     size: 21,
-                    color: AppColors.textSecondary,
+                    color: palette.textSecondary,
                   );
                 },
               ),
@@ -55,8 +47,8 @@ class SocialLoginButton extends StatelessWidget {
                 child: Text(
                   text,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    color: palette.textPrimary,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
