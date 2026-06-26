@@ -1,9 +1,13 @@
 /// Route names only. Screens are connected in app_pages.dart.
 abstract final class AppRoutes {
+  static const unknown = '/unknown';
   static const onboarding = '/onboarding';
   static const login = '/login';
   static const home = '/home';
   static const cvBuilder = '/cv-builder';
+  static const cvPreview = '/cv-preview';
+  static const savedJobs = '/saved-jobs';
+  static const applications = '/applications';
   static const aiChat = '/ai-chat';
   static const pricing = '/pricing';
   static const jobDetail = '/job-detail';
@@ -13,4 +17,22 @@ abstract final class AppRoutes {
   static const aboutUs = '/about-us';
   static const privacyPolicy = '/privacy-policy';
   static const report = '/report';
+  static const editProfile = '/edit-profile';
+  static const preferencesWizard = '/preferences-wizard';
+  static const companyProfile = '/company-profile';
+  static const applicationAnalytics = '/application-analytics';
+  static const notifications = '/notifications';
+  static const settings = '/settings';
+  static const search = '/search';
+  static const jobAlerts = '/job-alerts';
+  static const referrals = '/referrals';
+  static const salaryInsights = '/salary-insights';
+  static const assessments = '/assessments';
+  static const assessmentQuiz = '/assessment-quiz';
+  static const flashcards = '/flashcards';
+  static const conversations = '/conversations';
+  static const conversationDetail = '/conversation-detail';
+  static const companyReviews = '/company-reviews';
+  static const careerGoals = '/career-goals';
+  static const marketTrends = '/market-trends';
 }

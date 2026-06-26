@@ -1,5 +1,5 @@
 name: jobodia_frontend
-description: "A new Flutter project."
+description: "Jobodia — AI-powered job search and career management app"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -36,10 +36,20 @@ dependencies:
   cupertino_icons: ^1.0.8
   get: ^4.7.3
   get_storage: ^2.1.1
+  flutter_secure_storage: ^10.3.1
   liquid_glass_widgets: ^0.15.5
+  share_plus: 13.1.0
+  image_picker: 1.2.2
+  intl: ^0.20.2
+  pdf: 3.13.0
+  printing: 5.15.0
+  uuid: ^4.5.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  mockito: ^5.4.4
+  build_runner: ^2.4.8
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -64,6 +74,7 @@ flutter:
     - assets/icons/google.png
     - assets/icons/github.png
     - assets/images/onboarding/
+    - assets/data/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
