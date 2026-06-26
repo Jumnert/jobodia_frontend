@@ -1,18 +1,27 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
-import 'package:jobodia_frontend/features/home/model/job_feed_model.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/app_bottom_navigation_bar.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/app_navigation.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/home_search_bar.dart';
-import 'package:jobodia_frontend/features/home/view/widgets/job_feed_card.dart';
-import 'package:jobodia_frontend/features/job_detail/controller/job_detail_controller.dart';
-import 'package:jobodia_frontend/features/job_detail/view/job_detail_screen.dart';
+import 'package:jobodia_frontend/features/search/controller/search_controller.dart';
+import 'package:jobodia_frontend/features/search/view/widgets/filter_bottom_sheet.dart';
+import 'package:jobodia_frontend/features/search/view/widgets/search_results_list.dart';
+
+import 'package:jobodia_frontend/features/job_alerts/view/widgets/create_alert_sheet.dart';
 
 class SearchScreen extends StatelessWidget {
   const SearchScreen({super.key});
+
+  static String _formatSalary(double value) {
+    final amount = value.round();
+    if (amount >= 1000) {
+      final thousands = amount / 1000;
+      return '\$${thousands.toStringAsFixed(thousands.truncateToDouble() == thousands ? 0 : 1)}k';
+    }
+    return '\$$amount';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +29,9 @@ class SearchScreen extends StatelessWidget {
     final homeController = Get.isRegistered<HomeController>()
         ? Get.find<HomeController>()
         : Get.put(HomeController());
+    final searchHistory = Get.isRegistered<JobSearchController>()
+        ? Get.find<JobSearchController>()
+        : Get.put(JobSearchController());
 
     return Scaffold(
       backgroundColor: palette.scaffold,
@@ -33,23 +45,59 @@ class SearchScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Search',
-                    style: TextStyle(
-                      color: palette.textPrimary,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w900,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Search',
+                        style: TextStyle(
+                          color: palette.textPrimary,
+                          fontSize: 28,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      Obx(() {
+                        if (homeController.searchQuery.value.isNotEmpty ||
+                            homeController.hasActiveFilters) {
+                          return IconButton(
+                            icon: const Icon(
+                              Icons.notifications_active_outlined,
+                              color: AppColors.brandTeal,
+                            ),
+                            tooltip: 'Save as alert',
+                            onPressed: () {
+                              showModalBottomSheet<void>(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (_) => CreateAlertSheet(
+                                  initialKeyword:
+                                      homeController.searchQuery.value,
+                                ),
+                              );
+                            },
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      }),
+                    ],
                   ),
                   const SizedBox(height: 14),
                   Obx(
                     () => HomeSearchBar(
                       value: homeController.searchQuery.value,
                       onChanged: homeController.updateSearchQuery,
+                      onSubmitted: (q) {
+                        searchHistory.addSearch(q);
+                        homeController.updateSearchQuery(q);
+                      },
                       onClear: homeController.clearSearch,
                       onFilterPressed: () =>
-                          _showFilterSheet(context, homeController),
+                          FilterBottomSheet.show(context, homeController),
                       hasActiveFilters: homeController.hasActiveFilters,
+                      salaryRangeLabel: homeController.hasCustomSalaryRange
+                          ? '${_formatSalary(homeController.minSalaryFilter.value)}–${_formatSalary(homeController.maxSalaryFilter.value)}'
+                          : null,
                     ),
                   ),
                   const SizedBox(height: 18),
@@ -58,31 +106,22 @@ class SearchScreen extends StatelessWidget {
             ),
             Expanded(
               child: Obx(() {
+                final query = homeController.searchQuery.value;
                 final jobs = homeController.filteredJobs;
 
-                if (jobs.isEmpty) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(32, 0, 32, 24),
-                      child: Text(
-                        'No jobs match your search.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: palette.textSecondary,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
+                if (query.isEmpty && !homeController.hasActiveFilters) {
+                  return _buildEmptySearchState(
+                    context,
+                    palette,
+                    homeController,
+                    searchHistory,
                   );
                 }
 
-                return ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 92),
-                  itemCount: jobs.length,
-                  itemBuilder: (context, index) => Padding(
-                    padding: const EdgeInsets.only(bottom: 14),
-                    child: _SearchJobCard(job: jobs[index], colorIndex: index),
-                  ),
+                return SearchResultsList(
+                  jobs: jobs,
+                  query: query,
+                  homeController: homeController,
                 );
               }),
             ),
@@ -98,243 +137,134 @@ class SearchScreen extends StatelessWidget {
     );
   }
 
-  void _showFilterSheet(BuildContext context, HomeController homeController) {
-    final palette = context.palette;
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: palette.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-      ),
-      builder: (context) => SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-            child: Obx(
-              () => Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Filter jobs',
-                        style: TextStyle(
-                          color: palette.textPrimary,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                        ),
+  Widget _buildEmptySearchState(
+    BuildContext context,
+    AppPalette palette,
+    HomeController homeController,
+    JobSearchController searchHistory,
+  ) {
+    final trendingTags = homeController.jobs
+        .expand((j) => j.tags)
+        .toSet()
+        .toList();
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 92),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Recent Searches
+          Obx(() {
+            final recents = searchHistory.recentSearches;
+            if (recents.isEmpty) return const SizedBox.shrink();
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Recent Searches',
+                      style: TextStyle(
+                        color: palette.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
                       ),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: homeController.clearFilters,
-                        child: const Text('Clear'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    'Experience',
-                    style: TextStyle(
-                      color: palette.textPrimary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: homeController.levels
-                        .map(
-                          (level) => _FilterChip(
-                            label: level,
-                            selected:
-                                homeController.selectedLevel.value == level,
-                            onTap: () => homeController.selectLevel(level),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Location',
-                    style: TextStyle(
-                      color: palette.textPrimary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: homeController.locations
-                        .map(
-                          (location) => _FilterChip(
-                            label: location,
-                            selected:
-                                homeController.selectedLocation.value ==
-                                location,
-                            onTap: () =>
-                                homeController.selectLocation(location),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Text(
-                        'Salary range',
+                    const Spacer(),
+                    TextButton(
+                      onPressed: searchHistory.clearAll,
+                      child: Text(
+                        'Clear all',
                         style: TextStyle(
-                          color: palette.textPrimary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        '${_formatSalary(homeController.minSalaryFilter.value)} - ${_formatSalary(homeController.maxSalaryFilter.value)}',
-                        style: TextStyle(
-                          color: palette.textSecondary,
+                          color: palette.textTertiary,
                           fontSize: 13,
-                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  RangeSlider(
-                    values: RangeValues(
-                      homeController.minSalaryFilter.value,
-                      homeController.maxSalaryFilter.value,
                     ),
-                    min: homeController.minAvailableSalary.toDouble(),
-                    max: homeController.maxAvailableSalary.toDouble(),
-                    divisions:
-                        (homeController.maxAvailableSalary -
-                            homeController.minAvailableSalary) ~/
-                        100,
-                    activeColor: palette.textPrimary,
-                    inactiveColor: palette.border,
-                    labels: RangeLabels(
-                      _formatSalary(homeController.minSalaryFilter.value),
-                      _formatSalary(homeController.maxSalaryFilter.value),
-                    ),
-                    onChanged: (values) => homeController.updateSalaryRange(
-                      values.start,
-                      values.end,
-                    ),
-                  ),
-                  const SizedBox(height: 22),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: palette.textPrimary,
-                        foregroundColor: palette.scaffold,
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: recents.map((query) {
+                    return GestureDetector(
+                      onTap: () {
+                        homeController.updateSearchQuery(query);
+                        searchHistory.addSearch(query);
+                      },
+                      child: Chip(
+                        label: Text(
+                          query,
+                          style: TextStyle(
+                            color: palette.textPrimary,
+                            fontSize: 13,
+                          ),
+                        ),
+                        deleteIcon: Icon(
+                          Icons.close_rounded,
+                          size: 16,
+                          color: palette.iconMuted,
+                        ),
+                        onDeleted: () => searchHistory.removeSearch(query),
+                        backgroundColor: palette.surfaceMuted,
+                        side: BorderSide(color: palette.border),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(999),
                         ),
+                        padding: const EdgeInsets.only(left: 8),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
                       ),
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Show jobs'),
-                    ),
-                  ),
-                ],
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 24),
+              ],
+            );
+          }),
+
+          // Trending Tags
+          if (trendingTags.isNotEmpty) ...[
+            Text(
+              'Trending',
+              style: TextStyle(
+                color: palette.textPrimary,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _formatSalary(double value) {
-    final amount = value.round();
-    if (amount >= 1000) {
-      final thousands = amount / 1000;
-      return '\$${thousands.toStringAsFixed(thousands.truncateToDouble() == thousands ? 0 : 1)}k';
-    }
-    return '\$$amount';
-  }
-}
-
-class _SearchJobCard extends StatelessWidget {
-  const _SearchJobCard({required this.job, required this.colorIndex});
-
-  final JobFeedModel job;
-  final int colorIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoContextMenu(
-      actions: [
-        CupertinoContextMenuAction(
-          trailingIcon: CupertinoIcons.flag,
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Report'),
-        ),
-        CupertinoContextMenuAction(
-          trailingIcon: CupertinoIcons.heart,
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Fave'),
-        ),
-        CupertinoContextMenuAction(
-          trailingIcon: CupertinoIcons.share,
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Share'),
-        ),
-        CupertinoContextMenuAction(
-          trailingIcon: CupertinoIcons.hand_thumbsdown,
-          isDestructiveAction: true,
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Not interested'),
-        ),
-      ],
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => Get.to(
-          () => const JobDetailScreen(),
-          binding: BindingsBuilder(
-            () => Get.lazyPut<JobDetailController>(JobDetailController.new),
-          ),
-        ),
-        child: JobFeedCard(job: job, colorIndex: colorIndex),
-      ),
-    );
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  const _FilterChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    return ChoiceChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: (_) => onTap(),
-      selectedColor: palette.textPrimary,
-      backgroundColor: palette.surfaceMuted,
-      labelStyle: TextStyle(
-        color: selected ? palette.scaffold : palette.textPrimary,
-        fontWeight: FontWeight.w600,
-      ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-      side: BorderSide(
-        color: selected ? palette.textPrimary : Colors.transparent,
+            const SizedBox(height: 8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: trendingTags.map((tag) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ActionChip(
+                      label: Text(
+                        tag,
+                        style: TextStyle(
+                          color: palette.textPrimary,
+                          fontSize: 13,
+                        ),
+                      ),
+                      backgroundColor: palette.surfaceMuted,
+                      side: BorderSide(color: palette.border),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      onPressed: () {
+                        searchHistory.addSearch(tag);
+                        homeController.updateSearchQuery(tag);
+                      },
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

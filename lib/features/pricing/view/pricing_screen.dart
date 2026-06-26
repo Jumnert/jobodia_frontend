@@ -1,9 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
-
-enum _BillingCycle { monthly, yearly }
+import 'package:share_plus/share_plus.dart';
+import 'widgets/selected_plan_card.dart';
+import 'widgets/faq_card.dart';
 
 class PricingScreen extends StatefulWidget {
   const PricingScreen({super.key});
@@ -13,12 +14,12 @@ class PricingScreen extends StatefulWidget {
 }
 
 class _PricingScreenState extends State<PricingScreen> {
-  _BillingCycle _billingCycle = _BillingCycle.monthly;
+  BillingCycle _billingCycle = BillingCycle.monthly;
   int _selectedPlanIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    final plans = _plans(yearly: _billingCycle == _BillingCycle.yearly);
+    final plans = _plans(yearly: _billingCycle == BillingCycle.yearly);
     final selectedPlan = plans[_selectedPlanIndex];
 
     return Scaffold(
@@ -33,13 +34,13 @@ class _PricingScreenState extends State<PricingScreen> {
             const SizedBox(height: 16),
             const _FeatureTiles(),
             const SizedBox(height: 18),
-            _PlanTabs(
+            PricingPlanTabs(
               plans: plans,
               selectedIndex: _selectedPlanIndex,
               onChanged: (index) => setState(() => _selectedPlanIndex = index),
             ),
             const SizedBox(height: 16),
-            _SelectedPlanCard(
+            SelectedPlanCard(
               plan: selectedPlan,
               billingCycle: _billingCycle,
               onBillingChanged: (value) {
@@ -52,16 +53,16 @@ class _PricingScreenState extends State<PricingScreen> {
             const SizedBox(height: 14),
             _BenefitPanel(plan: selectedPlan),
             const SizedBox(height: 16),
-            const _FaqCard(),
+            const FaqCard(),
           ],
         ),
       ),
     );
   }
 
-  List<_Plan> _plans({required bool yearly}) {
+  List<PricingPlan> _plans({required bool yearly}) {
     return [
-      _Plan(
+      PricingPlan(
         name: 'Starter',
         tabLabel: 'Free',
         price: '0',
@@ -77,7 +78,7 @@ class _PricingScreenState extends State<PricingScreen> {
           'Mock AI chat replies',
         ],
       ),
-      _Plan(
+      PricingPlan(
         name: 'Pro',
         tabLabel: 'Pro',
         price: yearly ? '79' : '8',
@@ -93,7 +94,7 @@ class _PricingScreenState extends State<PricingScreen> {
           'Priority job matching',
         ],
       ),
-      _Plan(
+      PricingPlan(
         name: 'Career Plus',
         tabLabel: 'Plus',
         price: yearly ? '149' : '15',
@@ -122,6 +123,7 @@ class _PageHeader extends StatelessWidget {
       children: [
         IconButton(
           onPressed: Get.back,
+          tooltip: 'Back',
           icon: const Icon(Icons.chevron_left_rounded, size: 30),
         ),
         const Expanded(
@@ -238,14 +240,15 @@ class _FeatureTile extends StatelessWidget {
   }
 }
 
-class _PlanTabs extends StatelessWidget {
-  const _PlanTabs({
+class PricingPlanTabs extends StatelessWidget {
+  const PricingPlanTabs({
+    super.key,
     required this.plans,
     required this.selectedIndex,
     required this.onChanged,
   });
 
-  final List<_Plan> plans;
+  final List<PricingPlan> plans;
   final int selectedIndex;
   final ValueChanged<int> onChanged;
 
@@ -297,177 +300,10 @@ class _PlanTabs extends StatelessWidget {
   }
 }
 
-class _SelectedPlanCard extends StatelessWidget {
-  const _SelectedPlanCard({
-    required this.plan,
-    required this.billingCycle,
-    required this.onBillingChanged,
-  });
-
-  final _Plan plan;
-  final _BillingCycle billingCycle;
-  final ValueChanged<_BillingCycle?> onBillingChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF26292C)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(plan.icon, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  plan.name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-              Text(
-                plan.delivery,
-                style: const TextStyle(
-                  color: Color(0xFFC5C8CB),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            plan.description,
-            style: const TextStyle(
-              color: Color(0xFF9EA4A9),
-              fontSize: 12.5,
-              height: 1.35,
-            ),
-          ),
-          const SizedBox(height: 14),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              const Text(
-                r'$',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              Text(
-                plan.price,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 42,
-                  fontWeight: FontWeight.w900,
-                  height: 0.95,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 4, bottom: 6),
-                child: Text(
-                  '/${plan.period}',
-                  style: const TextStyle(
-                    color: Color(0xFFC5C8CB),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          CupertinoSlidingSegmentedControl<_BillingCycle>(
-            groupValue: billingCycle,
-            backgroundColor: Colors.white.withValues(alpha: 0.08),
-            thumbColor: Colors.white,
-            children: {
-              _BillingCycle.monthly: _BillingChip(
-                label: 'Monthly',
-                selected: billingCycle == _BillingCycle.monthly,
-              ),
-              _BillingCycle.yearly: _BillingChip(
-                label: 'Yearly',
-                selected: billingCycle == _BillingCycle.yearly,
-              ),
-            },
-            onValueChanged: onBillingChanged,
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              FilledButton(
-                onPressed: () => Get.snackbar(
-                  'Pricing',
-                  '${plan.name} checkout will be connected here.',
-                  snackPosition: SnackPosition.BOTTOM,
-                ),
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  shape: const StadiumBorder(),
-                  textStyle: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                child: const Text('Get started'),
-              ),
-              const Spacer(),
-              const Icon(
-                Icons.arrow_outward_rounded,
-                color: Colors.white,
-                size: 18,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BillingChip extends StatelessWidget {
-  const _BillingChip({required this.label, required this.selected});
-
-  final String label;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: selected ? Colors.black : Colors.black87,
-          fontSize: 11,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-    );
-  }
-}
-
 class _BenefitPanel extends StatelessWidget {
   const _BenefitPanel({required this.plan});
 
-  final _Plan plan;
+  final PricingPlan plan;
 
   @override
   Widget build(BuildContext context) {
@@ -501,7 +337,10 @@ class _BenefitPanel extends StatelessWidget {
                   ),
                 ),
               ),
-              TextButton(onPressed: () {}, child: const Text('Contact us')),
+              TextButton(
+                onPressed: () => _showContactSheet(context),
+                child: const Text('Contact us'),
+              ),
             ],
           ),
         ],
@@ -550,108 +389,6 @@ class _FeatureRow extends StatelessWidget {
   }
 }
 
-class _FaqCard extends StatelessWidget {
-  const _FaqCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return const _InfoCard(
-      title: 'Questions',
-      child: Column(
-        children: [
-          _FaqItem(
-            question: 'Can I cancel anytime?',
-            answer:
-                'Yes. Plans are mock subscriptions for now, and checkout will be connected later.',
-          ),
-          _FaqItem(
-            question: 'Do I need Pro to browse jobs?',
-            answer:
-                'No. Starter keeps the core job feed available while Pro unlocks stronger AI tools.',
-          ),
-          _FaqItem(
-            question: 'Will my CV data stay editable?',
-            answer:
-                'Yes. The builder flow keeps your profile structured so templates can be changed later.',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.title, required this.child});
-
-  final String title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: palette.surface,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: palette.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: palette.textPrimary,
-              fontSize: 19,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 14),
-          child,
-        ],
-      ),
-    );
-  }
-}
-
-class _FaqItem extends StatelessWidget {
-  const _FaqItem({required this.question, required this.answer});
-
-  final String question;
-  final String answer;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            question,
-            style: TextStyle(
-              color: palette.textPrimary,
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            answer,
-            style: TextStyle(
-              color: palette.textSecondary,
-              fontSize: 13,
-              height: 1.35,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _TinyPill extends StatelessWidget {
   const _TinyPill({required this.text, this.dark = false});
 
@@ -672,7 +409,7 @@ class _TinyPill extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          color: dark ? Colors.white : Colors.white,
+          color: Colors.white,
           fontSize: 11,
           fontWeight: FontWeight.w800,
         ),
@@ -688,8 +425,8 @@ class _FeatureTileData {
   final String label;
 }
 
-class _Plan {
-  const _Plan({
+class PricingPlan {
+  const PricingPlan({
     required this.name,
     required this.tabLabel,
     required this.price,
@@ -710,4 +447,127 @@ class _Plan {
   final IconData icon;
   final String delivery;
   final List<String> features;
+}
+
+void _showContactSheet(BuildContext context) {
+  final palette = context.palette;
+  showModalBottomSheet<void>(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (sheetContext) => Padding(
+      padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.mail_outline_rounded,
+            size: 40,
+            color: AppColors.brandTeal,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Contact Us',
+            style: TextStyle(
+              color: palette.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Reach out to our team for custom plans or questions.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: palette.textSecondary, fontSize: 14),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: palette.surfaceMuted,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.email_outlined,
+                  size: 20,
+                  color: AppColors.brandTeal,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'hello@jobodia.app',
+                    style: TextStyle(
+                      color: palette.textPrimary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Clipboard.setData(
+                      const ClipboardData(text: 'hello@jobodia.app'),
+                    );
+                    Navigator.of(sheetContext).pop();
+                    Get.snackbar(
+                      'Copied',
+                      'Email address copied to clipboard.',
+                      snackPosition: SnackPosition.BOTTOM,
+                      margin: const EdgeInsets.all(16),
+                    );
+                  },
+                  icon: const Icon(Icons.copy_rounded, size: 16),
+                  label: const Text('Copy email'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.brandTeal,
+                    side: BorderSide(color: AppColors.brandTeal),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () {
+                    Navigator.of(sheetContext).pop();
+                    SharePlus.instance.share(
+                      ShareParams(
+                        text:
+                            'Hi Jobodia team, I\'d like to discuss a custom plan.\n\n'
+                            'Please contact me at: ',
+                        subject: 'Custom Plan Inquiry',
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.share_outlined, size: 16),
+                  label: const Text('Share inquiry'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.brandTeal,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
 }

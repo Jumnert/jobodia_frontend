@@ -37,7 +37,7 @@ class ThemeController extends GetxController {
   bool _readStoredMode() {
     try {
       return _storage.read<bool>(themeKey) ?? false;
-    } on Object {
+    } on Exception {
       return false;
     }
   }
