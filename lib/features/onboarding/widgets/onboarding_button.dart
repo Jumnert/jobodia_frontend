@@ -26,66 +26,72 @@ class _OnboardingButtonState extends State<OnboardingButton> {
       scale: _isPressed ? 0.98 : 1,
       duration: const Duration(milliseconds: 120),
       curve: Curves.easeOut,
-      child: GestureDetector(
-        onTap: widget.onPressed,
-        onTapDown: (_) => setState(() => _isPressed = true),
-        onTapCancel: () => setState(() => _isPressed = false),
-        onTapUp: (_) => setState(() => _isPressed = false),
-        child: Container(
-          height: 56,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(26),
-            gradient: const LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [AppColors.accentPurpleDark, AppColors.accentPurple],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.accentPurple.withValues(alpha: 0.32),
-                blurRadius: 22,
-                offset: const Offset(0, 10),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(26),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: widget.onPressed,
+          onTapDown: (_) => setState(() => _isPressed = true),
+          onTapCancel: () => setState(() => _isPressed = false),
+          onTapUp: (_) => setState(() => _isPressed = false),
+          borderRadius: BorderRadius.circular(26),
+          child: Ink(
+            height: 56,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(26),
+              gradient: const LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [AppColors.accentPurpleDark, AppColors.accentPurple],
               ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 240),
-                switchInCurve: Curves.easeOutCubic,
-                switchOutCurve: Curves.easeInCubic,
-                transitionBuilder: (child, animation) {
-                  final offsetAnimation = Tween<Offset>(
-                    begin: const Offset(0, 0.25),
-                    end: Offset.zero,
-                  ).animate(animation);
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accentPurple.withValues(alpha: 0.32),
+                  blurRadius: 22,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 240),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  transitionBuilder: (child, animation) {
+                    final offsetAnimation = Tween<Offset>(
+                      begin: const Offset(0, 0.25),
+                      end: Offset.zero,
+                    ).animate(animation);
 
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: offsetAnimation,
-                      child: child,
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: offsetAnimation,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: Text(
+                    label,
+                    key: ValueKey(label),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
                     ),
-                  );
-                },
-                child: Text(
-                  label,
-                  key: ValueKey(label),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              const Icon(
-                Icons.arrow_forward_rounded,
-                color: Colors.white,
-                size: 19,
-              ),
-            ],
+                const SizedBox(width: 12),
+                const Icon(
+                  Icons.arrow_forward_rounded,
+                  color: Colors.white,
+                  size: 19,
+                ),
+              ],
+            ),
           ),
         ),
       ),

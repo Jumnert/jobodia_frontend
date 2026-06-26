@@ -67,6 +67,8 @@ class JobCardsStackVisual extends StatelessWidget {
                   'assets/images/onboarding/job_cards_3.png',
                   width: visualWidth * 0.58,
                   fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.image_not_supported),
                 ),
               ),
             ),
@@ -82,6 +84,8 @@ class JobCardsStackVisual extends StatelessWidget {
                   'assets/images/onboarding/job_cards_2.png',
                   width: visualWidth * 0.62,
                   fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.image_not_supported),
                 ),
               ),
             ),
@@ -97,6 +101,8 @@ class JobCardsStackVisual extends StatelessWidget {
                   'assets/images/onboarding/job_cards_1.png',
                   width: visualWidth * 0.65,
                   fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.image_not_supported),
                 ),
               ),
             ),
@@ -131,6 +137,8 @@ class _ResumeVisual extends StatelessWidget {
             'assets/images/onboarding/resume_card.png',
             width: resumeWidth,
             fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.image_not_supported),
           ),
           Positioned(
             top: height * 0.14,
@@ -139,6 +147,8 @@ class _ResumeVisual extends StatelessWidget {
               'assets/images/onboarding/ats_score.png',
               width: (screenWidth * 0.18).clamp(66.0, 82.0),
               fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.image_not_supported),
             ),
           ),
         ],
@@ -168,6 +178,8 @@ class AiInterviewVisualGroup extends StatelessWidget {
             'assets/images/onboarding/ai_signal.png',
             width: size.width * 0.95,
             fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.image_not_supported),
           ),
           Container(
             width: robotWidth,
@@ -187,6 +199,8 @@ class AiInterviewVisualGroup extends StatelessWidget {
             'assets/images/onboarding/ai_interviewer.png',
             width: robotWidth,
             fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.image_not_supported),
           ),
         ],
       ),

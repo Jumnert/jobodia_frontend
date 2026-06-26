@@ -8,31 +8,38 @@ class OnboardingBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final height = constraints.maxHeight;
 
-    return Stack(
-      children: [
-        const Positioned.fill(child: ColoredBox(color: Color(0xFF070707))),
-        Positioned.fill(child: CustomPaint(painter: _SmokyBackgroundPainter())),
-        Positioned(
-          top: size.height * 0.34,
-          left: -size.width * 0.35,
-          right: -size.width * 0.35,
-          child: Container(
-            height: size.height * 0.34,
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.accentPurple.withValues(alpha: 0.13),
-                  blurRadius: 95,
-                  spreadRadius: 18,
-                ),
-              ],
+        return Stack(
+          children: [
+            const Positioned.fill(child: ColoredBox(color: Color(0xFF070707))),
+            Positioned.fill(
+              child: CustomPaint(painter: _SmokyBackgroundPainter()),
             ),
-          ),
-        ),
-        Positioned.fill(child: child),
-      ],
+            Positioned(
+              top: height * 0.34,
+              left: -width * 0.35,
+              right: -width * 0.35,
+              child: Container(
+                height: height * 0.34,
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.accentPurple.withValues(alpha: 0.13),
+                      blurRadius: 95,
+                      spreadRadius: 18,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Positioned.fill(child: child),
+          ],
+        );
+      },
     );
   }
 }

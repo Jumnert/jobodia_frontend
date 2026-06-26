@@ -22,6 +22,7 @@ class OnboardingContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -29,7 +30,9 @@ class OnboardingContent extends StatelessWidget {
           Text(
             line.text,
             style: TextStyle(
-              color: line.isHighlighted ? AppColors.accentPurple : Colors.white,
+              color: line.isHighlighted
+                  ? AppColors.accentPurple
+                  : palette.textPrimary,
               fontSize: compact ? 27 : 30,
               height: 1.08,
               fontWeight: FontWeight.w900,
@@ -62,7 +65,7 @@ class OnboardingContent extends StatelessWidget {
           child: Text(
             subtitle,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.86),
+              color: palette.textSecondary,
               fontSize: compact ? 12.5 : 13.5,
               height: 1.45,
               fontWeight: FontWeight.w500,
