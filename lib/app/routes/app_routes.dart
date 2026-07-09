@@ -21,6 +21,7 @@ abstract final class AppRoutes {
   static const preferencesWizard = '/preferences-wizard';
   static const companyProfile = '/company-profile';
   static const applicationAnalytics = '/application-analytics';
+  static const statistics = '/statistics';
   static const notifications = '/notifications';
   static const settings = '/settings';
   static const search = '/search';

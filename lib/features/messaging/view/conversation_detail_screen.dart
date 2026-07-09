@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -37,57 +38,57 @@ class _ConversationDetailScreenState extends State<ConversationDetailScreen> {
     final ctrl = Get.find<MessagingController>();
     final c = Get.arguments as ConversationModel;
 
-    return Scaffold(
-      backgroundColor: palette.scaffold,
-      appBar: AppBar(
-        backgroundColor: palette.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.chevron_left_rounded,
-            color: palette.iconPrimary,
-            size: 30,
+    return AdaptiveScaffold(
+      appBar: AdaptiveAppBar(
+        useNativeToolbar: false,
+        appBar: AppBar(
+          backgroundColor: palette.surface,
+          elevation: 0,
+          leading: AdaptiveButton.icon(
+            onPressed: Get.back,
+            icon: Icons.chevron_left_rounded,
+            iconColor: palette.iconPrimary,
+            style: AdaptiveButtonStyle.plain,
           ),
-          onPressed: Get.back,
-        ),
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: AppColors.brandTeal.withAlpha(40),
-              child: Text(
-                c.recruiterName[0],
-                style: const TextStyle(
-                  color: AppColors.brandTeal,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
+          title: Row(
+            children: [
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: AppColors.brandTeal.withAlpha(40),
+                child: Text(
+                  c.recruiterName[0],
+                  style: const TextStyle(
+                    color: AppColors.brandTeal,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    c.recruiterName,
-                    style: TextStyle(
-                      color: palette.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      c.recruiterName,
+                      style: TextStyle(
+                        color: palette.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                  Text(
-                    '${c.jobTitle} @ ${c.recruiterCompany}',
-                    style: TextStyle(
-                      color: palette.textSecondary,
-                      fontSize: 11,
+                    Text(
+                      '${c.jobTitle} @ ${c.recruiterCompany}',
+                      style: TextStyle(
+                        color: palette.textSecondary,
+                        fontSize: 11,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       body: Column(

@@ -72,3 +72,16 @@ fix_*
 extract_*
 *.py
 
+# Agent generated reports, logs & helper scripts
+*_FIX.md
+*_SUMMARY.md
+*_OPTIMIZATIONS.md
+*_DESIGN.md
+*_AGENTS.md
+BUILD_TEST.md
+design.md
+liquid_glass_nutshell.md
+api-docs.html
+API_ENDPOINTS.md
+diagnose_build.sh
+test_device.sh

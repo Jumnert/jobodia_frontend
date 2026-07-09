@@ -11,6 +11,8 @@ import 'package:jobodia_frontend/services/secure_storage_service.dart';
 
 import 'job_detail_controller_test.mocks.dart';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 @GenerateNiceMocks([MockSpec<GetStorage>()])
 void main() {
   late MockGetStorage mockStorage;
@@ -33,6 +35,10 @@ void main() {
   setUp(() {
     Get.testMode = true;
     mockStorage = MockGetStorage();
+
+    // Reset the static secure-storage mock per test so applied entries don't
+    // leak across tests.
+    FlutterSecureStorage.setMockInitialValues({});
 
     when(mockStorage.read<dynamic>(any)).thenReturn(null);
     when(mockStorage.write(any, any)).thenAnswer((_) async => true);

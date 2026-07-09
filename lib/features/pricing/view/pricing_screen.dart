@@ -1,10 +1,12 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:share_plus/share_plus.dart';
 import 'widgets/selected_plan_card.dart';
-import 'widgets/faq_card.dart';
+import 'widgets/pricing_card.dart';
+import 'widgets/faq_section.dart';
 
 class PricingScreen extends StatefulWidget {
   const PricingScreen({super.key});
@@ -51,9 +53,12 @@ class _PricingScreenState extends State<PricingScreen> {
               },
             ),
             const SizedBox(height: 14),
-            _BenefitPanel(plan: selectedPlan),
+            PricingCard(
+              features: selectedPlan.features,
+              onCtaPressed: () => _showContactSheet(context),
+            ),
             const SizedBox(height: 16),
-            const FaqCard(),
+            const FaqSection(),
           ],
         ),
       ),
@@ -121,10 +126,10 @@ class _PageHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        IconButton(
+        AdaptiveButton.icon(
           onPressed: Get.back,
-          tooltip: 'Back',
-          icon: const Icon(Icons.chevron_left_rounded, size: 30),
+          icon: Icons.chevron_left_rounded,
+          style: AdaptiveButtonStyle.plain,
         ),
         const Expanded(
           child: Text(
@@ -295,95 +300,6 @@ class PricingPlanTabs extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _BenefitPanel extends StatelessWidget {
-  const _BenefitPanel({required this.plan});
-
-  final PricingPlan plan;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
-      decoration: BoxDecoration(
-        color: palette.surfaceMuted,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: palette.border),
-      ),
-      child: Column(
-        children: [
-          ...plan.features.map((feature) => _FeatureRow(text: feature)),
-          Divider(color: palette.divider, height: 18),
-          Row(
-            children: [
-              Icon(
-                Icons.arrow_outward_rounded,
-                color: palette.iconPrimary,
-                size: 15,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'For custom requests',
-                  style: TextStyle(
-                    color: palette.textPrimary,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () => _showContactSheet(context),
-                child: const Text('Contact us'),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FeatureRow extends StatelessWidget {
-  const _FeatureRow({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 9),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: Container(
-              width: 4,
-              height: 4,
-              decoration: const BoxDecoration(
-                color: Color(0xFF8A8E92),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                color: context.palette.textSecondary,
-                fontSize: 12,
-                height: 1.35,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

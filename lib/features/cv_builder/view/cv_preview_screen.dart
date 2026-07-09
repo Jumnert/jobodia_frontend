@@ -1,7 +1,8 @@
-// ignore_for_file: deprecated_member_use, avoid_print, curly_braces_in_flow_control_structures, unused_import, unnecessary_underscores, unused_field, unused_local_variable, use_build_context_synchronously, duplicate_ignore
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
+import 'package:jobodia_frontend/core/widgets/confirmation_dialog.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
 import 'package:jobodia_frontend/features/cv_builder/model/cv_data.dart';
 import 'package:jobodia_frontend/features/cv_builder/service/cv_pdf_builder.dart';
@@ -22,22 +23,8 @@ class CvPreviewScreen extends GetView<CvBuilderController> {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return Scaffold(
-      backgroundColor: palette.scaffold,
-      appBar: AppBar(
-        backgroundColor: palette.scaffold,
-        elevation: 0,
-        leading: IconButton(
-          tooltip: 'Back',
-          onPressed: Get.back,
-          icon: const Icon(Icons.chevron_left_rounded, size: 30),
-        ),
-        title: const Text(
-          'Your CV',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-        ),
-        centerTitle: true,
-      ),
+    return AdaptiveScaffold(
+      appBar: const AdaptiveAppBar(title: 'Your CV', useNativeToolbar: false),
       body: Obx(() {
         final cv = controller.generatedCv.value;
         if (cv == null) {
@@ -138,26 +125,16 @@ class _ActionBar extends StatelessWidget {
           ? 'cv'
           : cv.fullName.trim().replaceAll(RegExp(r'[^A-Za-z0-9]+'), '_');
       final filename = '${safeName}_cv.pdf';
+      if (!context.mounted) return;
       if (share) {
-        final confirmed = await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Share CV'),
-            content: const Text(
-              'Your CV contains personal information (name, email, phone, photo). '
-              'This will be shared via your device\'s share sheet. Continue?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(true),
-                child: const Text('Share'),
-              ),
-            ],
-          ),
+        final confirmed = await showConfirmationDialog(
+          title: 'Share CV',
+          message:
+              'Your CV contains personal information (name, email, phone, '
+              "photo). This will be shared via your device's share sheet. "
+              'Continue?',
+          confirmLabel: 'Share',
+          cancelLabel: 'Cancel',
         );
         if (confirmed != true) return;
         await Printing.sharePdf(bytes: bytes, filename: filename);

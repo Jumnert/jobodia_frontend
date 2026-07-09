@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -60,26 +61,14 @@ class ApplicationsScreen extends StatelessWidget {
         ? Get.find<HomeController>()
         : Get.put(HomeController());
 
-    return Scaffold(
-      backgroundColor: palette.scaffold,
-      appBar: AppBar(
-        backgroundColor: palette.scaffold,
-        elevation: 0,
-        leading: IconButton(
-          tooltip: 'Back',
-          onPressed: Get.back,
-          icon: const Icon(Icons.chevron_left_rounded, size: 30),
-        ),
-        title: const Text(
-          'Applications',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-        ),
-        centerTitle: true,
+    return AdaptiveScaffold(
+      appBar: AdaptiveAppBar(
+        title: 'Applications',
+        useNativeToolbar: false,
         actions: [
-          IconButton(
+          AdaptiveAppBarAction(
+            icon: Icons.analytics_outlined,
             onPressed: () => Get.toNamed(AppRoutes.applicationAnalytics),
-            icon: Icon(Icons.analytics_outlined, color: palette.iconPrimary),
-            tooltip: 'Analytics',
           ),
         ],
       ),
@@ -187,201 +176,205 @@ class ApplicationsScreen extends StatelessWidget {
                           final coverLetter = application.coverLetter;
                           final statusLabel =
                               _statusLabels[application.status] ?? 'Applied';
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 14),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Material(
-                                  type: MaterialType.transparency,
-                                  child: InkWell(
-                                    onTap: () {
-                                      unawaited(HapticFeedback.lightImpact());
-                                      Get.to(
-                                        () => const JobDetailScreen(),
-                                        arguments: job,
-                                        binding: BindingsBuilder(
-                                          () =>
-                                              Get.lazyPut<JobDetailController>(
-                                                JobDetailController.new,
-                                              ),
-                                        ),
-                                      );
-                                    },
-                                    child: Stack(
-                                      children: [
-                                        JobFeedCard(
-                                          job: job,
-                                          colorIndex: index,
-                                        ),
-                                        // ── "Move to..." menu ──
-                                        Positioned(
-                                          top: 8,
-                                          right: 8,
-                                          child: PopupMenuButton<String>(
-                                            icon: Container(
-                                              padding: const EdgeInsets.all(4),
-                                              decoration: BoxDecoration(
-                                                color: Colors.black.withValues(
-                                                  alpha: 0.35,
+                          return RepaintBoundary(
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 14),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Material(
+                                    type: MaterialType.transparency,
+                                    child: InkWell(
+                                      onTap: () {
+                                        unawaited(HapticFeedback.lightImpact());
+                                        Get.to(
+                                          () => const JobDetailScreen(),
+                                          arguments: job,
+                                          binding: BindingsBuilder(
+                                            () =>
+                                                Get.lazyPut<
+                                                  JobDetailController
+                                                >(JobDetailController.new),
+                                          ),
+                                        );
+                                      },
+                                      child: Stack(
+                                        children: [
+                                          JobFeedCard(
+                                            job: job,
+                                            colorIndex: index,
+                                          ),
+                                          // ── "Move to..." menu ──
+                                          Positioned(
+                                            top: 8,
+                                            right: 8,
+                                            child: PopupMenuButton<String>(
+                                              icon: Container(
+                                                padding: const EdgeInsets.all(
+                                                  4,
                                                 ),
-                                                shape: BoxShape.circle,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black
+                                                      .withValues(alpha: 0.35),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: const Icon(
+                                                  Icons.more_horiz_rounded,
+                                                  color: Colors.white,
+                                                  size: 18,
+                                                ),
                                               ),
-                                              child: const Icon(
-                                                Icons.more_horiz_rounded,
-                                                color: Colors.white,
-                                                size: 18,
-                                              ),
-                                            ),
-                                            onSelected: (value) {
-                                              if (value ==
-                                                  '__schedule_interview') {
-                                                _pickAndScheduleInterview(
-                                                  context,
-                                                  job.id,
-                                                );
-                                              } else {
-                                                applications.updateStatus(
-                                                  job.id,
-                                                  value,
-                                                );
-                                              }
-                                            },
-                                            itemBuilder: (context) => [
-                                              ..._statusValues.entries
-                                                  .where(
-                                                    (e) =>
-                                                        e.value !=
-                                                        application.status,
-                                                  )
-                                                  .map(
-                                                    (
-                                                      e,
-                                                    ) => PopupMenuItem<String>(
-                                                      value: e.value,
-                                                      child: Row(
-                                                        children: [
-                                                          Icon(
-                                                            _statusIcons[e
-                                                                .value],
-                                                            size: 18,
-                                                            color: palette
-                                                                .textPrimary,
-                                                          ),
-                                                          const SizedBox(
-                                                            width: 10,
-                                                          ),
-                                                          Text(
-                                                            'Move to ${e.key}',
-                                                            style: TextStyle(
-                                                              fontSize: 13,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
+                                              onSelected: (value) {
+                                                if (value ==
+                                                    '__schedule_interview') {
+                                                  _pickAndScheduleInterview(
+                                                    context,
+                                                    job.id,
+                                                  );
+                                                } else {
+                                                  applications.updateStatus(
+                                                    job.id,
+                                                    value,
+                                                  );
+                                                }
+                                              },
+                                              itemBuilder: (context) => [
+                                                ..._statusValues.entries
+                                                    .where(
+                                                      (e) =>
+                                                          e.value !=
+                                                          application.status,
+                                                    )
+                                                    .map(
+                                                      (
+                                                        e,
+                                                      ) => PopupMenuItem<String>(
+                                                        value: e.value,
+                                                        child: Row(
+                                                          children: [
+                                                            Icon(
+                                                              _statusIcons[e
+                                                                  .value],
+                                                              size: 18,
                                                               color: palette
                                                                   .textPrimary,
                                                             ),
-                                                          ),
-                                                        ],
+                                                            const SizedBox(
+                                                              width: 10,
+                                                            ),
+                                                            Text(
+                                                              'Move to ${e.key}',
+                                                              style: TextStyle(
+                                                                fontSize: 13,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                color: palette
+                                                                    .textPrimary,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                              const PopupMenuDivider(),
-                                              PopupMenuItem<String>(
-                                                value: '__schedule_interview',
-                                                child: Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons
-                                                          .calendar_month_rounded,
-                                                      size: 18,
-                                                      color: AppColors.primary,
-                                                    ),
-                                                    const SizedBox(width: 10),
-                                                    Text(
-                                                      'Schedule Interview',
-                                                      style: TextStyle(
-                                                        fontSize: 13,
-                                                        fontWeight:
-                                                            FontWeight.w600,
+                                                const PopupMenuDivider(),
+                                                PopupMenuItem<String>(
+                                                  value: '__schedule_interview',
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons
+                                                            .calendar_month_rounded,
+                                                        size: 18,
                                                         color:
-                                                            palette.textPrimary,
+                                                            AppColors.primary,
                                                       ),
-                                                    ),
-                                                  ],
+                                                      const SizedBox(width: 10),
+                                                      Text(
+                                                        'Schedule Interview',
+                                                        style: TextStyle(
+                                                          fontSize: 13,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          color: palette
+                                                              .textPrimary,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
+                                              ],
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
                                               ),
-                                            ],
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
                                             ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 4),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          _statusIcons[application.status] ??
+                                              Icons.check_circle_rounded,
+                                          size: 14,
+                                          color: AppColors.primary,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          statusLabel,
+                                          style: const TextStyle(
+                                            color: AppColors.primary,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Icon(
+                                          Icons.calendar_today_rounded,
+                                          size: 11,
+                                          color: palette.textSecondary,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'Applied on ${_formatDate(appliedDate)}',
+                                          style: TextStyle(
+                                            color: palette.textSecondary,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 6),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 4),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        _statusIcons[application.status] ??
-                                            Icons.check_circle_rounded,
-                                        size: 14,
-                                        color: AppColors.primary,
+                                  if (coverLetter != null &&
+                                      coverLetter.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        left: 4,
+                                        top: 4,
                                       ),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        statusLabel,
-                                        style: const TextStyle(
-                                          color: AppColors.primary,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Icon(
-                                        Icons.calendar_today_rounded,
-                                        size: 11,
-                                        color: palette.textSecondary,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'Applied on ${_formatDate(appliedDate)}',
+                                      child: Text(
+                                        coverLetter.length > 60
+                                            ? '${coverLetter.substring(0, 60)}...'
+                                            : coverLetter,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           color: palette.textSecondary,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500,
+                                          fontStyle: FontStyle.italic,
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ),
-                                if (coverLetter != null &&
-                                    coverLetter.isNotEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                      left: 4,
-                                      top: 4,
                                     ),
-                                    child: Text(
-                                      coverLetter.length > 60
-                                          ? '${coverLetter.substring(0, 60)}...'
-                                          : coverLetter,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        color: palette.textSecondary,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w500,
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                    ),
-                                  ),
-                              ],
+                                ],
+                              ),
                             ),
                           );
                         },

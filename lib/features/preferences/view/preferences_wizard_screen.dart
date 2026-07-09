@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -53,15 +54,14 @@ class _WizardBody extends GetView<PreferencesController> {
         Row(
           children: [
             if (step > 0)
-              IconButton(
-                onPressed: controller.goBack,
-                icon: Icon(
-                  Icons.arrow_back_rounded,
-                  color: palette.iconPrimary,
+              Tooltip(
+                message: 'Back',
+                child: AdaptiveButton.icon(
+                  onPressed: controller.goBack,
+                  icon: Icons.arrow_back_rounded,
+                  iconColor: palette.iconPrimary,
+                  style: AdaptiveButtonStyle.plain,
                 ),
-                tooltip: 'Back',
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
               )
             else
               const SizedBox(width: 24),

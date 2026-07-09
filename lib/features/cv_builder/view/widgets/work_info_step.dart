@@ -4,7 +4,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:jobodia_frontend/core/widgets/custom_button.dart';
 import 'package:jobodia_frontend/core/widgets/custom_text_field.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
 import 'package:jobodia_frontend/features/cv_builder/view/widgets/cv_builder_helpers.dart';
@@ -19,7 +18,7 @@ class WorkInfoStep extends StatelessWidget {
     final palette = context.palette;
     return ListView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 112),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
       children: [
         Text(
           'Tell us about your work',
@@ -173,13 +172,7 @@ class WorkInfoStep extends StatelessWidget {
         MultiLineField(
           controller: controller.summaryController,
           hintText: 'Write a short professional summary...',
-        ),
-        const SizedBox(height: 24),
-        CustomButton(label: 'Continue', onPressed: controller.nextStep),
-        const SizedBox(height: 10),
-        TextButton(
-          onPressed: controller.previousStep,
-          child: const Text('Back'),
+          maxLength: 2000,
         ),
       ],
     );

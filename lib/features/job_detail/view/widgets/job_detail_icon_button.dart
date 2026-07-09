@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 
 class JobDetailIconButton extends StatelessWidget {
@@ -16,15 +17,18 @@ class JobDetailIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    // These buttons float over cover images, so glass styling reads well on
+    // iOS 26 (and falls back to a Material circle on Android). The white icon
+    // is kept for contrast over arbitrary photos regardless of theme.
+    final button = AdaptiveButton.icon(
+      onPressed: onPressed,
+      icon: icon,
+      iconColor: Colors.white,
       color: backgroundColor ?? Colors.black.withValues(alpha: 0.38),
-      shape: const CircleBorder(),
-      clipBehavior: Clip.antiAlias,
-      child: IconButton(
-        tooltip: tooltip,
-        onPressed: onPressed,
-        icon: Icon(icon, color: Colors.white),
-      ),
+      style: AdaptiveButtonStyle.glass,
+      borderRadius: BorderRadius.circular(100),
+      minSize: const Size(44, 44),
     );
+    return tooltip != null ? Tooltip(message: tooltip!, child: button) : button;
   }
 }

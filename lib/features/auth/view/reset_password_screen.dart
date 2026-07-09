@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -97,21 +98,11 @@ class _ResetPasswordHeader extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    width: 46,
-                    height: 32,
-                    child: OutlinedButton(
-                      onPressed: onBack,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.zero,
-                        side: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.22),
-                        ),
-                        shape: const StadiumBorder(),
-                      ),
-                      child: const Icon(Icons.arrow_back_ios_new, size: 15),
-                    ),
+                  AdaptiveButton.icon(
+                    onPressed: onBack,
+                    icon: Icons.arrow_back_ios_new,
+                    iconColor: Colors.white,
+                    style: AdaptiveButtonStyle.bordered,
                   ),
                   const Spacer(),
                   const Text(

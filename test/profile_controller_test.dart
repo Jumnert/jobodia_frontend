@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -50,13 +51,16 @@ void main() {
 
   setUp(() async {
     await storage.erase();
+    // Clear the singleton secure-storage cache so tests don't leak state.
+    await SecureStorageService.to.deleteAllSecure();
   });
 
   late ProfileController ctrl;
 
-  setUp(() {
+  setUp(() async {
     ctrl = ProfileController(storage: storage);
     ctrl.onInit();
+    await ctrl.ready;
   });
 
   tearDown(() {
@@ -95,14 +99,17 @@ void main() {
       expect(ctrl.profile.role, 'Senior Dev');
     });
 
-    test('persists to storage', () {
+    test('persists to secure storage, not plaintext', () async {
       final updated = ctrl.profile.copyWith(name: 'Persisted');
 
       ctrl.updateProfile(updated);
 
-      final stored = storage.read<Map>('profile');
-      expect(stored, isNotNull);
-      expect(stored!['name'], 'Persisted');
+      // PII must land in secure storage...
+      final raw = await SecureStorageService.to.readSecure('profile');
+      expect(raw, isNotNull);
+      expect((jsonDecode(raw!) as Map<String, dynamic>)['name'], 'Persisted');
+      // ...and must NOT linger in plaintext GetStorage (the #3 fix).
+      expect(storage.read<Map>('profile'), isNull);
     });
 
     test('clears saveError on success', () {
@@ -149,38 +156,69 @@ void main() {
   });
 
   group('persistence', () {
-    test('loading from stored profile works', () {
-      // Save a profile to storage.
+    test('loading from stored profile works', () async {
+      // Seed secure storage (the source of truth).
       final updated = ctrl.profile.copyWith(name: 'Stored User');
-      storage.writeInMemory('profile', updated.toJson());
+      await SecureStorageService.to.writeSecure(
+        'profile',
+        jsonEncode(updated.toJson()),
+      );
 
-      // Create a new controller that reads from storage.
+      // Create a new controller that reads from secure storage.
       final ctrl2 = ProfileController(storage: storage);
       ctrl2.onInit();
+      await ctrl2.ready;
 
       expect(ctrl2.profile.name, 'Stored User');
       ctrl2.dispose();
     });
 
-    test('experiences round-trip through persistence', () {
+    test('experiences round-trip through persistence', () async {
       final original = ctrl.profile;
-      storage.writeInMemory('profile', original.toJson());
+      await SecureStorageService.to.writeSecure(
+        'profile',
+        jsonEncode(original.toJson()),
+      );
 
       final ctrl2 = ProfileController(storage: storage);
       ctrl2.onInit();
+      await ctrl2.ready;
 
       expect(ctrl2.profile.experiences.length, original.experiences.length);
       ctrl2.dispose();
     });
 
-    test('skills round-trip through persistence', () {
+    test('skills round-trip through persistence', () async {
       final original = ctrl.profile;
-      storage.writeInMemory('profile', original.toJson());
+      await SecureStorageService.to.writeSecure(
+        'profile',
+        jsonEncode(original.toJson()),
+      );
 
       final ctrl2 = ProfileController(storage: storage);
       ctrl2.onInit();
+      await ctrl2.ready;
 
       expect(ctrl2.profile.skills, original.skills);
+      ctrl2.dispose();
+    });
+
+    test('legacy plaintext profile is migrated to secure storage', () async {
+      // Simulate an older build that wrote PII to plaintext GetStorage.
+      final legacy = ctrl.profile.copyWith(name: 'Legacy User');
+      storage.writeInMemory('profile', legacy.toJson());
+
+      final ctrl2 = ProfileController(storage: storage);
+      ctrl2.onInit();
+      await ctrl2.ready;
+
+      // Loaded from the legacy copy...
+      expect(ctrl2.profile.name, 'Legacy User');
+      // ...migrated into secure storage...
+      final raw = await SecureStorageService.to.readSecure('profile');
+      expect(raw, isNotNull);
+      // ...and the plaintext copy purged.
+      expect(storage.read<Map>('profile'), isNull);
       ctrl2.dispose();
     });
   });

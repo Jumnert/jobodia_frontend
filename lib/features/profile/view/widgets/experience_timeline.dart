@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
+import 'package:jobodia_frontend/core/utils/safe_image_loader.dart';
 import 'package:jobodia_frontend/features/profile/model/profile_model.dart';
 
 class ExperienceTimeline extends StatelessWidget {
@@ -146,18 +147,9 @@ class _ExperienceLogo extends StatelessWidget {
         border: Border.all(color: palette.border, width: 1),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Image.network(
-        imageUrl!,
+      child: SafeImageLoader(
+        url: imageUrl!,
         fit: BoxFit.cover,
-        loadingBuilder: (context, child, progress) => progress == null
-            ? child
-            : const Center(
-                child: SizedBox(
-                  width: 14,
-                  height: 14,
-                  child: CircularProgressIndicator(strokeWidth: 1.5),
-                ),
-              ),
         errorBuilder: (context, error, stackTrace) =>
             const Icon(Icons.business_rounded, size: 20),
       ),

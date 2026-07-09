@@ -67,7 +67,8 @@ void main() {
       c.selectedTab.value = 0;
       c.selectLevel('Senior');
       final filtered = c.filteredJobs;
-      expect(filtered.length, 3);
+      expect(filtered.length, 5);
+      expect(filtered.every((j) => j.level == 'Senior'), isTrue);
     });
 
     test('dismiss adds job to dismissedJobIds', () {

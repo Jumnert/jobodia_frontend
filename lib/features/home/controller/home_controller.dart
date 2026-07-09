@@ -114,6 +114,14 @@ class HomeController extends GetxController {
     return all.sublist(0, end);
   }
 
+  /// Combined paged jobs + hasMore in a single pass, so the feed screen runs
+  /// the (regex-based) filtering exactly once per frame instead of three times.
+  ({List<JobFeedModel> jobs, bool hasMore}) get visiblePage {
+    final all = filteredJobs;
+    final end = (currentPage.value * _pageSize).clamp(0, all.length);
+    return (jobs: all.sublist(0, end), hasMore: end < all.length);
+  }
+
   void _resetPagination() => currentPage.value = 1;
 
   final jobs = const <JobFeedModel>[
@@ -281,6 +289,51 @@ class HomeController extends GetxController {
       tags: ['Testing', 'Selenium', 'Appium', 'CI/CD'],
       salary: '\$3,600 - \$5,200',
       distance: 'Fully remote',
+    ),
+    JobFeedModel(
+      id: 'lumina-data-scientist',
+      company: 'Lumina Data',
+      companyTag: 'Enterprise',
+      matchPercent: 88,
+      title: 'Data Scientist',
+      level: 'Senior',
+      location: 'New York, NY',
+      timeAgo: '1 day ago',
+      description:
+          'Apply machine learning techniques to solve complex business problems. Build predictive models and dashboards.',
+      tags: ['Python', 'Machine Learning', 'SQL', 'Tableau'],
+      salary: '\$6,000 - \$8,500',
+      distance: '2.1 km away',
+    ),
+    JobFeedModel(
+      id: 'vertex-mobile-dev',
+      company: 'Vertex Mobile',
+      companyTag: 'Startup',
+      matchPercent: 91,
+      title: 'Flutter Developer',
+      level: 'Mid-level',
+      location: 'Remote',
+      timeAgo: '6 hours ago',
+      description:
+          'Create high-performance, beautiful mobile apps using Flutter. Work closely with product designers and backend teams.',
+      tags: ['Flutter', 'Dart', 'Firebase', 'Mobile'],
+      salary: '\$4,000 - \$5,500',
+      distance: 'Fully remote',
+    ),
+    JobFeedModel(
+      id: 'aegis-security-eng',
+      company: 'Aegis Security',
+      companyTag: 'Agency',
+      matchPercent: 77,
+      title: 'Security Engineer',
+      level: 'Senior',
+      location: 'Austin, TX',
+      timeAgo: '3 days ago',
+      description:
+          'Conduct penetration testing and secure code reviews. Monitor systems for vulnerabilities and respond to incidents.',
+      tags: ['Cybersecurity', 'Python', 'AWS', 'Pen Testing'],
+      salary: '\$5,500 - \$7,800',
+      distance: '4.5 km away',
     ),
   ];
 

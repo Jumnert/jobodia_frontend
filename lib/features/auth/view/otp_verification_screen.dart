@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -89,19 +90,11 @@ class _OtpHeader extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    width: 46,
-                    height: 32,
-                    child: OutlinedButton(
-                      onPressed: controller.goBackToLogin,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: const BorderSide(color: Color(0xFF5B5D5F)),
-                        padding: EdgeInsets.zero,
-                        shape: const StadiumBorder(),
-                      ),
-                      child: const Icon(Icons.arrow_back_rounded, size: 18),
-                    ),
+                  AdaptiveButton.icon(
+                    onPressed: controller.goBackToLogin,
+                    icon: Icons.arrow_back_rounded,
+                    iconColor: Colors.white,
+                    style: AdaptiveButtonStyle.bordered,
                   ),
                   const Spacer(),
                   Text(

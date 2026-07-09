@@ -1,9 +1,13 @@
-import 'package:flutter/material.dart';
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:get/get.dart';
-import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 /// Shows a confirmation dialog with a title, message, and confirm/cancel
 /// buttons. Returns `true` if the user confirms, `false` otherwise.
+///
+/// Renders via [AdaptiveAlertDialog] so it adopts platform-native styling
+/// (and iOS 26 Liquid Glass where available). The adaptive dialog pops itself
+/// when an action is tapped, so the confirm/cancel choice is captured through
+/// a local flag rather than a dialog result.
 ///
 /// ```dart
 /// final confirmed = await showConfirmationDialog(
@@ -21,65 +25,28 @@ Future<bool> showConfirmationDialog({
   String cancelLabel = 'Cancel',
   bool isDestructive = false,
 }) async {
-  final result = await Get.dialog<bool>(
-    _ConfirmationDialog(
-      title: title,
-      message: message,
-      confirmLabel: confirmLabel,
-      cancelLabel: cancelLabel,
-      isDestructive: isDestructive,
-    ),
-  );
-  return result ?? false;
-}
+  final context = Get.context;
+  if (context == null) return false;
 
-class _ConfirmationDialog extends StatelessWidget {
-  const _ConfirmationDialog({
-    required this.title,
-    required this.message,
-    required this.confirmLabel,
-    required this.cancelLabel,
-    required this.isDestructive,
-  });
-
-  final String title;
-  final String message;
-  final String confirmLabel;
-  final String cancelLabel;
-  final bool isDestructive;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    final confirmColor = isDestructive ? palette.error : AppColors.brandTeal;
-
-    return AlertDialog(
-      backgroundColor: palette.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: palette.textPrimary,
-          fontWeight: FontWeight.w700,
-        ),
+  var confirmed = false;
+  await AdaptiveAlertDialog.show(
+    context: context,
+    title: title,
+    message: message,
+    actions: [
+      AlertAction(
+        title: cancelLabel,
+        style: AlertActionStyle.cancel,
+        onPressed: () => confirmed = false,
       ),
-      content: Text(message, style: TextStyle(color: palette.textSecondary)),
-      actions: [
-        TextButton(
-          onPressed: () => Get.back(result: false),
-          child: Text(
-            cancelLabel,
-            style: TextStyle(color: palette.textSecondary),
-          ),
-        ),
-        TextButton(
-          onPressed: () => Get.back(result: true),
-          child: Text(
-            confirmLabel,
-            style: TextStyle(color: confirmColor, fontWeight: FontWeight.w700),
-          ),
-        ),
-      ],
-    );
-  }
+      AlertAction(
+        title: confirmLabel,
+        style: isDestructive
+            ? AlertActionStyle.destructive
+            : AlertActionStyle.primary,
+        onPressed: () => confirmed = true,
+      ),
+    ],
+  );
+  return confirmed;
 }

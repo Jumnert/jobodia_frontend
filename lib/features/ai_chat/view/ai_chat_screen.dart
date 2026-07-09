@@ -1,139 +1,144 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
-import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 import 'package:jobodia_frontend/features/ai_chat/controller/ai_chat_controller.dart';
 import 'package:jobodia_frontend/features/ai_chat/model/chat_message_model.dart';
 import 'package:jobodia_frontend/features/ai_chat/view/widgets/bot_avatar.dart';
 import 'package:jobodia_frontend/features/ai_chat/view/widgets/chat_history_drawer.dart';
 import 'package:jobodia_frontend/features/ai_chat/view/widgets/message_bubble.dart';
 import 'package:jobodia_frontend/features/ai_chat/view/widgets/message_composer.dart';
-import 'package:jobodia_frontend/features/home/view/widgets/app_bottom_navigation_bar.dart';
-import 'package:jobodia_frontend/features/home/view/widgets/app_navigation.dart';
 
 class AiChatScreen extends GetView<AiChatController> {
-  const AiChatScreen({super.key, this.showBottomNav = true});
+  AiChatScreen({super.key});
 
-  final bool? showBottomNav;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+    final isDark = context.isDark;
+    final fg = isDark ? Colors.white : palette.iconPrimary;
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final topInset = MediaQuery.paddingOf(context).top;
 
-    return Scaffold(
-      backgroundColor: context.palette.scaffold,
-      extendBody: true,
+    return AdaptiveScaffold(
+      scaffoldKey: _scaffoldKey,
+      useHeroBackButton: false,
       endDrawer: ChatHistoryDrawer(controller: controller),
-      body: Padding(
-        padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
-        child: Column(
+      body: Container(
+        color: palette.scaffold,
+        child: Stack(
           children: [
-            const _ChatHeader(),
-            Expanded(
-              child: Obx(
-                () => controller.hasMessages
-                    ? Column(
-                        children: [
-                          Expanded(
-                            child: _ConversationList(
-                              messages: controller.messages,
-                              controller: controller,
-                            ),
-                          ),
-                          if (controller.isTyping.value)
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                left: 18,
-                                bottom: 8,
-                                right: 18,
-                              ),
-                              child: Row(
-                                children: [
-                                  const BotAvatar(size: 32),
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 10,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: context.palette.surface,
-                                      borderRadius: BorderRadius.circular(18),
+            Positioned.fill(
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Obx(
+                      () => controller.hasMessages
+                          ? Column(
+                              children: [
+                                Expanded(
+                                  child: _ConversationList(
+                                    messages: controller.messages,
+                                    controller: controller,
+                                  ),
+                                ),
+                                if (controller.isTyping.value)
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      left: 18,
+                                      bottom: 8,
+                                      right: 18,
                                     ),
                                     child: Row(
-                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        _TypingDot(
-                                          delay: 0,
-                                          color: context.palette.textSecondary,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        _TypingDot(
-                                          delay: 200,
-                                          color: context.palette.textSecondary,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        _TypingDot(
-                                          delay: 400,
-                                          color: context.palette.textSecondary,
+                                        const BotAvatar(size: 32),
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 10,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: palette.surface,
+                                            borderRadius: BorderRadius.circular(
+                                              18,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              _TypingDot(
+                                                delay: 0,
+                                                color: palette.textSecondary,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              _TypingDot(
+                                                delay: 200,
+                                                color: palette.textSecondary,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              _TypingDot(
+                                                delay: 400,
+                                                color: palette.textSecondary,
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      )
-                    : _EmptyChatState(controller: controller),
+                              ],
+                            )
+                          : _EmptyChatState(controller: controller),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(14, 8, 14, 58 + bottomPadding),
+                    child: MessageComposer(controller: controller),
+                  ),
+                ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(14, 8, 14, 132 + bottomPadding),
-              child: MessageComposer(controller: controller),
+            // ── Floating glass toolbar (like the Settings page) ──
+            Positioned(
+              top: topInset + 14,
+              left: 20,
+              right: 20,
+              child: Row(
+                children: [
+                  AdaptiveButton.icon(
+                    onPressed: controller.startNewChat,
+                    icon: Icons.add_comment_outlined,
+                    iconColor: fg,
+                    style: AdaptiveButtonStyle.glass,
+                    minSize: const Size(44, 44),
+                    useSmoothRectangleBorder: false,
+                  ),
+                  const Spacer(),
+                  AdaptiveButton(
+                    onPressed: () {},
+                    label: 'Jobodia AI',
+                    textColor: isDark ? Colors.white : palette.textPrimary,
+                    style: AdaptiveButtonStyle.glass,
+                    minSize: const Size(150, 44),
+                    useSmoothRectangleBorder: false,
+                  ),
+                  const Spacer(),
+                  AdaptiveButton.icon(
+                    onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+                    icon: Icons.history_rounded,
+                    iconColor: fg,
+                    style: AdaptiveButtonStyle.glass,
+                    minSize: const Size(44, 44),
+                    useSmoothRectangleBorder: false,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: (showBottomNav ?? true)
-          ? AppBottomNavigationBar(
-              selectedIndex: 2,
-              onDestinationSelected: (index) =>
-                  navigateMainDestination(context, index, currentIndex: 2),
-              onSearchPressed: () => Get.toNamed<void>(AppRoutes.search),
-            )
-          : null,
-    );
-  }
-}
-
-class _ChatHeader extends StatelessWidget {
-  const _ChatHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 84,
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: Get.back,
-            tooltip: 'Back',
-            icon: const Icon(Icons.chevron_left_rounded, size: 30),
-          ),
-          const Expanded(
-            child: Text(
-              'Jobodia Ai',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
-            ),
-          ),
-          IconButton(
-            onPressed: () => Scaffold.of(context).openEndDrawer(),
-            icon: const Icon(Icons.more_horiz_rounded),
-          ),
-        ],
       ),
     );
   }
@@ -147,6 +152,7 @@ class _EmptyChatState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final topInset = MediaQuery.paddingOf(context).top;
     final defaultIcons = [
       Icons.article_outlined,
       Icons.work_outline_rounded,
@@ -166,39 +172,44 @@ class _EmptyChatState extends StatelessWidget {
         ));
       }
 
-      return ListView(
-        padding: const EdgeInsets.fromLTRB(14, 20, 14, 12),
-        children: [
-          const SizedBox(height: 12),
-          const Center(child: BotAvatar(size: 96)),
-          const SizedBox(height: 42),
-          Text(
-            'Hi, ${Get.find<AuthController>().currentUser.value?.name ?? 'there'}!',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: palette.textPrimary,
-              fontSize: 25,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            'How can I help you today?',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: palette.textPrimary, fontSize: 18),
-          ),
-          const SizedBox(height: 64),
-          ...items.map(
-            (item) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: _SuggestionTile(
-                icon: item.$1,
-                label: item.$2,
-                onTap: () => controller.sendMessage(item.$2),
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(14, topInset + 72, 14, 24),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight - (topInset + 96),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Center(child: BotAvatar(size: 88)),
+                  const SizedBox(height: 28),
+                  Text(
+                    'What can I help you with?',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: palette.textPrimary,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  ...items.map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _SuggestionTile(
+                        icon: item.$1,
+                        label: item.$2,
+                        onTap: () => controller.sendMessage(item.$2),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
+          );
+        },
       );
     });
   }
@@ -257,17 +268,27 @@ class _ConversationList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Precompute the last bot message index once (O(n)) instead of scanning
+    // the tail of the list for every row (which was O(n^2)).
+    var lastBotIndex = -1;
+    for (var i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].sender == ChatMessageSender.bot) {
+        lastBotIndex = i;
+        break;
+      }
+    }
+
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(18, 42, 18, 16),
+      padding: EdgeInsets.fromLTRB(
+        18,
+        MediaQuery.paddingOf(context).top + 72,
+        18,
+        16,
+      ),
       itemCount: messages.length,
       itemBuilder: (context, index) {
         final message = messages[index];
-        final isLastBot =
-            message.sender == ChatMessageSender.bot &&
-            (index == messages.length - 1 ||
-                messages
-                    .sublist(index + 1)
-                    .every((m) => m.sender == ChatMessageSender.user));
+        final isLastBot = index == lastBotIndex;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

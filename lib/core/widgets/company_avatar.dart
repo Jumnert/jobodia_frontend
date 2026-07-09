@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jobodia_frontend/core/utils/safe_image_loader.dart';
 
 /// Circle avatar that shows a company's initials with a deterministic
 /// background color derived from the company name hash.
@@ -29,8 +30,8 @@ class CompanyAvatar extends StatelessWidget {
 
     if (imageUrl != null && imageUrl!.isNotEmpty) {
       return ClipOval(
-        child: Image.network(
-          imageUrl!,
+        child: SafeImageLoader(
+          url: imageUrl!,
           width: size,
           height: size,
           fit: BoxFit.cover,

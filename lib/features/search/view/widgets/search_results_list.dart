@@ -71,9 +71,11 @@ class SearchResultsList extends StatelessWidget {
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 92),
         itemCount: jobs.length,
-        itemBuilder: (context, index) => Padding(
-          padding: const EdgeInsets.only(bottom: 14),
-          child: SearchJobCard(job: jobs[index], colorIndex: index),
+        itemBuilder: (context, index) => RepaintBoundary(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: SearchJobCard(job: jobs[index], colorIndex: index),
+          ),
         ),
       ),
     );

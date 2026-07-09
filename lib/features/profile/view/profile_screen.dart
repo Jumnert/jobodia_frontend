@@ -1,19 +1,16 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
-import 'package:jobodia_frontend/features/applications/controller/applications_controller.dart';
-import 'package:jobodia_frontend/features/company/controller/company_controller.dart';
+import 'package:jobodia_frontend/core/utils/safe_image_loader.dart';
+import 'package:jobodia_frontend/core/widgets/animated_scale_button.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
 import 'package:jobodia_frontend/features/cv_builder/model/cv_data.dart';
-import 'package:jobodia_frontend/features/job_alerts/controller/job_alert_controller.dart';
 import 'package:jobodia_frontend/features/profile/controller/profile_controller.dart';
 import 'package:jobodia_frontend/features/profile/view/widgets/experience_timeline.dart';
 import 'package:jobodia_frontend/features/profile/view/widgets/profile_about_section.dart';
-import 'package:jobodia_frontend/features/profile/view/widgets/profile_cover_header.dart';
-import 'package:jobodia_frontend/features/profile/view/widgets/profile_identity_header.dart';
 import 'package:jobodia_frontend/features/profile/model/profile_model.dart';
-import 'package:jobodia_frontend/features/saved_jobs/controller/saved_jobs_controller.dart';
 
 class ProfileScreen extends GetView<ProfileController> {
   const ProfileScreen({super.key});
@@ -21,282 +18,242 @@ class ProfileScreen extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final topInset = MediaQuery.paddingOf(context).top;
 
-    return Scaffold(
-      backgroundColor: palette.scaffold,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed<void>(AppRoutes.editProfile),
-        backgroundColor: AppColors.primary,
-        tooltip: 'Edit profile',
-        child: const Icon(Icons.edit_rounded, color: Colors.white),
-      ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 430),
-          child: Stack(
-            children: [
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: Obx(
-                  () => ProfileCoverHeader(
-                    imageUrl: controller.profile.coverImageUrl,
-                    isSaved: controller.isSaved.value,
-                    onShare: controller.shareProfile,
-                    onSave: controller.toggleSaved,
+    return AdaptiveScaffold(
+      body: Container(
+        color: palette.scaffold,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 480),
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: [
+                      // Full-bleed cover banner (runs behind the toolbar) with
+                      // the avatar overlapping its bottom edge.
+                      _ProfileHeader(
+                        controller: controller,
+                        topInset: topInset,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 36),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Obx(
+                              () => ProfileAboutSection(
+                                about: controller.profile.about,
+                                isExpanded: controller.isAboutExpanded.value,
+                                onReadMore: controller.toggleAbout,
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            Obx(() {
+                              final skills = controller.profile.skills;
+                              if (skills.isEmpty) {
+                                return const SizedBox.shrink();
+                              }
+                              return _SkillsSection(skills: skills);
+                            }),
+                            const SizedBox(height: 18),
+                            Obx(() {
+                              final links = controller.profile.portfolioLinks;
+                              if (links.isEmpty) return const SizedBox.shrink();
+                              return _PortfolioSection(links: links);
+                            }),
+                            const SizedBox(height: 18),
+                            Obx(
+                              () => ExperienceTimeline(
+                                experiences: controller.profile.experiences,
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            Obx(() {
+                              final cv = Get.find<CvBuilderController>()
+                                  .generatedCv
+                                  .value;
+                              return _CvLinkCard(generatedCv: cv);
+                            }),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              CustomScrollView(
-                slivers: [
-                  const SliverToBoxAdapter(child: SizedBox(height: 205)),
-                  SliverToBoxAdapter(
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Obx(
-                          () => Container(
-                            constraints: BoxConstraints(
-                              minHeight:
-                                  MediaQuery.sizeOf(context).height - 205,
-                            ),
-                            decoration: BoxDecoration(
-                              color: palette.surface,
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(26),
-                              ),
-                            ),
-                            padding: const EdgeInsets.fromLTRB(22, 78, 22, 28),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // ── Activity stats row ──────────────────────
-                                Obx(() {
-                                  final saved = Get.find<SavedJobsController>()
-                                      .savedIds
-                                      .length;
-                                  final applied =
-                                      Get.find<ApplicationsController>()
-                                          .applications
-                                          .length;
-                                  final cvReady =
-                                      Get.find<CvBuilderController>()
-                                          .isGenerated
-                                          .value;
-                                  final following =
-                                      Get.find<CompanyController>()
-                                          .followingCount;
-                                  final alertsCount =
-                                      Get.isRegistered<JobAlertController>()
-                                      ? Get.find<JobAlertController>().alerts
-                                            .where((a) => a.isActive)
-                                            .length
-                                      : 0;
-                                  return _ActivityStatsRow(
-                                    savedCount: saved,
-                                    appliedCount: applied,
-                                    cvReady: cvReady,
-                                    followingCount: following,
-                                    alertsCount: alertsCount,
-                                  );
-                                }),
-                                const SizedBox(height: 18),
-                                _InviteFriendsCard(palette: palette),
-                                const SizedBox(height: 12),
-                                _MarketValueCard(palette: palette),
-                                const SizedBox(height: 12),
-                                _CertificationsCard(palette: palette),
-                                const SizedBox(height: 12),
-                                _CareerGoalsCard(palette: palette),
-                                const SizedBox(height: 18),
-                                Obx(
-                                  () => ProfileAboutSection(
-                                    about: controller.profile.about,
-                                    isExpanded:
-                                        controller.isAboutExpanded.value,
-                                    onReadMore: controller.toggleAbout,
-                                  ),
-                                ),
-                                const SizedBox(height: 14),
-                                Obx(() {
-                                  final skills = controller.profile.skills;
-                                  if (skills.isEmpty) {
-                                    return const SizedBox.shrink();
-                                  }
-                                  return _SkillsSection(skills: skills);
-                                }),
-                                const SizedBox(height: 14),
-                                Obx(() {
-                                  final links =
-                                      controller.profile.portfolioLinks;
-                                  if (links.isEmpty) {
-                                    return const SizedBox.shrink();
-                                  }
-                                  return _PortfolioSection(links: links);
-                                }),
-                                const SizedBox(height: 14),
-                                Obx(
-                                  () => ExperienceTimeline(
-                                    experiences: controller.profile.experiences,
-                                  ),
-                                ),
-                                const SizedBox(height: 14),
-                                // ── CV preview link card ─────────────────────
-                                Obx(() {
-                                  final cv = Get.find<CvBuilderController>()
-                                      .generatedCv
-                                      .value;
-                                  return _CvLinkCard(generatedCv: cv);
-                                }),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          left: 22,
-                          right: 18,
-                          top: -26,
-                          child: Obx(
-                            () => ProfileIdentityHeader(
-                              name: controller.profile.name,
-                              role: controller.profile.role,
-                              avatarUrl: controller.profile.avatarImageUrl,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+            ),
+            // ── Floating glass toolbar (over the cover) ──
+            Positioned(
+              top: topInset + 14,
+              left: 20,
+              right: 20,
+              child: Row(
+                children: [
+                  AdaptiveButton.icon(
+                    onPressed: () => Get.back<void>(),
+                    icon: PlatformInfo.isIOS
+                        ? Icons.arrow_back_ios_new_rounded
+                        : Icons.arrow_back_rounded,
+                    iconColor: palette.iconPrimary,
+                    style: AdaptiveButtonStyle.glass,
+                    minSize: const Size(44, 44),
+                    useSmoothRectangleBorder: false,
+                  ),
+                  const Spacer(),
+                  AdaptiveButton.icon(
+                    onPressed: () => Get.toNamed<void>(AppRoutes.settings),
+                    icon: Icons.settings_outlined,
+                    iconColor: palette.iconPrimary,
+                    style: AdaptiveButtonStyle.glass,
+                    minSize: const Size(44, 44),
+                    useSmoothRectangleBorder: false,
+                  ),
+                  const SizedBox(width: 8),
+                  AdaptiveButton.icon(
+                    onPressed: () => Get.toNamed<void>(AppRoutes.statistics),
+                    icon: Icons.bar_chart_rounded,
+                    iconColor: palette.iconPrimary,
+                    style: AdaptiveButtonStyle.glass,
+                    minSize: const Size(44, 44),
+                    useSmoothRectangleBorder: false,
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ── Activity stats row ────────────────────────────────────────────────────────
-
-class _ActivityStatsRow extends StatelessWidget {
-  const _ActivityStatsRow({
-    required this.savedCount,
-    required this.appliedCount,
-    required this.cvReady,
-    required this.followingCount,
-    required this.alertsCount,
-  });
-
-  final int savedCount;
-  final int appliedCount;
-  final bool cvReady;
-  final int followingCount;
-  final int alertsCount;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: [
-        SizedBox(
-          width: (MediaQuery.of(context).size.width - 60) / 3,
-          child: _StatTile(
-            value: '$savedCount',
-            label: 'Saved',
-            onTap: () => Get.toNamed<void>(AppRoutes.savedJobs),
-            palette: palette,
-          ),
-        ),
-        SizedBox(
-          width: (MediaQuery.of(context).size.width - 60) / 3,
-          child: _StatTile(
-            value: '$appliedCount',
-            label: 'Applied',
-            onTap: () => Get.toNamed<void>(AppRoutes.applications),
-            palette: palette,
-          ),
-        ),
-        SizedBox(
-          width: (MediaQuery.of(context).size.width - 60) / 3,
-          child: _StatTile(
-            value: cvReady ? '✓' : '—',
-            label: 'CV Ready',
-            onTap: () => Get.toNamed<void>(AppRoutes.cvBuilder),
-            palette: palette,
-          ),
-        ),
-        SizedBox(
-          width: (MediaQuery.of(context).size.width - 60) / 3,
-          child: _StatTile(
-            value: '$followingCount',
-            label: 'Following',
-            onTap: () {},
-            palette: palette,
-          ),
-        ),
-        SizedBox(
-          width: (MediaQuery.of(context).size.width - 60) / 3,
-          child: _StatTile(
-            value: '$alertsCount',
-            label: 'Alerts',
-            onTap: () => Get.toNamed<void>(AppRoutes.jobAlerts),
-            palette: palette,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _StatTile extends StatelessWidget {
-  const _StatTile({
-    required this.value,
-    required this.label,
-    required this.onTap,
-    required this.palette,
-  });
-
-  final String value;
-  final String label;
-  final VoidCallback onTap;
-  final AppPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: palette.surfaceMuted.withAlpha(180),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: palette.textSecondary.withAlpha(30)),
-        ),
-        child: Column(
-          children: [
-            Text(
-              value,
-              style: TextStyle(
-                color: palette.textPrimary,
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                height: 1.1,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(color: palette.textSecondary, fontSize: 12),
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+// ── Header: full-bleed cover + overlapping avatar + name + role + edit ────────
+
+class _ProfileHeader extends StatelessWidget {
+  const _ProfileHeader({required this.controller, required this.topInset});
+
+  final ProfileController controller;
+  final double topInset;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    // Cover runs from the very top (behind the status bar + toolbar).
+    final coverHeight = topInset + 150;
+    const avatarSize = 104.0;
+
+    return Obx(() {
+      final profile = controller.profile;
+
+      final avatar = Hero(
+        tag: 'user-avatar',
+        child: Container(
+          width: avatarSize,
+          height: avatarSize,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: palette.surface, width: 4),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: ClipOval(
+            child: SafeImageLoader(
+              url: profile.avatarImageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: palette.surfaceMuted,
+                child: Icon(
+                  Icons.person_rounded,
+                  size: 52,
+                  color: palette.iconMuted,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      return Column(
+        children: [
+          SizedBox(
+            // cover + the half of the avatar that hangs below it.
+            height: coverHeight + avatarSize / 2,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: coverHeight,
+                  child: const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.accentPurple,
+                          AppColors.accentPurpleDark,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: coverHeight - avatarSize / 2,
+                  left: 0,
+                  right: 0,
+                  child: Center(child: avatar),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(
+                  profile.name,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: palette.textPrimary,
+                    fontSize: 23,
+                    fontWeight: FontWeight.w800,
+                    height: 1.1,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              IconButton(
+                onPressed: () => Get.toNamed<void>(AppRoutes.editProfile),
+                visualDensity: VisualDensity.compact,
+                tooltip: 'Edit profile',
+                icon: Icon(
+                  Icons.edit_outlined,
+                  size: 20,
+                  color: palette.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            profile.role,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: palette.textSecondary, fontSize: 14),
+          ),
+        ],
+      );
+    });
   }
 }
 
@@ -329,15 +286,16 @@ class _SkillsSection extends StatelessWidget {
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: palette.surfaceMuted,
+                color: AppColors.primary.withAlpha(22),
                 borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.primary.withAlpha(60)),
               ),
               child: Text(
                 skill,
-                style: TextStyle(
-                  color: palette.textPrimary,
+                style: const TextStyle(
+                  color: AppColors.primary,
                   fontSize: 13,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             );
@@ -373,55 +331,51 @@ class _PortfolioSection extends StatelessWidget {
         ...links.map((link) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 6),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  Get.snackbar(
-                    'Coming soon',
-                    'This link will be available in a future update.',
-                    snackPosition: SnackPosition.BOTTOM,
-                    margin: const EdgeInsets.all(16),
-                  );
-                },
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
+            child: AnimatedScaleButton(
+              onTap: () {
+                Get.snackbar(
+                  'Coming soon',
+                  'This link will be available in a future update.',
+                  snackPosition: SnackPosition.BOTTOM,
+                  margin: const EdgeInsets.all(16),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: palette.surfaceMuted.withAlpha(180),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: palette.textSecondary.withAlpha(30),
                   ),
-                  decoration: BoxDecoration(
-                    color: palette.surfaceMuted.withAlpha(180),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: palette.textSecondary.withAlpha(30),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.link_rounded,
+                      color: AppColors.primary,
+                      size: 18,
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.link_rounded,
-                        color: AppColors.primary,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          link.title,
-                          style: TextStyle(
-                            color: palette.textPrimary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        link.title,
+                        style: TextStyle(
+                          color: palette.textPrimary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      Icon(
-                        Icons.open_in_new_rounded,
-                        color: palette.textSecondary,
-                        size: 16,
-                      ),
-                    ],
-                  ),
+                    ),
+                    Icon(
+                      Icons.open_in_new_rounded,
+                      color: palette.textSecondary,
+                      size: 16,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -503,9 +457,8 @@ class _CvLinkCard extends StatelessWidget {
                 ),
               ],
             )
-          : InkWell(
+          : AnimatedScaleButton(
               onTap: () => Get.toNamed<void>(AppRoutes.cvBuilder),
-              borderRadius: BorderRadius.circular(16),
               child: Row(
                 children: [
                   Icon(
@@ -524,258 +477,6 @@ class _CvLinkCard extends StatelessWidget {
                 ],
               ),
             ),
-    );
-  }
-}
-
-class _InviteFriendsCard extends StatelessWidget {
-  const _InviteFriendsCard({required this.palette});
-
-  final AppPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => Get.toNamed<void>(AppRoutes.referrals),
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: palette.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: palette.border),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.brandTeal.withAlpha(25),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.volunteer_activism_rounded,
-                color: AppColors.brandTeal,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Invite Friends',
-                    style: TextStyle(
-                      color: palette.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Earn \$50 for every successful hire',
-                    style: TextStyle(
-                      color: palette.textSecondary,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: palette.iconMuted),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MarketValueCard extends StatelessWidget {
-  const _MarketValueCard({required this.palette});
-
-  final AppPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => Get.toNamed<void>(AppRoutes.salaryInsights),
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: palette.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: palette.border),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.brandTeal.withAlpha(25),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.insights_rounded,
-                color: AppColors.brandTeal,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Market Value',
-                    style: TextStyle(
-                      color: palette.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'View salary insights for your role',
-                    style: TextStyle(
-                      color: palette.textSecondary,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: palette.iconMuted),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CertificationsCard extends StatelessWidget {
-  const _CertificationsCard({required this.palette});
-
-  final AppPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => Get.toNamed<void>(AppRoutes.assessments),
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: palette.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: palette.border),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.brandTeal.withAlpha(25),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.verified_rounded,
-                color: AppColors.brandTeal,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Certifications',
-                    style: TextStyle(
-                      color: palette.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Take skill assessments to earn badges',
-                    style: TextStyle(
-                      color: palette.textSecondary,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: palette.iconMuted),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CareerGoalsCard extends StatelessWidget {
-  const _CareerGoalsCard({required this.palette});
-
-  final AppPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => Get.toNamed<void>(AppRoutes.careerGoals),
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: palette.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: palette.border),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withAlpha(25),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.trending_up_rounded,
-                color: AppColors.primary,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Career Goals',
-                    style: TextStyle(
-                      color: palette.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Track your progress & milestones',
-                    style: TextStyle(
-                      color: palette.textSecondary,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: palette.iconMuted),
-          ],
-        ),
-      ),
     );
   }
 }

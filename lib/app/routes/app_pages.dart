@@ -23,6 +23,7 @@ import 'package:jobodia_frontend/features/pricing/view/pricing_screen.dart';
 import 'package:jobodia_frontend/features/profile/controller/profile_controller.dart';
 import 'package:jobodia_frontend/features/profile/view/edit_profile_screen.dart';
 import 'package:jobodia_frontend/features/profile/view/profile_screen.dart';
+import 'package:jobodia_frontend/features/profile/view/statistics_screen.dart';
 import 'package:jobodia_frontend/features/preferences/controller/preferences_controller.dart';
 import 'package:jobodia_frontend/features/preferences/view/preferences_wizard_screen.dart';
 import 'package:jobodia_frontend/features/report/controller/report_controller.dart';
@@ -63,28 +64,28 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.otpVerification,
       page: () => const OtpVerificationScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
     ),
     GetPage(
       name: AppRoutes.resetPassword,
       page: () => const ResetPasswordScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
     ),
     GetPage(
       name: AppRoutes.aboutUs,
       page: () => const AboutUsScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
     ),
     GetPage(
       name: AppRoutes.privacyPolicy,
       page: () => const PrivacyPolicyScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
     ),
@@ -103,7 +104,7 @@ abstract final class AppPages {
       binding: BindingsBuilder(
         () => Get.lazyPut<ReportController>(ReportController.new),
       ),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -114,7 +115,7 @@ abstract final class AppPages {
       binding: BindingsBuilder(
         () => Get.lazyPut<CvBuilderController>(CvBuilderController.new),
       ),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -125,18 +126,18 @@ abstract final class AppPages {
       binding: BindingsBuilder(
         () => Get.lazyPut<CvBuilderController>(CvBuilderController.new),
       ),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.aiChat,
-      page: () => const AiChatScreen(),
+      page: () => AiChatScreen(),
       binding: BindingsBuilder(
         () => Get.lazyPut<AiChatController>(AiChatController.new),
       ),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -144,7 +145,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.pricing,
       page: () => const PricingScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -155,7 +156,7 @@ abstract final class AppPages {
       binding: BindingsBuilder(
         () => Get.lazyPut<JobDetailController>(JobDetailController.new),
       ),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -166,7 +167,7 @@ abstract final class AppPages {
       binding: BindingsBuilder(
         () => Get.lazyPut<ProfileController>(ProfileController.new),
       ),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -174,7 +175,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.savedJobs,
       page: () => const SavedJobsScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -182,7 +183,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.applications,
       page: () => ApplicationsScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -193,7 +194,7 @@ abstract final class AppPages {
       binding: BindingsBuilder(
         () => Get.lazyPut<ProfileController>(ProfileController.new),
       ),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -204,7 +205,7 @@ abstract final class AppPages {
       binding: BindingsBuilder(
         () => Get.lazyPut<PreferencesController>(PreferencesController.new),
       ),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -212,7 +213,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.companyProfile,
       page: () => const CompanyProfileScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -220,7 +221,15 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.applicationAnalytics,
       page: () => const ApplicationAnalyticsScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
+      transitionDuration: _defaultDuration,
+      curve: _defaultCurve,
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.statistics,
+      page: () => const StatisticsScreen(),
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -231,7 +240,7 @@ abstract final class AppPages {
       binding: BindingsBuilder(
         () => Get.lazyPut<NotificationsController>(NotificationsController.new),
       ),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -239,7 +248,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.settings,
       page: () => const SettingsScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -247,7 +256,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.search,
       page: () => const SearchScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -258,7 +267,7 @@ abstract final class AppPages {
       binding: BindingsBuilder(
         () => Get.lazyPut<JobAlertController>(JobAlertController.new),
       ),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -266,7 +275,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.referrals,
       page: () => const ReferralScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -274,7 +283,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.salaryInsights,
       page: () => const SalaryScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -282,7 +291,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.assessments,
       page: () => const AssessmentsScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -290,7 +299,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.assessmentQuiz,
       page: () => const AssessmentQuizScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -298,7 +307,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.conversations,
       page: () => const ConversationsScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -306,7 +315,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.conversationDetail,
       page: () => const ConversationDetailScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -314,7 +323,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.companyReviews,
       page: () => const CompanyReviewsScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -322,7 +331,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.careerGoals,
       page: () => const CareerGoalsScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],
@@ -330,7 +339,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.marketTrends,
       page: () => const MarketTrendsScreen(),
-      transition: Transition.rightToLeft,
+      transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],

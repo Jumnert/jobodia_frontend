@@ -1,25 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
 
 import 'cv_builder_controller_test.mocks.dart';
 
-@GenerateNiceMocks([MockSpec<GetStorage>(), MockSpec<ImagePicker>()])
+@GenerateNiceMocks([MockSpec<ImagePicker>()])
 void main() {
-  late MockGetStorage mockStorage;
   late MockImagePicker mockPicker;
 
   setUp(() {
     Get.testMode = true;
-    mockStorage = MockGetStorage();
     mockPicker = MockImagePicker();
-
-    when(mockStorage.read(any)).thenReturn(null);
-    when(mockStorage.write(any, any)).thenAnswer((_) async => true);
   });
 
   tearDown(() {
@@ -27,7 +20,7 @@ void main() {
   });
 
   CvBuilderController makeController() {
-    final c = CvBuilderController(storage: mockStorage, picker: mockPicker);
+    final c = CvBuilderController(picker: mockPicker);
     // Do NOT call onInit -- it requires SecureStorageService and
     // ProfileController which are not available in unit tests.
     return c;

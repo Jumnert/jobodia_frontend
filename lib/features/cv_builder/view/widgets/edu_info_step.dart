@@ -1,6 +1,3 @@
-// ignore_for_file: deprecated_member_use, avoid_print, curly_braces_in_flow_control_structures, unused_import, unnecessary_underscores, unused_field, unused_local_variable, use_build_context_synchronously, duplicate_ignore
-import 'package:jobodia_frontend/features/cv_builder/model/cv_form_classes.dart';
-import 'package:jobodia_frontend/core/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
@@ -15,7 +12,6 @@ class EduInfoStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
     return Obx(
       () => ProfileSectionCard(
         title: 'Education',

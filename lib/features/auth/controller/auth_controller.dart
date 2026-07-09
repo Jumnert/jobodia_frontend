@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
+import 'package:jobodia_frontend/core/utils/input_sanitizer.dart';
 import 'package:jobodia_frontend/features/auth/model/user_model.dart';
 import 'package:jobodia_frontend/features/auth/repository/auth_repository.dart';
 
@@ -62,15 +63,15 @@ class AuthController extends GetxController with FormValidationMixin {
   }
 
   Future<void> login() async {
-    final email = emailController.text.trim();
+    final email = InputSanitizer.normalizeEmail(emailController.text) ?? '';
     final password = passwordController.text;
 
-    if (email.isEmpty) {
+    if (emailController.text.trim().isEmpty) {
       errorMessage.value = 'Email is required.';
       return;
     }
 
-    if (!isValidEmail(email)) {
+    if (email.isEmpty || !isValidEmail(email)) {
       errorMessage.value = 'Please enter a valid email address';
       return;
     }
@@ -114,8 +115,8 @@ class AuthController extends GetxController with FormValidationMixin {
   }
 
   Future<void> signUp() async {
-    final username = usernameController.text.trim();
-    final email = emailController.text.trim();
+    final username = InputSanitizer.sanitizeText(usernameController.text);
+    final email = InputSanitizer.normalizeEmail(emailController.text) ?? '';
     final password = passwordController.text;
     final confirmPassword = confirmPasswordController.text;
 
@@ -130,12 +131,12 @@ class AuthController extends GetxController with FormValidationMixin {
       return;
     }
 
-    if (email.isEmpty) {
+    if (emailController.text.trim().isEmpty) {
       errorMessage.value = 'Email is required.';
       return;
     }
 
-    if (!isValidEmail(email)) {
+    if (email.isEmpty || !isValidEmail(email)) {
       errorMessage.value = 'Please enter a valid email address';
       return;
     }

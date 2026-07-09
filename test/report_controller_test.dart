@@ -63,7 +63,7 @@ void main() {
   });
 
   group('submit', () {
-    test('records a report entry in storage', () {
+    test('records a report entry in memory, not plaintext storage', () {
       // Get.back and Get.snackbar will fail without a navigator,
       // so we wrap in try-catch for the navigation side effect.
       try {
@@ -76,12 +76,13 @@ void main() {
         // Get.back() may throw without a navigator context.
       }
 
-      final reports = storage.read<List>('submittedReports');
-      expect(reports, isNotNull);
-      expect(reports!.length, 1);
+      final reports = ctrl.reports;
+      expect(reports.length, 1);
       expect(reports.first['jobId'], 'job-001');
       expect(reports.first['jobTitle'], 'Flutter Dev');
       expect(reports.first['comment'], 'This is a fake listing.');
+      // Reports must NOT be persisted to plaintext GetStorage (the #3 fix).
+      expect(storage.read<List>('submittedReports'), isNull);
     });
 
     test('records multiple reports', () {
@@ -94,11 +95,9 @@ void main() {
         ctrl.submit(jobId: 'job-002', jobTitle: 'Job 2', comment: 'Report 2');
       } catch (_) {}
 
-      final reports = storage.read<List>('submittedReports');
-      expect(reports, isNotNull);
       // At least one report should be recorded; the exact count depends
-      // on whether Get.back() throws before or after the storage write.
-      expect(reports!.length, greaterThanOrEqualTo(1));
+      // on whether Get.back() throws before or after the write.
+      expect(ctrl.reports.length, greaterThanOrEqualTo(1));
     });
 
     test('includes submittedAt timestamp', () {
@@ -106,9 +105,7 @@ void main() {
         ctrl.submit(jobId: 'job-001', jobTitle: 'Job', comment: 'Comment');
       } catch (_) {}
 
-      final reports = storage.read<List>('submittedReports');
-      expect(reports, isNotNull);
-      final entry = reports!.first as Map;
+      final entry = ctrl.reports.first;
       expect(entry.containsKey('submittedAt'), isTrue);
       expect(DateTime.tryParse(entry['submittedAt'] as String), isNotNull);
     });
@@ -172,10 +169,9 @@ void main() {
           ctrl.submit(jobId: 'job-001', jobTitle: 'Job', comment: '');
         } catch (_) {}
 
-        final reports = storage.read<List>('submittedReports');
-        expect(reports, isNotNull);
-        expect(reports!.length, 1);
-        expect((reports.first as Map)['comment'], '');
+        final reports = ctrl.reports;
+        expect(reports.length, 1);
+        expect(reports.first['comment'], '');
       },
     );
 
@@ -184,9 +180,7 @@ void main() {
         ctrl.submit(jobId: '', jobTitle: 'Job', comment: 'Something');
       } catch (_) {}
 
-      final reports = storage.read<List>('submittedReports');
-      expect(reports, isNotNull);
-      expect(reports!.length, 1);
+      expect(ctrl.reports.length, 1);
     });
   });
 }

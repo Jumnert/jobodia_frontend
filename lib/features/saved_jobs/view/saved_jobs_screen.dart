@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -29,38 +30,15 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
         ? Get.find<HomeController>()
         : Get.put(HomeController());
 
-    return Scaffold(
-      backgroundColor: palette.scaffold,
-      appBar: AppBar(
-        backgroundColor: palette.scaffold,
-        elevation: 0,
-        leading: IconButton(
-          tooltip: 'Back',
-          onPressed: Get.back,
-          icon: const Icon(Icons.chevron_left_rounded, size: 30),
-        ),
-        title: const Text(
-          'Saved Jobs',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-        ),
-        centerTitle: true,
+    return AdaptiveScaffold(
+      appBar: AdaptiveAppBar(
+        title: 'Saved Jobs',
+        useNativeToolbar: false,
         actions: [
           if (_comparisonSet.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: Center(
-                child: GestureDetector(
-                  onTap: () => setState(() => _comparisonSet.clear()),
-                  child: Text(
-                    'Clear',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
+            AdaptiveAppBarAction(
+              title: 'Clear',
+              onPressed: () => setState(() => _comparisonSet.clear()),
             ),
         ],
       ),
@@ -89,54 +67,56 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                 itemBuilder: (context, index) {
                   final job = jobs[index];
                   final isSelected = _comparisonSet.contains(job.id);
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 14),
-                    child: Material(
-                      type: MaterialType.transparency,
-                      child: InkWell(
-                        onLongPress: () {
-                          setState(() {
-                            if (isSelected) {
-                              _comparisonSet.remove(job.id);
-                            } else if (_comparisonSet.length < 3) {
-                              _comparisonSet.add(job.id);
-                            }
-                          });
-                        },
-                        onTap: () {
-                          unawaited(HapticFeedback.lightImpact());
-                          Get.to(
-                            () => const JobDetailScreen(),
-                            arguments: job,
-                            binding: BindingsBuilder(
-                              () => Get.lazyPut<JobDetailController>(
-                                JobDetailController.new,
+                  return RepaintBoundary(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: Material(
+                        type: MaterialType.transparency,
+                        child: InkWell(
+                          onLongPress: () {
+                            setState(() {
+                              if (isSelected) {
+                                _comparisonSet.remove(job.id);
+                              } else if (_comparisonSet.length < 3) {
+                                _comparisonSet.add(job.id);
+                              }
+                            });
+                          },
+                          onTap: () {
+                            unawaited(HapticFeedback.lightImpact());
+                            Get.to(
+                              () => const JobDetailScreen(),
+                              arguments: job,
+                              binding: BindingsBuilder(
+                                () => Get.lazyPut<JobDetailController>(
+                                  JobDetailController.new,
+                                ),
                               ),
+                            );
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              border: isSelected
+                                  ? Border.all(
+                                      color: AppColors.primary,
+                                      width: 2.5,
+                                    )
+                                  : null,
                             ),
-                          );
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            border: isSelected
-                                ? Border.all(
-                                    color: AppColors.primary,
-                                    width: 2.5,
-                                  )
-                                : null,
-                          ),
-                          child: JobFeedCard(
-                            job: job,
-                            colorIndex: index,
-                            isSaved: true,
-                            onToggleSave: () {
-                              savedJobs.remove(job.id);
-                              showUndoSnackbar(
-                                message: 'Job removed from saved',
-                                onUndo: () => savedJobs.toggleSave(job),
-                              );
-                            },
+                            child: JobFeedCard(
+                              job: job,
+                              colorIndex: index,
+                              isSaved: true,
+                              onToggleSave: () {
+                                savedJobs.remove(job.id);
+                                showUndoSnackbar(
+                                  message: 'Job removed from saved',
+                                  onUndo: () => savedJobs.toggleSave(job),
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),

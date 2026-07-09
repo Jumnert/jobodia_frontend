@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:jobodia_frontend/core/utils/app_logger.dart';
+import 'package:jobodia_frontend/core/utils/input_sanitizer.dart';
 import 'package:jobodia_frontend/features/profile/model/profile_model.dart';
 import 'package:jobodia_frontend/services/secure_storage_service.dart';
 import 'package:share_plus/share_plus.dart';
@@ -93,38 +95,65 @@ class ProfileController extends GetxController {
 
   ProfileModel get profile => profileRx.value;
 
+  Future<void>? _loadFuture;
+
+  /// Completes when the initial async load from secure storage finishes.
+  /// Lets screens (and tests) await the first real profile read.
+  Future<void> get ready => _loadFuture ?? Future<void>.value();
+
   @override
   void onInit() {
     super.onInit();
-    profileRx = _load().obs;
+    profileRx = _mockProfile.obs;
+    _loadFuture = loadProfile();
   }
 
-  ProfileModel _load() {
-    // Secure storage is async; use GetStorage as fallback for sync onInit.
-    // Profile will be migrated to secure storage on next save.
+  /// Loads the profile from secure storage (the PII source of truth).
+  ///
+  /// Migrates any legacy plaintext copy written by older builds into secure
+  /// storage and removes the plaintext, so PII no longer lingers on disk
+  /// unencrypted. Falls back to the mock profile when nothing is stored.
+  Future<void> loadProfile() async {
     try {
-      final stored = _storage.read<Map>(_profileKey);
-      if (stored != null) {
-        return ProfileModel.fromJson(Map<String, dynamic>.from(stored));
+      final raw = await SecureStorageService.to.readSecure(_profileKey);
+      if (raw != null) {
+        profileRx.value = ProfileModel.fromJson(
+          Map<String, dynamic>.from(jsonDecode(raw) as Map),
+        );
+        return;
       }
-    } on Object {
-      // Fall through to mock on any parse error.
+      final legacy = _storage.read<Map>(_profileKey);
+      if (legacy != null) {
+        final model = ProfileModel.fromJson(Map<String, dynamic>.from(legacy));
+        profileRx.value = model;
+        await SecureStorageService.to.writeSecure(
+          _profileKey,
+          jsonEncode(model.toJson()),
+        );
+        _storage.remove(_profileKey);
+      }
+    } on Object catch (e, st) {
+      AppLogger.error('Failed to load profile from secure storage', e, st);
     }
-    return _mockProfile;
   }
 
-  /// Saves an updated profile and notifies listeners.
-  /// Writes to both secure storage (PII) and GetStorage (sync fallback).
+  /// Saves an updated profile and notifies listeners. PII text is sanitized and
+  /// persisted to secure storage only — never to plaintext GetStorage.
   void updateProfile(ProfileModel updated) {
     saveError.value = null;
     try {
-      profileRx.value = updated;
-      _storage.write(_profileKey, updated.toJson());
+      final sanitized = updated.copyWith(
+        name: InputSanitizer.sanitizeText(updated.name),
+        role: InputSanitizer.sanitizeText(updated.role),
+        about: InputSanitizer.stripControlChars(updated.about),
+      );
+      profileRx.value = sanitized;
       SecureStorageService.to.writeSecure(
         _profileKey,
-        jsonEncode(updated.toJson()),
+        jsonEncode(sanitized.toJson()),
       );
-    } on Exception {
+    } on Object catch (e, st) {
+      AppLogger.error('Failed to save profile', e, st);
       saveError.value = 'Failed to save profile. Please try again.';
     }
   }

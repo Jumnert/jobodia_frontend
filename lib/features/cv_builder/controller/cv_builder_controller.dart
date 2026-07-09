@@ -4,26 +4,25 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/utils/app_logger.dart';
+import 'package:jobodia_frontend/core/utils/input_sanitizer.dart';
 import 'package:jobodia_frontend/features/cv_builder/model/cv_data.dart';
 import 'package:jobodia_frontend/features/cv_builder/model/cv_form_classes.dart';
+import 'package:jobodia_frontend/features/cv_builder/service/auto_fill_service.dart';
 import 'package:jobodia_frontend/features/cv_builder/service/resume_parser_service.dart'
     as jobodia_frontend_service;
 import 'package:jobodia_frontend/features/profile/controller/profile_controller.dart';
 import 'package:jobodia_frontend/services/secure_storage_service.dart';
 
 class CvBuilderController extends GetxController {
-  CvBuilderController({GetStorage? storage, ImagePicker? picker})
-    : _storage = storage ?? GetStorage(),
-      _picker = picker ?? ImagePicker();
+  CvBuilderController({ImagePicker? picker})
+    : _picker = picker ?? ImagePicker();
 
   static const savedCvKey = 'savedCv';
 
-  final GetStorage _storage;
   final ImagePicker _picker;
 
   final RxInt stepIndex = 0.obs;
@@ -100,6 +99,115 @@ class CvBuilderController extends GetxController {
     }
   }
 
+  /// Parses [text] with the real regex parser, fills the form with whatever
+  /// fields were extracted, and shows a snackbar summarising the result.
+  Future<void> importFromText(String text) async {
+    if (text.trim().isEmpty) {
+      Get.snackbar(
+        'Nothing to parse',
+        'Paste some resume text first.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    isParsing.value = true;
+    try {
+      final parser = jobodia_frontend_service.ResumeParserService();
+      final result = parser.parseFromText(text);
+      _applyParsedFields(result.fields);
+
+      final scored =
+          jobodia_frontend_service.ResumeParserService.scoredFieldCount;
+      final extracted = (result.confidence * scored).round();
+      final message = result.warnings.isEmpty
+          ? 'Parsed $extracted/$scored fields.'
+          : 'Parsed $extracted/$scored fields.\n${result.warnings.join('\n')}';
+
+      Get.snackbar(
+        'Resume parsed',
+        message,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 5),
+      );
+    } finally {
+      isParsing.value = false;
+    }
+  }
+
+  /// Fills the form from the current user profile, when one is registered.
+  void fillFromProfile() {
+    if (!Get.isRegistered<ProfileController>()) {
+      Get.snackbar(
+        'No profile',
+        'Your profile is not available to fill from.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    final fields = AutoFillService().fillFromProfile(
+      Get.find<ProfileController>(),
+    );
+    _applyParsedFields(fields);
+
+    Get.snackbar(
+      'Filled from profile',
+      'Your profile details were copied into the form.',
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
+
+  /// Applies a partial field map (only keys present are written). Shared by
+  /// [importFromText] and [fillFromProfile]; leaves untouched fields as-is.
+  void _applyParsedFields(Map<String, dynamic> data) {
+    void setText(TextEditingController c, String key) {
+      final value = data[key];
+      if (value is String && value.isNotEmpty) c.text = value;
+    }
+
+    setText(fullNameController, 'fullName');
+    setText(emailController, 'email');
+    setText(phoneController, 'phone');
+    setText(locationController, 'location');
+    setText(titleController, 'title');
+    setText(summaryController, 'summary');
+
+    final parsedSkills = data['skills'];
+    if (parsedSkills is List && parsedSkills.isNotEmpty) {
+      skills.assignAll(parsedSkills.map((e) => e.toString()).toList());
+    }
+
+    if (data.containsKey('company') ||
+        data.containsKey('role') ||
+        data.containsKey('workDesc')) {
+      if (workExperiences.isEmpty) {
+        workExperiences.add(CvWorkExperienceForm());
+      }
+      final workForm = workExperiences.first;
+      _setIfPresent(workForm.companyController, data['company']);
+      _setIfPresent(workForm.roleController, data['role']);
+      _setIfPresent(workForm.startController, data['workStart']);
+      _setIfPresent(workForm.endController, data['workEnd']);
+      _setIfPresent(workForm.descriptionController, data['workDesc']);
+    }
+
+    if (data.containsKey('school') || data.containsKey('degree')) {
+      if (educations.isEmpty) {
+        educations.add(CvEducationForm());
+      }
+      final eduForm = educations.first;
+      _setIfPresent(eduForm.schoolController, data['school']);
+      _setIfPresent(eduForm.degreeController, data['degree']);
+      _setIfPresent(eduForm.startController, data['eduStart']);
+      _setIfPresent(eduForm.endController, data['eduEnd']);
+    }
+  }
+
+  void _setIfPresent(TextEditingController c, Object? value) {
+    if (value is String && value.isNotEmpty) c.text = value;
+  }
+
   final templateTitles = const ['Classic', 'Balanced', 'Modern'];
   static const int maxEntries = 3;
 
@@ -172,12 +280,12 @@ class CvBuilderController extends GetxController {
 
   CvData _buildCvData() {
     return CvData(
-      fullName: fullNameController.text.trim(),
-      title: titleController.text.trim(),
+      fullName: InputSanitizer.sanitizeText(fullNameController.text),
+      title: InputSanitizer.sanitizeText(titleController.text),
       email: emailController.text.trim(),
-      phone: phoneController.text.trim(),
-      location: locationController.text.trim(),
-      summary: summaryController.text.trim(),
+      phone: InputSanitizer.sanitizeText(phoneController.text),
+      location: InputSanitizer.sanitizeText(locationController.text),
+      summary: InputSanitizer.stripControlChars(summaryController.text.trim()),
       templateIndex: selectedTemplateIndex.value,
       skills: List<String>.from(skills),
       workExperiences: workExperiences

@@ -43,6 +43,7 @@ class BasicInfoSection extends StatelessWidget {
           icon: Icons.notes_rounded,
           minLines: 4,
           maxLines: 8,
+          maxLength: 1000,
         ),
       ],
     );

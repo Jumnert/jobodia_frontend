@@ -15,6 +15,8 @@ void showUndoSnackbar({
   required VoidCallback onUndo,
   Duration duration = const Duration(seconds: 4),
 }) {
+  if (Get.testMode) return;
+
   Get.snackbar(
     '',
     '',

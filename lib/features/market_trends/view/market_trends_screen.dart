@@ -1,6 +1,4 @@
-// ignore_for_file: deprecated_member_use, avoid_print, curly_braces_in_flow_control_structures, unused_import, unnecessary_underscores, unused_field, unused_local_variable, use_build_context_synchronously, duplicate_ignore
-// ignore_for_file: curly_braces_in_flow_control_structures
-
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -15,36 +13,36 @@ class MarketTrendsScreen extends StatelessWidget {
     final palette = context.palette;
     final ctrl = Get.put(MarketTrendsController());
 
-    return Scaffold(
-      backgroundColor: palette.scaffold,
-      appBar: AppBar(
-        backgroundColor: palette.surface,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(
-            Icons.chevron_left_rounded,
-            color: palette.iconPrimary,
-            size: 30,
+    return AdaptiveScaffold(
+      appBar: AdaptiveAppBar(
+        useNativeToolbar: false,
+        appBar: AppBar(
+          backgroundColor: palette.surface,
+          elevation: 0,
+          centerTitle: true,
+          leading: AdaptiveButton.icon(
+            onPressed: Get.back,
+            icon: Icons.chevron_left_rounded,
+            iconColor: palette.iconPrimary,
+            style: AdaptiveButtonStyle.plain,
           ),
-          onPressed: Get.back,
-        ),
-        title: Column(
-          children: [
-            Text(
-              'Job Market Insights',
-              style: TextStyle(
-                color: palette.textPrimary,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
+          title: Column(
+            children: [
+              Text(
+                'Job Market Insights',
+                style: TextStyle(
+                  color: palette.textPrimary,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              'Updated weekly',
-              style: TextStyle(color: palette.textSecondary, fontSize: 12),
-            ),
-          ],
+              const SizedBox(height: 2),
+              Text(
+                'Updated weekly',
+                style: TextStyle(color: palette.textSecondary, fontSize: 12),
+              ),
+            ],
+          ),
         ),
       ),
       body: Obx(() {
@@ -137,10 +135,11 @@ class _MarketFitCard extends StatelessWidget {
     Color ringColor;
     if (fit >= 70) {
       ringColor = AppColors.success;
-    } else if (fit >= 50)
+    } else if (fit >= 50) {
       ringColor = AppColors.warning;
-    else
+    } else {
       ringColor = AppColors.error;
+    }
 
     return Container(
       padding: const EdgeInsets.all(20),

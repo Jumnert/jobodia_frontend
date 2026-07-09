@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/auto_scroll_on_focus.dart';
+import 'package:jobodia_frontend/core/widgets/confirmation_dialog.dart';
 import 'package:jobodia_frontend/features/profile/controller/profile_controller.dart';
 import 'package:jobodia_frontend/features/profile/model/profile_model.dart';
 
@@ -149,8 +151,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
-
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
@@ -159,49 +159,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           Navigator.of(context).pop();
           return;
         }
-        final discard = await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Discard changes?'),
-            content: const Text(
-              'You have unsaved changes. Are you sure you want to leave?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text('Stay'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(ctx).pop(true),
-                child: const Text('Discard'),
-              ),
-            ],
-          ),
+        final discard = await showConfirmationDialog(
+          title: 'Discard changes?',
+          message: 'You have unsaved changes. Are you sure you want to leave?',
+          confirmLabel: 'Discard',
+          cancelLabel: 'Stay',
+          isDestructive: true,
         );
         if (discard == true && context.mounted) {
           Navigator.of(context).pop();
         }
       },
-      child: Scaffold(
-        backgroundColor: palette.scaffold,
-        appBar: AppBar(
-          backgroundColor: palette.surface,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded),
-            color: palette.textPrimary,
-            tooltip: 'Back',
-            onPressed: Get.back,
-          ),
-          title: Text(
-            'Edit Profile',
-            style: TextStyle(
-              color: palette.textPrimary,
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          centerTitle: true,
+      child: AdaptiveScaffold(
+        appBar: const AdaptiveAppBar(
+          title: 'Edit Profile',
+          useNativeToolbar: false,
         ),
         body: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(
@@ -476,6 +448,7 @@ class EditField extends StatelessWidget {
     required this.icon,
     this.minLines = 1,
     this.maxLines = 1,
+    this.maxLength,
   });
 
   final String label;
@@ -484,6 +457,7 @@ class EditField extends StatelessWidget {
   final IconData icon;
   final int minLines;
   final int maxLines;
+  final int? maxLength;
 
   @override
   Widget build(BuildContext context) {
@@ -505,6 +479,7 @@ class EditField extends StatelessWidget {
             controller: controller,
             minLines: minLines,
             maxLines: maxLines,
+            maxLength: maxLength,
             keyboardType: maxLines > 1
                 ? TextInputType.multiline
                 : TextInputType.text,

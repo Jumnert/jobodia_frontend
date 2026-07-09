@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -9,8 +10,38 @@ import 'package:jobodia_frontend/features/auth/view/widgets/login_form.dart';
 import 'package:jobodia_frontend/features/auth/view/widgets/signup_form.dart';
 
 /// Shared authentication screen for Login and Register.
-class LoginScreen extends GetView<AuthController> {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showDemoAlert();
+    });
+  }
+
+  void _showDemoAlert() {
+    AdaptiveAlertDialog.show(
+      context: context,
+      title: 'Welcome to Jobodia',
+      message:
+          'This is a demo application not intended for release. All data is mocked.',
+      icon: 'info.circle.fill',
+      actions: [
+        AlertAction(
+          title: 'Understood',
+          style: AlertActionStyle.primary,
+          onPressed: () {},
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

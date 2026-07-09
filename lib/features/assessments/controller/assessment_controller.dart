@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/features/assessments/model/assessment_model.dart';
 import 'package:uuid/uuid.dart';
@@ -108,17 +108,22 @@ class AssessmentController extends GetxController {
 
     Get.back(); // close quiz screen
 
-    Get.dialog<void>(
-      AlertDialog(
-        title: Text(passed ? 'Congratulations!' : 'Keep Practicing'),
-        content: Text(
-          'You scored ${score.toStringAsFixed(0)}%.\n'
-          '${passed ? "You earned a new badge!" : "You need 70% to pass."}',
-        ),
+    final context = Get.context;
+    if (context != null) {
+      AdaptiveAlertDialog.show(
+        context: context,
+        title: passed ? 'Congratulations!' : 'Keep Practicing',
+        message:
+            'You scored ${score.toStringAsFixed(0)}%.\n'
+            '${passed ? "You earned a new badge!" : "You need 70% to pass."}',
         actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('OK')),
+          AlertAction(
+            title: 'OK',
+            style: AlertActionStyle.primary,
+            onPressed: () {},
+          ),
         ],
-      ),
-    );
+      );
+    }
   }
 }

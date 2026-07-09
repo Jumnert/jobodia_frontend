@@ -1,10 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
-import 'package:jobodia_frontend/core/widgets/custom_button.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
 import 'package:jobodia_frontend/features/cv_builder/view/widgets/cv_builder_helpers.dart';
 
@@ -29,7 +25,7 @@ class TemplateStep extends StatelessWidget {
 
     return ListView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 112),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
       children: [
         Text(
           'Choose a template you like',
@@ -143,23 +139,10 @@ class TemplateStep extends StatelessWidget {
                   ),
                 ),
         ),
-        CustomButton(
-          label: 'Generate CV',
-          onPressed: () {
-            unawaited(HapticFeedback.mediumImpact());
-            controller.nextStep();
-          },
-        ),
-        const SizedBox(height: 10),
         Text(
           'AI will create your professional CV',
           textAlign: TextAlign.center,
           style: TextStyle(color: context.palette.textTertiary, fontSize: 14),
-        ),
-        const SizedBox(height: 8),
-        TextButton(
-          onPressed: controller.previousStep,
-          child: const Text('Back'),
         ),
       ],
     );

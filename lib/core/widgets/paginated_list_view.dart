@@ -94,7 +94,9 @@ class _PaginatedListViewState extends State<PaginatedListView> {
               )
             : const SizedBox.shrink();
       }
-      return widget.itemBuilder(context, index);
+      // Isolate each row's painting so scrolling/animating one item does not
+      // repaint its neighbours.
+      return RepaintBoundary(child: widget.itemBuilder(context, index));
     }
 
     if (widget.separatorBuilder != null) {

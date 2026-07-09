@@ -1,3 +1,6 @@
+// Hide the package's BlurStyle so it doesn't shadow Flutter's BlurStyle,
+// which the background painter uses for MaskFilter.blur.
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart' hide BlurStyle;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -36,17 +39,12 @@ class FeatureHeader extends StatelessWidget {
                   SizedBox(
                     width: 46,
                     height: 32,
-                    child: OutlinedButton(
+                    child: AdaptiveButton.icon(
                       onPressed: onBack ?? Get.back,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.zero,
-                        side: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.22),
-                        ),
-                        shape: const StadiumBorder(),
-                      ),
-                      child: const Icon(Icons.arrow_back_rounded, size: 18),
+                      icon: Icons.arrow_back_rounded,
+                      iconColor: Colors.white,
+                      style: AdaptiveButtonStyle.bordered,
+                      padding: EdgeInsets.zero,
                     ),
                   ),
                   const Spacer(),

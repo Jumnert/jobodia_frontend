@@ -10,9 +10,7 @@ import 'package:get/get.dart';
 class SecureStorageService extends GetxService {
   static SecureStorageService get to => Get.find();
 
-  static const _androidOptions = AndroidOptions(
-    encryptedSharedPreferences: true,
-  );
+  static const _androidOptions = AndroidOptions();
 
   static const _iosOptions = IOSOptions(
     accessibility: KeychainAccessibility.first_unlock_this_device,
@@ -27,9 +25,11 @@ class SecureStorageService extends GetxService {
   final Map<String, String?> _cache = {};
 
   Future<void> writeSecure(String key, String value) async {
+    // Write-through cache: update the cache first so a read issued right after
+    // a (not-yet-awaited) write returns the fresh value without a Keychain hit.
+    _cache[key] = value;
     try {
       await _storage.write(key: key, value: value);
-      _cache[key] = value;
     } on Exception catch (e) {
       debugPrint('SecureStorageService.writeSecure error: $e');
     }
@@ -48,18 +48,18 @@ class SecureStorageService extends GetxService {
   }
 
   Future<void> deleteSecure(String key) async {
+    _cache.remove(key);
     try {
       await _storage.delete(key: key);
-      _cache.remove(key);
     } on Exception catch (e) {
       debugPrint('SecureStorageService.deleteSecure error: $e');
     }
   }
 
   Future<void> deleteAllSecure() async {
+    _cache.clear();
     try {
       await _storage.deleteAll();
-      _cache.clear();
     } on Exception catch (e) {
       debugPrint('SecureStorageService.deleteAllSecure error: $e');
     }

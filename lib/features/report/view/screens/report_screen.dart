@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/auto_scroll_on_focus.dart';
+import 'package:jobodia_frontend/core/widgets/confirmation_dialog.dart';
 import 'package:jobodia_frontend/core/widgets/custom_button.dart';
 import 'package:jobodia_frontend/core/widgets/feature_card_container.dart';
 import 'package:jobodia_frontend/core/widgets/feature_header.dart';
@@ -102,22 +103,12 @@ class _ReportContentState extends State<_ReportContent> {
           Navigator.of(context).pop();
           return;
         }
-        final discard = await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Discard report?'),
-            content: const Text('You have unsaved text. Leave anyway?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text('Stay'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(ctx).pop(true),
-                child: const Text('Discard'),
-              ),
-            ],
-          ),
+        final discard = await showConfirmationDialog(
+          title: 'Discard report?',
+          message: 'You have unsaved text. Leave anyway?',
+          confirmLabel: 'Discard',
+          cancelLabel: 'Stay',
+          isDestructive: true,
         );
         if (discard == true && context.mounted) {
           Navigator.of(context).pop();

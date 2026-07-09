@@ -1,8 +1,13 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
-import 'package:jobodia_frontend/core/widgets/animated_scale_button.dart';
 
-/// Reusable dark rounded button with loading state.
+/// Reusable rounded brand button with loading state.
+///
+/// Uses [AdaptiveButton] so it renders with platform-native styling (and
+/// iOS 26 Liquid Glass where available) while keeping the Jobodia teal fill
+/// and pill shape. [AdaptiveButton] supplies its own press feedback, so no
+/// extra scale-animation wrapper is needed.
 class CustomButton extends StatelessWidget {
   const CustomButton({
     required this.label,
@@ -22,35 +27,32 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDisabled = isLoading || onPressed == null;
-    return AnimatedScaleButton(
-      onTap: () {
-        if (!isDisabled) onPressed!();
-      },
-      child: FilledButton(
-        onPressed: isLoading ? null : onPressed,
-        style: FilledButton.styleFrom(
-          backgroundColor: backgroundColor ?? AppColors.primary,
-          disabledBackgroundColor: backgroundColor ?? AppColors.primary,
-          foregroundColor: foregroundColor ?? Colors.white,
-          minimumSize: const Size.fromHeight(48),
-          shape: const StadiumBorder(),
-          textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
-        ),
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 250),
-          switchInCurve: Curves.easeInOutCubic,
-          switchOutCurve: Curves.easeInOutCubic,
-          child: isLoading
-              ? const SizedBox.square(
-                  key: ValueKey('button_loading'),
-                  dimension: 21,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2.2,
-                  ),
-                )
-              : Text(label, key: ValueKey(label)),
-        ),
+    final fg = foregroundColor ?? Colors.white;
+    return AdaptiveButton.child(
+      onPressed: isDisabled ? null : onPressed,
+      enabled: !isDisabled,
+      color: backgroundColor ?? AppColors.primary,
+      borderRadius: BorderRadius.circular(48),
+      minSize: const Size.fromHeight(48),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 250),
+        switchInCurve: Curves.easeInOutCubic,
+        switchOutCurve: Curves.easeInOutCubic,
+        child: isLoading
+            ? SizedBox.square(
+                key: const ValueKey('button_loading'),
+                dimension: 21,
+                child: CircularProgressIndicator(color: fg, strokeWidth: 2.2),
+              )
+            : Text(
+                label,
+                key: ValueKey(label),
+                style: TextStyle(
+                  color: fg,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
       ),
     );
   }

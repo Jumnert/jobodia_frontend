@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
-import 'package:jobodia_frontend/features/home/view/widgets/app_bottom_navigation_bar.dart';
-import 'package:jobodia_frontend/features/home/view/widgets/app_navigation.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/home_search_bar.dart';
 import 'package:jobodia_frontend/features/search/controller/search_controller.dart';
 import 'package:jobodia_frontend/features/search/view/widgets/filter_bottom_sheet.dart';
@@ -127,12 +125,6 @@ class SearchScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: AppBottomNavigationBar(
-        selectedIndex: 0,
-        onDestinationSelected: (index) =>
-            navigateMainDestination(context, index, currentIndex: -1),
-        onSearchPressed: () {},
       ),
     );
   }

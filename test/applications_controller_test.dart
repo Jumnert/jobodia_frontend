@@ -134,10 +134,14 @@ void main() {
       expect(c.applicationFor('nonexistent'), isNull);
     });
 
-    test('apply persists to storage', () {
+    test('apply persists to secure storage, not plaintext', () async {
       final c = makeController();
       c.apply(sampleJob);
-      verify(mockStorage.write('applications', any)).called(greaterThan(0));
+
+      // Applications are PII — persisted to secure storage only (the #3 fix).
+      final raw = await SecureStorageService.to.readSecure('applications');
+      expect(raw, isNotNull);
+      verifyNever(mockStorage.write('applications', any));
     });
 
     test('apply with cover letter stores it', () {

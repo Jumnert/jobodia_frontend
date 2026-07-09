@@ -23,10 +23,15 @@ class ApplicationsController extends GetxController {
   /// Reactive list of applications, most recent first.
   final RxList<JobApplication> applications = <JobApplication>[].obs;
 
+  Future<void>? _loadFuture;
+
+  /// Completes when the initial async load from secure storage finishes.
+  Future<void> get ready => _loadFuture ?? Future<void>.value();
+
   @override
   void onInit() {
     super.onInit();
-    applications.addAll(_readStored());
+    _loadFuture = _load();
   }
 
   bool hasApplied(String id) => applications.any((a) => a.jobId == id);
@@ -83,22 +88,43 @@ class ApplicationsController extends GetxController {
 
   void _persist() {
     final data = applications.map((a) => a.toJson()).toList();
-    _storage.write(applicationsKey, data);
     SecureStorageService.to.writeSecure(applicationsKey, jsonEncode(data));
   }
 
-  List<JobApplication> _readStored() {
+  /// Loads applications from secure storage, migrating any legacy plaintext
+  /// copy written by older builds and purging the plaintext afterwards.
+  Future<void> _load() async {
     try {
-      final raw = _storage.read<dynamic>(applicationsKey);
-      if (raw is List) {
-        return raw
-            .whereType<Map>()
-            .map((e) => JobApplication.fromJson(Map<String, dynamic>.from(e)))
-            .toList();
+      final raw = await SecureStorageService.to.readSecure(applicationsKey);
+      // If the user applied while this async read was in flight, don't clobber
+      // or duplicate the live in-memory state with the stored snapshot.
+      if (applications.isNotEmpty) return;
+      if (raw != null) {
+        final decoded = jsonDecode(raw);
+        if (decoded is List) {
+          applications.addAll(
+            decoded.whereType<Map>().map(
+              (e) => JobApplication.fromJson(Map<String, dynamic>.from(e)),
+            ),
+          );
+        }
+        return;
+      }
+      final legacy = _storage.read<dynamic>(applicationsKey);
+      if (legacy is List) {
+        applications.addAll(
+          legacy.whereType<Map>().map(
+            (e) => JobApplication.fromJson(Map<String, dynamic>.from(e)),
+          ),
+        );
+        await SecureStorageService.to.writeSecure(
+          applicationsKey,
+          jsonEncode(applications.map((a) => a.toJson()).toList()),
+        );
+        _storage.remove(applicationsKey);
       }
     } on Object catch (e, st) {
-      AppLogger.error('Failed to load applications from storage', e, st);
+      AppLogger.error('Failed to load applications from secure storage', e, st);
     }
-    return <JobApplication>[];
   }
 }

@@ -1,8 +1,12 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart' show PaletteX;
 
 /// Reusable rounded input field for auth forms.
+///
+/// Wraps [AdaptiveTextField] so the input renders with platform-native styling
+/// while keeping the Jobodia pill shape, soft shadow, and label layout.
 class CustomTextField extends StatelessWidget {
   const CustomTextField({
     required this.label,
@@ -36,6 +40,7 @@ class CustomTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final hasError = errorText != null && errorText!.isNotEmpty;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -59,7 +64,7 @@ class CustomTextField extends StatelessWidget {
               ),
             ],
           ),
-          child: TextField(
+          child: AdaptiveTextField(
             controller: controller,
             obscureText: obscureText,
             keyboardType: keyboardType,
@@ -67,12 +72,14 @@ class CustomTextField extends StatelessWidget {
             inputFormatters: inputFormatters,
             maxLength: maxLength,
             onSubmitted: onSubmitted,
+            placeholder: hintText,
+            prefixIcon: Icon(prefixIcon, color: palette.textPrimary),
+            suffixIcon: suffixIcon,
             decoration: InputDecoration(
               filled: true,
               fillColor: palette.surface,
               hintText: hintText,
               hintStyle: TextStyle(color: palette.textTertiary, fontSize: 14),
-              errorText: errorText,
               prefixIcon: Icon(prefixIcon, color: palette.textPrimary),
               suffixIcon: suffixIcon,
               contentPadding: const EdgeInsets.symmetric(vertical: 17),
@@ -89,8 +96,30 @@ class CustomTextField extends StatelessWidget {
                 borderSide: BorderSide(color: palette.textPrimary, width: 1.4),
               ),
             ),
+            // iOS renders a CupertinoTextField and ignores the Material
+            // `decoration` above, so style the native field here to keep the
+            // pill shape + surface fill instead of the default gray box.
+            cupertinoDecoration: BoxDecoration(
+              color: palette.surface,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: palette.border),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
         ),
+        if (hasError) ...[
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.only(left: 16),
+            child: Text(
+              errorText!,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

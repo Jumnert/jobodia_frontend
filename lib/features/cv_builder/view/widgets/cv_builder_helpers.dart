@@ -1,4 +1,5 @@
 import 'package:jobodia_frontend/features/cv_builder/model/cv_form_classes.dart';
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -555,10 +556,16 @@ class CompactInput extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        TextField(
+        AdaptiveTextField(
           controller: controller,
           onSubmitted: onSubmitted,
+          placeholder: hintText,
           style: TextStyle(color: palette.textPrimary),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+          cupertinoDecoration: BoxDecoration(
+            color: palette.surfaceMuted,
+            borderRadius: BorderRadius.circular(14),
+          ),
           decoration: InputDecoration(
             hintText: hintText,
             filled: true,
@@ -585,19 +592,28 @@ class MultiLineField extends StatelessWidget {
     super.key,
     required this.controller,
     required this.hintText,
+    this.maxLength,
   });
 
   final TextEditingController controller;
   final String hintText;
+  final int? maxLength;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return TextField(
+    return AdaptiveTextField(
       controller: controller,
       minLines: 3,
       maxLines: 5,
+      maxLength: maxLength,
+      placeholder: hintText,
       style: TextStyle(color: palette.textPrimary),
+      padding: const EdgeInsets.all(14),
+      cupertinoDecoration: BoxDecoration(
+        color: palette.surfaceMuted,
+        borderRadius: BorderRadius.circular(18),
+      ),
       decoration: InputDecoration(
         hintText: hintText,
         filled: true,

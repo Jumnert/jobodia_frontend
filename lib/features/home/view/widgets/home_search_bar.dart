@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/debouncer.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 class HomeSearchBar extends StatefulWidget {
   const HomeSearchBar({
@@ -67,10 +66,14 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
     return Row(
       children: [
         Expanded(
-          child: GlassContainer(
+          child: Container(
             height: 46,
             padding: const EdgeInsets.symmetric(horizontal: 14),
-            shape: const LiquidRoundedSuperellipse(borderRadius: 12),
+            decoration: BoxDecoration(
+              color: palette.surfaceMuted,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: palette.border),
+            ),
             child: Row(
               children: [
                 Icon(Icons.search_rounded, color: palette.iconMuted),

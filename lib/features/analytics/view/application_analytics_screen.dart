@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -12,29 +13,10 @@ class ApplicationAnalyticsScreen extends StatelessWidget {
     final palette = context.palette;
     final apps = Get.find<ApplicationsController>();
 
-    return Scaffold(
-      backgroundColor: palette.scaffold,
-      appBar: AppBar(
-        backgroundColor: palette.scaffold,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: Get.back,
-          tooltip: 'Back',
-          icon: Icon(
-            Icons.chevron_left_rounded,
-            size: 30,
-            color: palette.textPrimary,
-          ),
-        ),
-        title: Text(
-          'Application Analytics',
-          style: TextStyle(
-            color: palette.textPrimary,
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        centerTitle: true,
+    return AdaptiveScaffold(
+      appBar: const AdaptiveAppBar(
+        title: 'Application Analytics',
+        useNativeToolbar: false,
       ),
       body: Obx(() {
         final applications = apps.applications;

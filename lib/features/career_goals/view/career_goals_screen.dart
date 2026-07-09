@@ -1,11 +1,10 @@
-// ignore_for_file: deprecated_member_use, avoid_print, curly_braces_in_flow_control_structures, unused_import, unnecessary_underscores, unused_field, unused_local_variable, use_build_context_synchronously, duplicate_ignore
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/custom_button.dart';
 import 'package:jobodia_frontend/core/widgets/custom_text_field.dart';
 import 'package:jobodia_frontend/features/career_goals/controller/career_goals_controller.dart';
-import 'package:jobodia_frontend/features/career_goals/model/career_models.dart';
 import 'package:intl/intl.dart';
 
 class CareerGoalsScreen extends StatefulWidget {
@@ -36,41 +35,41 @@ class _CareerGoalsScreenState extends State<CareerGoalsScreen>
     final palette = context.palette;
     final ctrl = Get.put(CareerGoalsController());
 
-    return Scaffold(
-      backgroundColor: palette.scaffold,
-      appBar: AppBar(
-        backgroundColor: palette.surface,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(
-            Icons.chevron_left_rounded,
-            color: palette.iconPrimary,
-            size: 30,
+    return AdaptiveScaffold(
+      appBar: AdaptiveAppBar(
+        useNativeToolbar: false,
+        appBar: AppBar(
+          backgroundColor: palette.surface,
+          elevation: 0,
+          centerTitle: true,
+          leading: AdaptiveButton.icon(
+            onPressed: Get.back,
+            icon: Icons.chevron_left_rounded,
+            iconColor: palette.iconPrimary,
+            style: AdaptiveButtonStyle.plain,
           ),
-          onPressed: Get.back,
-        ),
-        title: Text(
-          'Career Journey',
-          style: TextStyle(
-            color: palette.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
+          title: Text(
+            'Career Journey',
+            style: TextStyle(
+              color: palette.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-        ),
-        bottom: TabBar(
-          controller: _tabCtrl,
-          indicatorColor: AppColors.brandTeal,
-          labelColor: AppColors.brandTeal,
-          unselectedLabelColor: palette.textSecondary,
-          labelStyle: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 15,
+          bottom: TabBar(
+            controller: _tabCtrl,
+            indicatorColor: AppColors.brandTeal,
+            labelColor: AppColors.brandTeal,
+            unselectedLabelColor: palette.textSecondary,
+            labelStyle: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
+            tabs: const [
+              Tab(text: 'Goals'),
+              Tab(text: 'Timeline'),
+            ],
           ),
-          tabs: const [
-            Tab(text: 'Goals'),
-            Tab(text: 'Timeline'),
-          ],
         ),
       ),
       body: TabBarView(
@@ -81,8 +80,9 @@ class _CareerGoalsScreenState extends State<CareerGoalsScreen>
         ],
       ),
       floatingActionButton: Obx(() {
-        if (ctrl.goals.isEmpty)
+        if (ctrl.goals.isEmpty) {
           return const SizedBox.shrink(); // to avoid flutter issue with obs
+        }
         return FloatingActionButton.extended(
           onPressed: () => _showAddGoalSheet(context, ctrl),
           backgroundColor: AppColors.brandTeal,
@@ -270,7 +270,7 @@ class _GoalsTab extends StatelessWidget {
       return ListView.separated(
         padding: const EdgeInsets.all(20).copyWith(bottom: 100),
         itemCount: ctrl.goals.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 16),
+        separatorBuilder: (_, _) => const SizedBox(height: 16),
         itemBuilder: (context, index) {
           final g = ctrl.goals[index];
           return Container(
@@ -538,10 +538,6 @@ class _TimelinePainter extends CustomPainter {
       ..color = lineColor
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
-
-    final dotPaint = Paint()
-      ..color = dotColor
-      ..style = PaintingStyle.fill;
 
     const startX = 24.0;
 

@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:jobodia_frontend/features/interview/data/flashcard_data.dart';
 
+import 'package:flutter/foundation.dart';
+
 void main() {
   final Map<String, List<Map<String, dynamic>>> data = {
     'HTML': flashcardCategories
@@ -29,5 +31,5 @@ void main() {
 
   final file = File('assets/data/flashcards.json');
   file.writeAsStringSync(jsonEncode(data));
-  print('Done!');
+  debugPrint('Done!');
 }

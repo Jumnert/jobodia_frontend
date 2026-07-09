@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
@@ -22,18 +23,53 @@ class JobDetailScreen extends GetView<JobDetailController> {
   Widget build(BuildContext context) {
     final palette = context.palette;
 
-    return Scaffold(
-      backgroundColor: palette.scaffold,
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: Container(
-            color: palette.surface,
-            child: CustomScrollView(
-              slivers: [
-                _JobHeaderSliver(controller: controller),
-                _JobDetailsSliver(controller: controller),
-              ],
+    return Obx(
+      () => AdaptiveScaffold(
+        extendBodyBehindAppBar: true,
+        enableToolbarGradient: false,
+        appBar: AdaptiveAppBar(
+          useNativeToolbar: true,
+          leading: AdaptiveButton.child(
+            onPressed: Get.back,
+            style: AdaptiveButtonStyle.glass,
+            size: AdaptiveButtonSize.large,
+            minSize: const Size(44, 44),
+            useSmoothRectangleBorder: false,
+            child: const Icon(
+              Icons.chevron_left_rounded,
+              color: Colors.white,
+              size: 35,
+            ),
+          ),
+          actions: [
+            AdaptiveAppBarAction(
+              onPressed: controller.shareJob,
+              iosSymbol: 'square.and.arrow.up',
+              icon: Icons.ios_share_rounded,
+            ),
+            AdaptiveAppBarAction(
+              onPressed: controller.toggleSaved,
+              iosSymbol: controller.isSaved ? 'bookmark.fill' : 'bookmark',
+              icon: controller.isSaved
+                  ? Icons.bookmark_rounded
+                  : Icons.bookmark_border_rounded,
+            ),
+          ],
+        ),
+        body: Container(
+          color: palette.scaffold,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Container(
+                color: palette.surface,
+                child: CustomScrollView(
+                  slivers: [
+                    _JobHeaderSliver(controller: controller),
+                    _JobDetailsSliver(controller: controller),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -267,6 +303,7 @@ class _NotesCardState extends State<_NotesCard> {
             controller: textCtrl,
             maxLines: 5,
             minLines: 3,
+            maxLength: 5000,
             style: TextStyle(
               fontSize: 14,
               height: 1.45,

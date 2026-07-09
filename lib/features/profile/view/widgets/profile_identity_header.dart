@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
+import 'package:jobodia_frontend/core/utils/safe_image_loader.dart';
 
 class ProfileIdentityHeader extends StatelessWidget {
   const ProfileIdentityHeader({
@@ -29,17 +30,9 @@ class ProfileIdentityHeader extends StatelessWidget {
               border: Border.all(color: palette.surface, width: 4),
             ),
             child: ClipOval(
-              child: Image.network(
-                avatarUrl,
+              child: SafeImageLoader(
+                url: avatarUrl,
                 fit: BoxFit.cover,
-                loadingBuilder: (context, child, progress) => progress == null
-                    ? child
-                    : Center(
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: palette.textSecondary,
-                        ),
-                      ),
                 errorBuilder: (context, error, stackTrace) => Container(
                   color: palette.surfaceMuted,
                   child: const Icon(Icons.person_rounded, size: 50),

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:jobodia_frontend/core/utils/app_logger.dart';
 import 'package:jobodia_frontend/features/ai_chat/model/chat_message_model.dart';
 import 'package:jobodia_frontend/features/ai_chat/model/chat_session.dart';
 import 'package:jobodia_frontend/services/secure_storage_service.dart';
@@ -11,6 +12,8 @@ class AiChatController extends GetxController {
   static const _activeKey = 'activeChatMessages';
   static const _sessionsKey = 'chatSessions';
 
+  /// Retained only to migrate and purge any legacy plaintext chat data written
+  /// by older builds. New writes go to secure storage exclusively.
   final _storage = GetStorage();
 
   final messageController = TextEditingController();
@@ -45,43 +48,59 @@ class AiChatController extends GetxController {
     _loadSessions();
   }
 
-  void _loadActiveMessages() {
-    final stored = _storage.read<List>(_activeKey);
+  Future<void> _loadActiveMessages() async {
+    final stored = await _readSecureList(_activeKey);
     if (stored != null) {
       messages.assignAll(
         stored
-            .map(
-              (m) => ChatMessageModel.fromJson(
-                Map<String, dynamic>.from(m as Map),
-              ),
-            )
+            .whereType<Map>()
+            .map((m) => ChatMessageModel.fromJson(Map<String, dynamic>.from(m)))
             .toList(),
       );
     }
   }
 
-  void _loadSessions() {
-    final stored = _storage.read<List>(_sessionsKey);
+  Future<void> _loadSessions() async {
+    final stored = await _readSecureList(_sessionsKey);
     if (stored != null) {
       sessions.assignAll(
         stored
-            .map(
-              (s) => ChatSession.fromJson(Map<String, dynamic>.from(s as Map)),
-            )
+            .whereType<Map>()
+            .map((s) => ChatSession.fromJson(Map<String, dynamic>.from(s)))
             .toList(),
       );
     }
+  }
+
+  /// Reads a JSON list from secure storage, migrating any legacy plaintext copy
+  /// written by older builds (then purging it). Chat history is PII, so it
+  /// lives in secure storage only.
+  Future<List<dynamic>?> _readSecureList(String key) async {
+    try {
+      final raw = await SecureStorageService.to.readSecure(key);
+      if (raw != null) {
+        final decoded = jsonDecode(raw);
+        return decoded is List ? decoded : null;
+      }
+      final legacy = _storage.read<List>(key);
+      if (legacy != null) {
+        await SecureStorageService.to.writeSecure(key, jsonEncode(legacy));
+        _storage.remove(key);
+        return legacy;
+      }
+    } on Object catch (e, st) {
+      AppLogger.error('Failed to load "$key" from secure storage', e, st);
+    }
+    return null;
   }
 
   void _persistActiveMessages() {
     final data = messages.map((m) => m.toJson()).toList();
-    _storage.write(_activeKey, data);
     SecureStorageService.to.writeSecure(_activeKey, jsonEncode(data));
   }
 
   void _persistSessions() {
     final data = sessions.map((s) => s.toJson()).toList();
-    _storage.write(_sessionsKey, data);
     SecureStorageService.to.writeSecure(_sessionsKey, jsonEncode(data));
   }
 

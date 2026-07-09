@@ -59,6 +59,7 @@ class SettingsTile extends StatelessWidget {
     this.subtitle,
     this.trailing,
     this.showChevron = false,
+    this.isDestructive = false,
     this.onTap,
     this.foregroundColor = Colors.black,
     this.mutedColor = const Color(0xFF84888D),
@@ -70,6 +71,7 @@ class SettingsTile extends StatelessWidget {
   final String? subtitle;
   final Widget? trailing;
   final bool showChevron;
+  final bool isDestructive;
   final VoidCallback? onTap;
   final Color foregroundColor;
   final Color mutedColor;
@@ -77,20 +79,26 @@ class SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveColor = isDestructive
+        ? const Color(0xFFE53935)
+        : foregroundColor;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
             leading ??
                 Icon(
                   icon,
-                  color: foregroundColor.withValues(alpha: 0.76),
-                  size: 20,
+                  color: isDestructive
+                      ? effectiveColor
+                      : effectiveColor.withValues(alpha: 0.8),
+                  size: 22,
                 ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,9 +106,9 @@ class SettingsTile extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      color: foregroundColor,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
+                      color: effectiveColor,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   if (subtitle != null) ...[
@@ -119,10 +127,10 @@ class SettingsTile extends StatelessWidget {
             ),
             ?trailing,
             if (showChevron)
-              const Icon(
+              Icon(
                 Icons.chevron_right_rounded,
-                color: Color(0xFF00856F),
-                size: 22,
+                color: mutedColor.withValues(alpha: 0.6),
+                size: 20,
               ),
           ],
         ),

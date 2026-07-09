@@ -3,8 +3,6 @@ import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
-import 'package:jobodia_frontend/features/home/view/widgets/app_bottom_navigation_bar.dart';
-import 'package:jobodia_frontend/features/home/view/widgets/app_navigation.dart';
 import 'package:jobodia_frontend/features/interview/controller/interview_schedule_controller.dart';
 import 'package:jobodia_frontend/features/interview/controller/mock_interview_controller.dart';
 import 'package:jobodia_frontend/features/interview/view/flashcards_screen.dart';
@@ -334,14 +332,6 @@ class InterviewScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: (showBottomNav ?? true)
-          ? AppBottomNavigationBar(
-              selectedIndex: 3,
-              onDestinationSelected: (index) =>
-                  navigateMainDestination(context, index, currentIndex: 3),
-              onSearchPressed: () => Get.toNamed<void>(AppRoutes.search),
-            )
-          : null,
     );
   }
 }

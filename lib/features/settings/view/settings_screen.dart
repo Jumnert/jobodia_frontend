@@ -1,18 +1,13 @@
-// ignore_for_file: deprecated_member_use, avoid_print, curly_braces_in_flow_control_structures, unused_import, unnecessary_underscores, unused_field, unused_local_variable, use_build_context_synchronously, duplicate_ignore
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 import 'package:jobodia_frontend/features/settings/controller/feedback_controller.dart';
 import 'package:jobodia_frontend/features/settings/controller/theme_controller.dart';
-import 'package:jobodia_frontend/features/settings/view/widgets/about_section.dart';
-import 'package:jobodia_frontend/features/settings/view/widgets/account_section.dart';
-import 'package:jobodia_frontend/features/settings/view/widgets/appearance_section.dart';
 import 'package:jobodia_frontend/features/settings/view/widgets/settings_helpers.dart';
-import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/feature_discovery/controller/feature_discovery_controller.dart';
-import 'package:jobodia_frontend/services/secure_storage_service.dart';
-import 'package:jobodia_frontend/features/settings/view/widgets/support_section.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key, this.showBottomNav = true});
@@ -24,32 +19,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final ThemeController _themeController = Get.find<ThemeController>();
-  final GetStorage _storage = GetStorage();
-
-  static const _biometricKey = 'biometricEnabled';
-  static const _passcodeKey = 'passcodeEnabled';
-
-  bool _biometricEnabled = false;
-  bool _passcodeEnabled = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _biometricEnabled = _storage.read<bool>(_biometricKey) ?? false;
-    _passcodeEnabled = _storage.read<bool>(_passcodeKey) ?? false;
-  }
-
-  void _toggleBiometric(bool value) {
-    setState(() => _biometricEnabled = value);
-    _storage.write(_biometricKey, value);
-  }
-
-  void _togglePasscode(bool value) {
-    setState(() => _passcodeEnabled = value);
-    _storage.write(_passcodeKey, value);
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -65,97 +34,164 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ? const Color(0xFF2A2E33)
         : const Color(0xFFE9E9E9);
 
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      extendBody: true,
-      body: Padding(
-        padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 112),
+    return AdaptiveScaffold(
+      body: Material(
+        color: backgroundColor,
+        child: Stack(
           children: [
-            Row(
-              children: [
-                IconButton(
-                  onPressed: Get.back,
-                  tooltip: 'Back',
-                  icon: const Icon(Icons.chevron_left_rounded, size: 30),
+            Positioned.fill(
+              child: ListView(
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  MediaQuery.paddingOf(context).top + 80,
+                  20,
+                  112,
                 ),
-                Expanded(
-                  child: Text(
-                    'Settings',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: foregroundColor,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                    ),
+                children: [
+                  SectionTitle('Other settings', color: sectionColor),
+                  const SizedBox(height: 8),
+                  SettingsGroup(
+                    color: groupColor,
+                    borderColor: borderColor,
+                    children: [
+                      SettingsTile(
+                        icon: Icons.person_rounded,
+                        title: 'Profile details',
+                        showChevron: true,
+                        foregroundColor: foregroundColor,
+                        mutedColor: sectionColor,
+                        onTap: () => Get.toNamed<void>(AppRoutes.profile),
+                      ),
+                      SettingsTile(
+                        icon: Icons.lock_rounded,
+                        title: 'App PIN',
+                        showChevron: true,
+                        foregroundColor: foregroundColor,
+                        mutedColor: sectionColor,
+                        onTap: () => _showPinDialog(context),
+                      ),
+                      SettingsTile(
+                        icon: Icons.explore_rounded,
+                        title: 'Discover Features',
+                        showChevron: true,
+                        foregroundColor: foregroundColor,
+                        mutedColor: sectionColor,
+                        onTap: () {
+                          if (Get.isRegistered<FeatureDiscoveryController>()) {
+                            Get.find<FeatureDiscoveryController>()
+                                .resetDiscovery();
+                            Get.snackbar(
+                              'Discovery Reset',
+                              'You will see feature tooltips again.',
+                            );
+                          }
+                        },
+                      ),
+                      SettingsTile(
+                        icon: Icons.dark_mode_rounded,
+                        title: 'Dark mode',
+                        foregroundColor: foregroundColor,
+                        mutedColor: sectionColor,
+                        trailing: AdaptiveSwitch(
+                          value: isDark,
+                          onChanged: (val) {
+                            if (!Get.isRegistered<ThemeController>()) return;
+                            Get.find<ThemeController>().toggleTheme(val);
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 48),
-              ],
-            ),
-            const SizedBox(height: 18),
-            AccountSection(
-              foregroundColor: foregroundColor,
-              groupColor: groupColor,
-              borderColor: borderColor,
-              isDark: isDark,
-            ),
-            const SizedBox(height: 20),
-            SectionTitle('Your Activity', color: sectionColor),
-            const SizedBox(height: 8),
-            SupportSection(
-              foregroundColor: foregroundColor,
-              groupColor: groupColor,
-              borderColor: borderColor,
-              isDark: isDark,
-              onFeedbackTap: () => _showFeedbackSheet(context),
-              onClearCacheTap: () => _clearCache(context),
-              onFaqTap: () => _showFaqSheet(context),
-            ),
-            const SizedBox(height: 20),
-            SectionTitle('Discover Features', color: sectionColor),
-            const SizedBox(height: 8),
-            _FeatureDiscoverySection(
-              foregroundColor: foregroundColor,
-              groupColor: groupColor,
-              borderColor: borderColor,
-            ),
-            const SizedBox(height: 20),
-            AppearanceSection(
-              foregroundColor: foregroundColor,
-              groupColor: groupColor,
-              borderColor: borderColor,
-              biometricEnabled: _biometricEnabled,
-              passcodeEnabled: _passcodeEnabled,
-              onBiometricChanged: _toggleBiometric,
-              onPasscodeChanged: _togglePasscode,
-              onPinTap: () => _showPinDialog(context),
-            ),
-            AboutSection(
-              foregroundColor: foregroundColor,
-              groupColor: groupColor,
-              borderColor: borderColor,
-              isDark: isDark,
-            ),
-            const SizedBox(height: 26),
-            TextButton.icon(
-              onPressed: () => _showLogoutDialog(context),
-              style: TextButton.styleFrom(
-                foregroundColor: foregroundColor,
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 14,
-                ),
-              ),
-              icon: const Icon(Icons.logout_rounded, size: 20),
-              label: const Text(
-                'Sign out',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                  const SizedBox(height: 24),
+                  SettingsGroup(
+                    color: groupColor,
+                    borderColor: borderColor,
+                    children: [
+                      SettingsTile(
+                        icon: Icons.info_rounded,
+                        title: 'About application',
+                        showChevron: true,
+                        foregroundColor: foregroundColor,
+                        mutedColor: sectionColor,
+                        onTap: () => Get.toNamed<void>(AppRoutes.aboutUs),
+                      ),
+                      SettingsTile(
+                        icon: Icons.help_rounded,
+                        title: 'Help/FAQ',
+                        showChevron: true,
+                        foregroundColor: foregroundColor,
+                        mutedColor: sectionColor,
+                        onTap: () => _showFaqSheet(context),
+                      ),
+                      SettingsTile(
+                        icon: Icons.feedback_rounded,
+                        title: 'Leave Feedback',
+                        showChevron: true,
+                        foregroundColor: foregroundColor,
+                        mutedColor: sectionColor,
+                        onTap: () => _showFeedbackSheet(context),
+                      ),
+                      SettingsTile(
+                        icon: Icons.cleaning_services_rounded,
+                        title: 'Clear Cache',
+                        showChevron: true,
+                        foregroundColor: foregroundColor,
+                        mutedColor: sectionColor,
+                        onTap: () => _clearCache(context),
+                      ),
+                      SettingsTile(
+                        icon: Icons
+                            .delete_rounded, // Wait, Deactivate account icon in screenshot looks like a trash bin. delete_rounded is perfect.
+                        title: 'Sign out',
+                        showChevron: true,
+                        isDestructive: true,
+                        foregroundColor: foregroundColor,
+                        mutedColor: sectionColor,
+                        onTap: () => _showLogoutDialog(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
+            Positioned(
+              top: MediaQuery.paddingOf(context).top + 14,
+              left: 20,
+              right: 20,
+              child: Row(
+                children: [
+                  AdaptiveButton.icon(
+                    onPressed: () => Get.back<void>(),
+                    icon: PlatformInfo.isIOS
+                        ? Icons.arrow_back_ios_new_rounded
+                        : Icons.arrow_back_rounded,
+                    iconColor: foregroundColor,
+                    style: AdaptiveButtonStyle.glass,
+                    minSize: const Size(44, 44),
+                    useSmoothRectangleBorder: false,
+                  ),
+                  const Spacer(),
+                  AdaptiveButton(
+                    onPressed: () {},
+                    label: 'Settings',
+                    textColor: foregroundColor,
+                    style: AdaptiveButtonStyle.glass,
+                    minSize: const Size(150, 44),
+                    useSmoothRectangleBorder: false,
+                  ),
+                  const Spacer(),
+                  AdaptiveButton.icon(
+                    onPressed: () => Get.toNamed<void>(AppRoutes.report),
+                    icon: Icons.report_problem_rounded,
+                    iconColor: foregroundColor,
+                    style: AdaptiveButtonStyle.glass,
+                    minSize: const Size(44, 44),
+                    useSmoothRectangleBorder: false,
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -172,45 +208,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showLogoutDialog(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final foregroundColor = isDark ? Colors.white : Colors.black;
-
-    showDialog(
+    AdaptiveAlertDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? const Color(0xFF1A1D20) : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          'Log out',
-          style: TextStyle(color: foregroundColor, fontWeight: FontWeight.w800),
+      title: 'Log out',
+      message: 'Are you sure you want to log out?',
+      icon: 'rectangle.portrait.and.arrow.right',
+      actions: [
+        AlertAction(
+          title: 'Cancel',
+          style: AlertActionStyle.cancel,
+          onPressed: () {},
         ),
-        content: Text(
-          'Are you sure you want to log out?',
-          style: TextStyle(color: foregroundColor.withValues(alpha: 0.7)),
+        AlertAction(
+          title: 'Log out',
+          style: AlertActionStyle.destructive,
+          // The dialog pops itself before invoking this callback.
+          onPressed: () => Get.find<AuthController>().logout(),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: foregroundColor.withValues(alpha: 0.6)),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              Get.find<AuthController>().logout();
-            },
-            child: const Text(
-              'Log out',
-              style: TextStyle(
-                color: Color(0xFFD93B3B),
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
+      ],
     );
   }
 
@@ -231,73 +246,73 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showPinDialog(BuildContext context) {
+  Future<void> _showPinDialog(BuildContext context) async {
     final storage = GetStorage();
     const pinKey = 'appPin';
     final existingPin = storage.read<String>(pinKey);
-    final pinController = TextEditingController();
 
-    showDialog<void>(
+    // inputShow auto-pops and resolves to the entered text; we track which
+    // button was tapped via this flag because there can be three actions.
+    var tapped = 'cancel';
+
+    final result = await AdaptiveAlertDialog.inputShow(
       context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: Text(existingPin != null ? 'Change PIN' : 'Set PIN'),
-          content: TextField(
-            controller: pinController,
-            keyboardType: TextInputType.number,
-            maxLength: 4,
-            obscureText: true,
-            decoration: const InputDecoration(
-              hintText: 'Enter 4-digit PIN',
-              counterText: '',
-            ),
+      title: existingPin != null ? 'Change PIN' : 'Set PIN',
+      icon: 'lock.fill',
+      input: const AdaptiveAlertDialogInput(
+        placeholder: 'Enter 4-digit PIN',
+        keyboardType: TextInputType.number,
+        obscureText: true,
+        maxLength: 4,
+      ),
+      actions: [
+        if (existingPin != null)
+          AlertAction(
+            title: 'Remove PIN',
+            style: AlertActionStyle.destructive,
+            onPressed: () => tapped = 'remove',
           ),
-          actions: [
-            if (existingPin != null)
-              TextButton(
-                onPressed: () {
-                  storage.remove(pinKey);
-                  Navigator.of(ctx).pop();
-                  Get.snackbar(
-                    'PIN Removed',
-                    'App PIN has been cleared.',
-                    snackPosition: SnackPosition.BOTTOM,
-                    margin: const EdgeInsets.all(16),
-                  );
-                },
-                child: const Text('Remove PIN'),
-              ),
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final pin = pinController.text.trim();
-                if (pin.length == 4 && RegExp(r'^\d{4}$').hasMatch(pin)) {
-                  storage.write(pinKey, pin);
-                  Navigator.of(ctx).pop();
-                  Get.snackbar(
-                    'PIN Set',
-                    'Your 4-digit PIN has been saved.',
-                    snackPosition: SnackPosition.BOTTOM,
-                    margin: const EdgeInsets.all(16),
-                  );
-                } else {
-                  Get.snackbar(
-                    'Invalid',
-                    'Please enter exactly 4 digits.',
-                    snackPosition: SnackPosition.BOTTOM,
-                    margin: const EdgeInsets.all(16),
-                  );
-                }
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
+        AlertAction(
+          title: 'Cancel',
+          style: AlertActionStyle.cancel,
+          onPressed: () => tapped = 'cancel',
+        ),
+        AlertAction(
+          title: 'Save',
+          style: AlertActionStyle.primary,
+          onPressed: () => tapped = 'save',
+        ),
+      ],
     );
+
+    switch (tapped) {
+      case 'remove':
+        storage.remove(pinKey);
+        Get.snackbar(
+          'PIN Removed',
+          'App PIN has been cleared.',
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+        );
+      case 'save':
+        final pin = result?.trim() ?? '';
+        if (pin.length == 4 && RegExp(r'^\d{4}$').hasMatch(pin)) {
+          storage.write(pinKey, pin);
+          Get.snackbar(
+            'PIN Set',
+            'Your 4-digit PIN has been saved.',
+            snackPosition: SnackPosition.BOTTOM,
+            margin: const EdgeInsets.all(16),
+          );
+        } else {
+          Get.snackbar(
+            'Invalid',
+            'Please enter exactly 4 digits.',
+            snackPosition: SnackPosition.BOTTOM,
+            margin: const EdgeInsets.all(16),
+          );
+        }
+    }
   }
 
   void _showFaqSheet(BuildContext context) {
@@ -510,110 +525,6 @@ class _FeedbackSheetState extends State<_FeedbackSheet> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _FeatureDiscoverySection extends StatelessWidget {
-  const _FeatureDiscoverySection({
-    required this.foregroundColor,
-    required this.groupColor,
-    required this.borderColor,
-  });
-
-  final Color foregroundColor;
-  final Color groupColor;
-  final Color borderColor;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!Get.isRegistered<FeatureDiscoveryController>()) {
-      return const SizedBox.shrink();
-    }
-
-    final ctrl = Get.find<FeatureDiscoveryController>();
-
-    return Container(
-      decoration: BoxDecoration(
-        color: groupColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor),
-      ),
-      child: Obx(() {
-        final undiscovered = ctrl.undiscoveredCount();
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ...FeatureDiscoveryController.features.map((f) {
-              final isDisc = ctrl.isDiscovered(f.id);
-              return ListTile(
-                leading: Icon(
-                  f.icon,
-                  color: isDisc
-                      ? foregroundColor.withAlpha(150)
-                      : AppColors.brandTeal,
-                ),
-                title: Text(
-                  f.title,
-                  style: TextStyle(
-                    color: foregroundColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                subtitle: Text(
-                  f.description,
-                  style: TextStyle(
-                    color: foregroundColor.withAlpha(150),
-                    fontSize: 12,
-                  ),
-                ),
-                trailing: isDisc
-                    ? const Icon(
-                        Icons.check_circle_rounded,
-                        color: AppColors.success,
-                        size: 20,
-                      )
-                    : Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.brandTeal,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Text(
-                          'NEW',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                onTap: () {
-                  ctrl.markDiscovered(f.id);
-                  Get.toNamed<void>(f.route);
-                },
-              );
-            }),
-            const Divider(height: 1),
-            TextButton(
-              onPressed: () {
-                ctrl.resetDiscovery();
-                Get.snackbar(
-                  'Discovery Reset',
-                  'You will see feature tooltips again.',
-                );
-              },
-              child: const Text(
-                'Reset Discovery',
-                style: TextStyle(color: AppColors.error),
-              ),
-            ),
-          ],
-        );
-      }),
     );
   }
 }

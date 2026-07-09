@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use, avoid_print, curly_braces_in_flow_control_structures, unused_import, unnecessary_underscores, unused_field, unused_local_variable, use_build_context_synchronously, duplicate_ignore
 import 'dart:async';
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -25,14 +26,11 @@ class FlashcardsScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                IconButton(
+                AdaptiveButton.icon(
                   onPressed: Get.back,
-                  tooltip: 'Back',
-                  icon: Icon(
-                    Icons.chevron_left_rounded,
-                    size: 30,
-                    color: palette.iconPrimary,
-                  ),
+                  icon: Icons.chevron_left_rounded,
+                  iconColor: palette.iconPrimary,
+                  style: AdaptiveButtonStyle.plain,
                 ),
                 Expanded(
                   child: Text(
@@ -280,14 +278,11 @@ class _FlashcardDeckScreenState extends State<FlashcardDeckScreen> {
           children: [
             Row(
               children: [
-                IconButton(
+                AdaptiveButton.icon(
                   onPressed: Get.back,
-                  tooltip: 'Back',
-                  icon: Icon(
-                    Icons.chevron_left_rounded,
-                    size: 30,
-                    color: palette.iconPrimary,
-                  ),
+                  icon: Icons.chevron_left_rounded,
+                  iconColor: palette.iconPrimary,
+                  style: AdaptiveButtonStyle.plain,
                 ),
                 Expanded(
                   child: Text(
@@ -373,7 +368,6 @@ class _DeckStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
     final hasNext = index + 1 < cards.length;
     return Stack(
       alignment: Alignment.center,

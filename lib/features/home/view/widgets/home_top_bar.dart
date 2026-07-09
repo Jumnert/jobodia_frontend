@@ -1,58 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
+import 'package:jobodia_frontend/core/utils/safe_image_loader.dart';
 import 'package:jobodia_frontend/features/notifications/controller/notifications_controller.dart';
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:jobodia_frontend/features/profile/controller/profile_controller.dart';
 import 'package:jobodia_frontend/features/profile/view/profile_screen.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 class HomeTopBar extends StatelessWidget {
   const HomeTopBar({
     required this.name,
     required this.avatarUrl,
     required this.onNotifications,
-    required this.onSettings,
     super.key,
   });
 
   final String name;
   final String? avatarUrl;
   final VoidCallback onNotifications;
-  final VoidCallback onSettings;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final isDark = context.isDark;
+    final fg = isDark ? Colors.white : palette.iconPrimary;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Expanded(
-          child: RichText(
-            text: TextSpan(
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: palette.textPrimary,
-                fontWeight: FontWeight.w800,
-                height: 1.1,
-              ),
-              children: [
-                const TextSpan(text: 'Hi, '),
-                TextSpan(text: '$name 👋'),
-              ],
-            ),
-          ),
+        AdaptiveButton(
+          onPressed: () {},
+          label: 'Hi, Jumnert',
+          textColor: isDark ? Colors.white : palette.textPrimary,
+          style: AdaptiveButtonStyle.glass,
+          minSize: const Size(150, 44),
+          useSmoothRectangleBorder: false,
         ),
+        const Spacer(),
         Stack(
           clipBehavior: Clip.none,
           children: [
             Semantics(
               label: 'Notifications',
               button: true,
-              child: GlassIconButton(
+              child: AdaptiveButton.icon(
                 onPressed: onNotifications,
-                icon: Icon(
-                  Icons.notifications_none_rounded,
-                  color: palette.iconPrimary,
-                ),
+                icon: Icons.notifications_none_rounded,
+                iconColor: fg,
+                style: AdaptiveButtonStyle.glass,
+                size: AdaptiveButtonSize.large,
+                minSize: const Size(44, 44),
+                useSmoothRectangleBorder: false,
               ),
             ),
             Obx(() {
@@ -87,54 +84,32 @@ class HomeTopBar extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Semantics(
-          label: 'Settings',
+          label: 'Profile',
           button: true,
-          child: GlassIconButton(
-            onPressed: onSettings,
-            icon: Icon(Icons.settings_outlined, color: palette.iconPrimary),
-          ),
-        ),
-        const SizedBox(width: 8),
-        GestureDetector(
-          onTap: () => Get.to(
-            () => const ProfileScreen(),
-            binding: BindingsBuilder(
-              () => Get.lazyPut<ProfileController>(ProfileController.new),
-            ),
-          ),
           child: Hero(
             tag: 'user-avatar',
-            child: Container(
-              width: 44,
-              height: 44,
-              padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: palette.border, width: 2),
-                color: palette.surfaceMuted,
+            child: AdaptiveButton.child(
+              onPressed: () => Get.to(
+                () => const ProfileScreen(),
+                binding: BindingsBuilder(
+                  () => Get.lazyPut<ProfileController>(ProfileController.new),
+                ),
               ),
-              child: ClipOval(
-                child: avatarUrl == null
-                    ? const Icon(Icons.person_outline_rounded)
-                    : Image.network(
-                        avatarUrl!,
-                        fit: BoxFit.cover,
-                        loadingBuilder: (context, child, progress) =>
-                            progress == null
-                            ? child
-                            : Center(
-                                child: SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: palette.textSecondary,
-                                  ),
-                                ),
-                              ),
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.person_outline_rounded),
-                      ),
+              style: AdaptiveButtonStyle.glass,
+              minSize: const Size(44, 44),
+              useSmoothRectangleBorder: false,
+              padding: EdgeInsets.zero,
+              child: SizedBox(
+                width: 36,
+                height: 36,
+                child: ClipOval(
+                  child: SafeImageLoader(
+                    url: 'https://i.pravatar.cc/150?img=32',
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        Icon(Icons.person_outline_rounded, color: fg),
+                  ),
+                ),
               ),
             ),
           ),

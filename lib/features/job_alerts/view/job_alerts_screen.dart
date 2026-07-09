@@ -1,6 +1,8 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
+import 'package:jobodia_frontend/core/widgets/confirmation_dialog.dart';
 import 'package:jobodia_frontend/core/widgets/empty_state.dart';
 import 'package:jobodia_frontend/features/job_alerts/controller/job_alert_controller.dart';
 import 'package:jobodia_frontend/features/job_alerts/view/widgets/create_alert_sheet.dart';
@@ -13,28 +15,10 @@ class JobAlertsScreen extends StatelessWidget {
     final palette = context.palette;
     final ctrl = Get.find<JobAlertController>();
 
-    return Scaffold(
-      backgroundColor: palette.scaffold,
-      appBar: AppBar(
-        backgroundColor: palette.scaffold,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(
-            Icons.chevron_left_rounded,
-            color: palette.iconPrimary,
-            size: 30,
-          ),
-          onPressed: Get.back,
-        ),
-        title: Text(
-          'Job Alerts',
-          style: TextStyle(
-            color: palette.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+    return AdaptiveScaffold(
+      appBar: const AdaptiveAppBar(
+        title: 'Job Alerts',
+        useNativeToolbar: false,
       ),
       body: Obx(() {
         if (ctrl.alerts.isEmpty) {
@@ -115,10 +99,10 @@ class JobAlertsScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        Switch.adaptive(
+                        AdaptiveSwitch(
                           value: alert.isActive,
                           onChanged: (_) => ctrl.toggleAlert(alert.id),
-                          activeTrackColor: AppColors.brandTeal,
+                          activeColor: AppColors.brandTeal,
                         ),
                       ],
                     ),
@@ -149,43 +133,18 @@ class JobAlertsScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton.icon(
-                          onPressed: () {
-                            Get.dialog(
-                              AlertDialog(
-                                backgroundColor: palette.surface,
-                                title: Text(
-                                  'Delete alert?',
-                                  style: TextStyle(color: palette.textPrimary),
-                                ),
-                                content: Text(
-                                  'You will no longer receive notifications for this alert.',
-                                  style: TextStyle(
-                                    color: palette.textSecondary,
-                                  ),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: Get.back,
-                                    child: Text(
-                                      'Cancel',
-                                      style: TextStyle(
-                                        color: palette.textSecondary,
-                                      ),
-                                    ),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      ctrl.deleteAlert(alert.id);
-                                      Get.back();
-                                    },
-                                    child: Text(
-                                      'Delete',
-                                      style: TextStyle(color: palette.error),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                          onPressed: () async {
+                            final confirmed = await showConfirmationDialog(
+                              title: 'Delete alert?',
+                              message:
+                                  'You will no longer receive notifications '
+                                  'for this alert.',
+                              confirmLabel: 'Delete',
+                              isDestructive: true,
                             );
+                            if (confirmed) {
+                              ctrl.deleteAlert(alert.id);
+                            }
                           },
                           icon: Icon(
                             Icons.delete_outline,

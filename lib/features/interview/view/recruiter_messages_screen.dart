@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -19,14 +20,11 @@ class RecruiterMessagesScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                IconButton(
+                AdaptiveButton.icon(
                   onPressed: Get.back,
-                  tooltip: 'Back',
-                  icon: Icon(
-                    Icons.chevron_left_rounded,
-                    size: 30,
-                    color: palette.iconPrimary,
-                  ),
+                  icon: Icons.chevron_left_rounded,
+                  iconColor: palette.iconPrimary,
+                  style: AdaptiveButtonStyle.plain,
                 ),
                 Expanded(
                   child: Text(
