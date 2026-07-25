@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/confirmation_dialog.dart';
-import 'package:jobodia_frontend/core/widgets/custom_text_field.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
 import 'package:jobodia_frontend/features/cv_builder/view/widgets/cv_builder_helpers.dart';
 
@@ -17,24 +16,22 @@ class BasicInfoStep extends StatelessWidget {
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
       children: [
+        const ResumeSectionIntro(
+          title: 'Identity and contact',
+          description:
+              'Use the details recruiters should see at the top of your resume.',
+        ),
+        const SizedBox(height: 18),
         Text(
-          'Ready to make a CV?',
+          'QUICK START',
           style: TextStyle(
-            color: palette.textPrimary,
-            fontSize: 30,
-            fontWeight: FontWeight.w800,
+            color: palette.textTertiary,
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.2,
           ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          'Start with the basic details so the CV can match your profile.',
-          style: TextStyle(
-            fontSize: 15,
-            color: palette.textSecondary,
-            height: 1.4,
-          ),
-        ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 9),
         Row(
           children: [
             Expanded(
@@ -48,7 +45,7 @@ class BasicInfoStep extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
                 icon: const Icon(Icons.text_snippet_outlined, size: 20),
@@ -67,7 +64,7 @@ class BasicInfoStep extends StatelessWidget {
                   side: BorderSide(color: palette.border),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
                 icon: const Icon(Icons.person_pin_outlined, size: 20),
@@ -79,71 +76,60 @@ class BasicInfoStep extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         SizedBox(
           width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: controller.importResume,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.brandTeal.withAlpha(20),
-              foregroundColor: AppColors.brandTeal,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              elevation: 0,
+          child: TextButton.icon(
+            onPressed: () => _confirmSampleFill(context),
+            style: TextButton.styleFrom(
+              foregroundColor: palette.textSecondary,
+              padding: const EdgeInsets.symmetric(vertical: 11),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                side: const BorderSide(color: AppColors.brandTeal, width: 1.5),
               ),
             ),
-            icon: const Icon(Icons.upload_file_rounded),
+            icon: const Icon(Icons.science_outlined, size: 19),
             label: const Text(
-              'Upload Resume to Auto-Fill',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              'Use complete sample CV',
+              style: TextStyle(fontWeight: FontWeight.w700),
             ),
           ),
         ),
-        const SizedBox(height: 24),
-        const InfoIconLine(
-          icon: Icons.person_rounded,
-          text: 'Headshot, full name, email, phone number, and location',
-        ),
         const SizedBox(height: 18),
+        Divider(color: palette.divider),
+        const SizedBox(height: 14),
         HeadshotUploadTile(controller: controller),
         const SizedBox(height: 18),
-        CustomTextField(
+        CompactInput(
           label: 'Full name',
           hintText: 'Your full name',
           controller: controller.fullNameController,
-          prefixIcon: Icons.person_outline_rounded,
         ),
         const SizedBox(height: 16),
-        CustomTextField(
+        CompactInput(
           label: 'Email',
           hintText: 'example@gmail.com',
           controller: controller.emailController,
-          prefixIcon: Icons.mail_outline_rounded,
           keyboardType: TextInputType.emailAddress,
         ),
         const SizedBox(height: 16),
-        CustomTextField(
+        CompactInput(
           label: 'Phone number',
           hintText: '+855 12 345 678',
           controller: controller.phoneController,
-          prefixIcon: Icons.phone_outlined,
           keyboardType: TextInputType.phone,
         ),
         const SizedBox(height: 16),
-        CustomTextField(
+        CompactInput(
           label: 'Location',
           hintText: 'City, Country',
           controller: controller.locationController,
-          prefixIcon: Icons.location_on_outlined,
         ),
       ],
     );
   }
 
-  /// Opens a bottom sheet with a multiline field for pasting resume text,
-  /// plus "Parse" and "Use sample data" actions.
+  /// Opens a bottom sheet with a multiline field for pasting resume text.
   void _showImportSheet(BuildContext context) {
     final palette = context.palette;
     final textController = TextEditingController();
@@ -206,46 +192,26 @@ class BasicInfoStep extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.of(sheetContext).pop();
-                        controller.importResume();
-                      },
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: palette.textPrimary,
-                        side: BorderSide(color: palette.border),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text('Use sample data'),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    final text = textController.text;
+                    Navigator.of(sheetContext).pop();
+                    controller.importFromText(text);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.brandTeal,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        final text = textController.text;
-                        Navigator.of(sheetContext).pop();
-                        controller.importFromText(text);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.brandTeal,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text('Parse'),
-                    ),
-                  ),
-                ],
+                  icon: const Icon(Icons.auto_fix_high_rounded, size: 19),
+                  label: const Text('Import my resume'),
+                ),
               ),
             ],
           ),
@@ -268,5 +234,17 @@ class BasicInfoStep extends StatelessWidget {
     if (confirmed) {
       controller.fillFromProfile();
     }
+  }
+
+  Future<void> _confirmSampleFill(BuildContext context) async {
+    final confirmed = await showConfirmationDialog(
+      title: 'Load the sample CV?',
+      message:
+          'This fills every section with realistic test content and opens the design preview. Your current form entries will be replaced.',
+      confirmLabel: 'Load sample',
+      cancelLabel: 'Cancel',
+    );
+
+    if (confirmed) controller.fillWithSampleCv();
   }
 }

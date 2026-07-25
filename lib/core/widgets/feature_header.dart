@@ -1,6 +1,6 @@
 // Hide the package's BlurStyle so it doesn't shadow Flutter's BlurStyle,
 // which the background painter uses for MaskFilter.blur.
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart' hide BlurStyle;
+import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -89,7 +89,7 @@ class _FeatureHeaderBackgroundPainter extends CustomPainter {
 
     final light = Paint()
       ..color = Colors.white.withValues(alpha: 0.1)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18);
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18.0);
     final band = Path()
       ..moveTo(-55, size.height * 1.1)
       ..quadraticBezierTo(

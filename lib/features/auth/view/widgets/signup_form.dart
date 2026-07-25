@@ -6,7 +6,6 @@ import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/custom_button.dart';
 import 'package:jobodia_frontend/core/widgets/custom_text_field.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
-import 'package:jobodia_frontend/features/auth/view/widgets/social_login_section.dart';
 
 /// Register form UI. Validation and actions live in AuthController.
 class SignUpForm extends GetView<AuthController> {
@@ -14,6 +13,7 @@ class SignUpForm extends GetView<AuthController> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -24,7 +24,7 @@ class SignUpForm extends GetView<AuthController> {
           prefixIcon: Icons.person_outline_rounded,
           textInputAction: TextInputAction.next,
           inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z]')),
+            FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9 -]')),
           ],
         ),
         const SizedBox(height: 12),
@@ -84,23 +84,21 @@ class SignUpForm extends GetView<AuthController> {
                   },
           ),
         ),
-        const SizedBox(height: 18),
-        const SocialLoginSection(title: 'or Sign up with'),
-        const SizedBox(height: 22),
+        const SizedBox(height: 24),
         Wrap(
           alignment: WrapAlignment.center,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            const Text(
+            Text(
               'Already have an account? ',
-              style: TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: palette.textSecondary),
             ),
             GestureDetector(
               onTap: () => controller.changeAuthTab(0),
-              child: const Text(
+              child: Text(
                 'Log in',
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: palette.textPrimary,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -133,7 +131,7 @@ class _PasswordVisibilityButton extends StatelessWidget {
         child: Icon(
           isVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
           key: ValueKey(isVisible),
-          color: AppColors.textSecondary,
+          color: context.palette.textSecondary,
         ),
       ),
     );

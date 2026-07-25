@@ -14,6 +14,8 @@ class HomeSearchBar extends StatefulWidget {
     required this.hasActiveFilters,
     this.onSubmitted,
     this.salaryRangeLabel,
+    this.expandsOnFocus = false,
+    this.isExpanded = false,
   });
 
   final String value;
@@ -27,18 +29,27 @@ class HomeSearchBar extends StatefulWidget {
   /// icon (e.g. "$3k–$6k") to indicate a salary filter is active.
   final String? salaryRangeLabel;
 
+  /// Lets the full search screen give the field priority while typing.
+  final bool expandsOnFocus;
+
+  /// Lets a parent expand the field before it receives keyboard focus.
+  final bool isExpanded;
+
   @override
   State<HomeSearchBar> createState() => _HomeSearchBarState();
 }
 
 class _HomeSearchBarState extends State<HomeSearchBar> {
   late final TextEditingController _controller;
+  final _focusNode = FocusNode();
   final _debouncer = Debouncer();
+  bool _isFocused = false;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.value);
+    _focusNode.addListener(_handleFocusChange);
   }
 
   @override
@@ -56,23 +67,37 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
   @override
   void dispose() {
     _debouncer.dispose();
+    _focusNode
+      ..removeListener(_handleFocusChange)
+      ..dispose();
     _controller.dispose();
     super.dispose();
+  }
+
+  void _handleFocusChange() {
+    if (mounted) setState(() => _isFocused = _focusNode.hasFocus);
   }
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final isExpanded =
+        widget.isExpanded || (widget.expandsOnFocus && _isFocused);
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 46,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            height: isExpanded ? 54 : 46,
             padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
-              color: palette.surfaceMuted,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: palette.border),
+              color: isExpanded ? palette.surface : palette.surfaceMuted,
+              borderRadius: BorderRadius.circular(isExpanded ? 18 : 12),
+              border: Border.all(
+                color: isExpanded ? AppColors.brandTeal : palette.border,
+                width: isExpanded ? 1.5 : 1,
+              ),
             ),
             child: Row(
               children: [
@@ -81,6 +106,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
+                    focusNode: _focusNode,
                     onChanged: (v) => _debouncer.run(() => widget.onChanged(v)),
                     onSubmitted: widget.onSubmitted,
                     decoration: InputDecoration(
@@ -109,63 +135,77 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
             ),
           ),
         ),
-        const SizedBox(width: 10),
-        if (widget.salaryRangeLabel != null)
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.30),
-              ),
-            ),
-            child: Text(
-              widget.salaryRangeLabel!,
-              style: const TextStyle(
-                color: AppColors.primary,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        Material(
-          color: palette.textPrimary,
-          borderRadius: BorderRadius.circular(999),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(999),
-            onTap: () {
-              unawaited(HapticFeedback.lightImpact());
-              widget.onFilterPressed();
-            },
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                SizedBox(
-                  width: 46,
-                  height: 46,
-                  child: Icon(
-                    Icons.filter_alt_rounded,
-                    color: palette.scaffold,
-                  ),
-                ),
-                if (widget.hasActiveFilters)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: AppColors.warning,
-                        shape: BoxShape.circle,
+        AnimatedSize(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
+          child: isExpanded
+              ? const SizedBox.shrink()
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(width: 10),
+                    if (widget.salaryRangeLabel != null)
+                      Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: AppColors.primary.withValues(alpha: 0.30),
+                          ),
+                        ),
+                        child: Text(
+                          widget.salaryRangeLabel!,
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    Material(
+                      color: palette.textPrimary,
+                      borderRadius: BorderRadius.circular(999),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(999),
+                        onTap: () {
+                          unawaited(HapticFeedback.lightImpact());
+                          widget.onFilterPressed();
+                        },
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            SizedBox(
+                              width: 46,
+                              height: 46,
+                              child: Icon(
+                                Icons.filter_alt_rounded,
+                                color: palette.scaffold,
+                              ),
+                            ),
+                            if (widget.hasActiveFilters)
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.warning,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-              ],
-            ),
-          ),
+                  ],
+                ),
         ),
       ],
     );

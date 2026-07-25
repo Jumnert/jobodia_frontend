@@ -24,8 +24,6 @@ import 'package:jobodia_frontend/features/profile/controller/profile_controller.
 import 'package:jobodia_frontend/features/profile/view/edit_profile_screen.dart';
 import 'package:jobodia_frontend/features/profile/view/profile_screen.dart';
 import 'package:jobodia_frontend/features/profile/view/statistics_screen.dart';
-import 'package:jobodia_frontend/features/preferences/controller/preferences_controller.dart';
-import 'package:jobodia_frontend/features/preferences/view/preferences_wizard_screen.dart';
 import 'package:jobodia_frontend/features/report/controller/report_controller.dart';
 import 'package:jobodia_frontend/features/report/view/screens/report_screen.dart';
 import 'package:jobodia_frontend/features/saved_jobs/view/saved_jobs_screen.dart';
@@ -193,17 +191,6 @@ abstract final class AppPages {
       page: () => const EditProfileScreen(),
       binding: BindingsBuilder(
         () => Get.lazyPut<ProfileController>(ProfileController.new),
-      ),
-      transition: Transition.cupertino,
-      transitionDuration: _defaultDuration,
-      curve: _defaultCurve,
-      middlewares: [AuthMiddleware()],
-    ),
-    GetPage(
-      name: AppRoutes.preferencesWizard,
-      page: () => const PreferencesWizardScreen(),
-      binding: BindingsBuilder(
-        () => Get.lazyPut<PreferencesController>(PreferencesController.new),
       ),
       transition: Transition.cupertino,
       transitionDuration: _defaultDuration,

@@ -1,9 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
-import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 enum OnboardingVisualType { jobs, resume, interview }
 
-class OnboardingVisuals extends StatelessWidget {
+/// Displays the rendered onboarding artwork with a quiet floating motion.
+class OnboardingVisuals extends StatefulWidget {
   const OnboardingVisuals({
     required this.type,
     required this.compact,
@@ -14,220 +16,77 @@ class OnboardingVisuals extends StatelessWidget {
   final bool compact;
 
   @override
-  Widget build(BuildContext context) {
-    return switch (type) {
-      OnboardingVisualType.jobs => const JobCardsStackVisual(),
-      OnboardingVisualType.resume => _ResumeVisual(compact: compact),
-      OnboardingVisualType.interview => const AiInterviewVisualGroup(),
-    };
-  }
+  State<OnboardingVisuals> createState() => _OnboardingVisualsState();
 }
 
-class JobCardsStackVisual extends StatelessWidget {
-  const JobCardsStackVisual({super.key});
+class _OnboardingVisualsState extends State<OnboardingVisuals>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 3600),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final visualWidth = screenWidth * 0.76;
-    final visualHeight = visualWidth * 0.85;
+    final visual = _visualFor(widget.type);
 
-    return SizedBox(
-      width: visualWidth,
-      height: visualHeight,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned(
-            left: visualWidth * 0.03,
-            top: visualHeight * 0.1,
-            child: Container(
-              width: visualWidth * 0.58,
-              height: visualWidth * 0.72,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(28),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.accentPurple.withValues(alpha: 0.45),
-                    blurRadius: 45,
-                    spreadRadius: 8,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            right: 0,
-            top: visualHeight * 0.28,
-            child: Opacity(
-              opacity: 0.75,
-              child: Transform.rotate(
-                angle: 0.08,
-                child: Image.asset(
-                  'assets/images/onboarding/job_cards_3.png',
-                  width: visualWidth * 0.58,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.image_not_supported),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            right: visualWidth * 0.12,
-            top: visualHeight * 0.18,
-            child: Opacity(
-              opacity: 0.85,
-              child: Transform.rotate(
-                angle: 0.04,
-                child: Image.asset(
-                  'assets/images/onboarding/job_cards_2.png',
-                  width: visualWidth * 0.62,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.image_not_supported),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 0,
-            top: visualHeight * 0.03,
-            child: Opacity(
-              opacity: 1,
-              child: Transform.rotate(
-                angle: -0.1,
-                child: Image.asset(
-                  'assets/images/onboarding/job_cards_1.png',
-                  width: visualWidth * 0.65,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.image_not_supported),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ResumeVisual extends StatelessWidget {
-  const _ResumeVisual({required this.compact});
-
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final width = screenWidth * 0.78;
-    final height = width * 0.96;
-    final resumeWidth = (screenWidth * 0.58).clamp(205.0, 248.0);
-
-    return SizedBox(
-      width: width,
-      height: height,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.center,
-        children: [
-          const _PurpleGlow(size: 230),
-          Image.asset(
-            'assets/images/onboarding/resume_card.png',
-            width: resumeWidth,
+    return Semantics(
+      image: true,
+      label: visual.semanticLabel,
+      child: AnimatedBuilder(
+        animation: _controller,
+        child: RepaintBoundary(
+          child: Image.asset(
+            visual.assetPath,
+            width: widget.compact ? 245 : 292,
+            height: widget.compact ? 225 : 280,
             fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) =>
-                const Icon(Icons.image_not_supported),
+            filterQuality: FilterQuality.high,
+            gaplessPlayback: true,
           ),
-          Positioned(
-            top: height * 0.14,
-            right: width * 0.14,
-            child: Image.asset(
-              'assets/images/onboarding/ats_score.png',
-              width: (screenWidth * 0.18).clamp(66.0, 82.0),
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.image_not_supported),
-            ),
-          ),
-        ],
+        ),
+        builder: (context, child) {
+          final phase = _controller.value * math.pi * 2;
+          final lift = math.sin(phase) * (widget.compact ? 3.5 : 5.0);
+          final tilt = math.sin(phase + math.pi / 2) * .008;
+
+          return Transform.translate(
+            offset: Offset(0, lift),
+            child: Transform.rotate(angle: tilt, child: child),
+          );
+        },
       ),
     );
   }
 }
 
-class AiInterviewVisualGroup extends StatelessWidget {
-  const AiInterviewVisualGroup({super.key});
+_OnboardingArtwork _visualFor(OnboardingVisualType type) => switch (type) {
+  OnboardingVisualType.jobs => const _OnboardingArtwork(
+    assetPath: 'assets/images/onboarding/onboarding_jobs_3d.png',
+    semanticLabel: 'Job discovery illustration',
+  ),
+  OnboardingVisualType.resume => const _OnboardingArtwork(
+    assetPath: 'assets/images/onboarding/onboarding_resume_3d.png',
+    semanticLabel: 'CV building illustration',
+  ),
+  OnboardingVisualType.interview => const _OnboardingArtwork(
+    assetPath: 'assets/images/onboarding/onboarding_ai_3d.png',
+    semanticLabel: 'AI career assistant illustration',
+  ),
+};
 
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-    final width = size.width;
-    final height = size.height * 0.22;
-    final robotWidth = (size.width * 0.34).clamp(110.0, 135.0);
+class _OnboardingArtwork {
+  const _OnboardingArtwork({
+    required this.assetPath,
+    required this.semanticLabel,
+  });
 
-    return SizedBox(
-      width: width,
-      height: height,
-      child: Stack(
-        alignment: Alignment.center,
-        clipBehavior: Clip.none,
-        children: [
-          Image.asset(
-            'assets/images/onboarding/ai_signal.png',
-            width: size.width * 0.95,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) =>
-                const Icon(Icons.image_not_supported),
-          ),
-          Container(
-            width: robotWidth,
-            height: robotWidth,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.accentPurple.withValues(alpha: 0.45),
-                  blurRadius: 45,
-                  spreadRadius: 8,
-                ),
-              ],
-            ),
-          ),
-          Image.asset(
-            'assets/images/onboarding/ai_interviewer.png',
-            width: robotWidth,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) =>
-                const Icon(Icons.image_not_supported),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PurpleGlow extends StatelessWidget {
-  const _PurpleGlow({required this.size});
-
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.accentPurpleDark.withValues(alpha: 0.24),
-            blurRadius: 70,
-            spreadRadius: 18,
-          ),
-        ],
-      ),
-    );
-  }
+  final String assetPath;
+  final String semanticLabel;
 }

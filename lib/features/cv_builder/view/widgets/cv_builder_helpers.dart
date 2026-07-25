@@ -1,10 +1,50 @@
 import 'package:jobodia_frontend/features/cv_builder/model/cv_form_classes.dart';
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
+
+class ResumeSectionIntro extends StatelessWidget {
+  const ResumeSectionIntro({
+    super.key,
+    required this.title,
+    required this.description,
+  });
+
+  final String title;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: palette.textPrimary,
+            fontSize: 22,
+            height: 1.15,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.35,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          description,
+          style: TextStyle(
+            color: palette.textSecondary,
+            fontSize: 13,
+            height: 1.4,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 /// Icon + text helper used in step forms.
 class InfoIconLine extends StatelessWidget {
@@ -48,13 +88,13 @@ class HeadshotUploadTile extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: palette.surfaceMuted,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(color: palette.border),
         ),
         child: Row(
           children: [
             CircleAvatar(
-              radius: 34,
+              radius: 30,
               backgroundColor: controller.hasHeadshot
                   ? palette.textPrimary
                   : palette.surface,
@@ -151,15 +191,8 @@ class ProfileSectionCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: palette.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: palette.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.035),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,13 +201,13 @@ class ProfileSectionCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 38,
-                height: 38,
+                width: 34,
+                height: 34,
                 decoration: BoxDecoration(
-                  color: palette.textPrimary,
-                  shape: BoxShape.circle,
+                  color: AppColors.brandTeal.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(7),
                 ),
-                child: Icon(icon, color: palette.surface, size: 20),
+                child: Icon(icon, color: AppColors.brandTeal, size: 18),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -271,6 +304,7 @@ class WorkExperienceEntry extends StatelessWidget {
           controller: entry.descriptionController,
           hintText:
               'Describe responsibilities, achievements, tools, and impact...',
+          maxLength: 700,
         ),
       ],
     );
@@ -339,6 +373,7 @@ class EducationEntry extends StatelessWidget {
           controller: entry.descriptionController,
           hintText:
               'Add awards, coursework, thesis, clubs, or relevant projects...',
+          maxLength: 700,
         ),
       ],
     );
@@ -367,9 +402,14 @@ class RepeatableEntryCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: palette.surfaceMuted,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: palette.border),
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border(
+          left: const BorderSide(color: AppColors.brandTeal, width: 3),
+          top: BorderSide(color: palette.border),
+          right: BorderSide(color: palette.border),
+          bottom: BorderSide(color: palette.border),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -427,7 +467,7 @@ class AddEntryButton extends StatelessWidget {
               foregroundColor: palette.textPrimary,
               side: BorderSide(color: palette.textPrimary),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: BorderRadius.circular(8),
               ),
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
@@ -534,12 +574,14 @@ class CompactInput extends StatelessWidget {
     required this.hintText,
     required this.controller,
     this.onSubmitted,
+    this.keyboardType,
   });
 
   final String label;
   final String hintText;
   final TextEditingController controller;
   final ValueChanged<String>? onSubmitted;
+  final TextInputType? keyboardType;
 
   @override
   Widget build(BuildContext context) {
@@ -559,25 +601,27 @@ class CompactInput extends StatelessWidget {
         AdaptiveTextField(
           controller: controller,
           onSubmitted: onSubmitted,
+          keyboardType: keyboardType,
           placeholder: hintText,
           style: TextStyle(color: palette.textPrimary),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
           cupertinoDecoration: BoxDecoration(
-            color: palette.surfaceMuted,
-            borderRadius: BorderRadius.circular(14),
+            color: palette.surface,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: palette.border),
           ),
           decoration: InputDecoration(
             hintText: hintText,
             filled: true,
-            fillColor: palette.surfaceMuted,
+            fillColor: palette.surface,
             hintStyle: TextStyle(color: palette.textTertiary, fontSize: 13),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 13,
             ),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: palette.border),
             ),
           ),
         ),
@@ -611,184 +655,20 @@ class MultiLineField extends StatelessWidget {
       style: TextStyle(color: palette.textPrimary),
       padding: const EdgeInsets.all(14),
       cupertinoDecoration: BoxDecoration(
-        color: palette.surfaceMuted,
-        borderRadius: BorderRadius.circular(18),
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: palette.border),
       ),
       decoration: InputDecoration(
         hintText: hintText,
         filled: true,
-        fillColor: palette.surfaceMuted,
+        fillColor: palette.surface,
         hintStyle: TextStyle(color: palette.textTertiary, fontSize: 14),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: palette.border),
         ),
       ),
     );
   }
 }
-
-/// A preview card shown in the template step.
-class TemplatePreviewCard extends StatelessWidget {
-  const TemplatePreviewCard({super.key, required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFF9F9F9),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE9E9E9)),
-      ),
-      child: FittedBox(
-        fit: BoxFit.contain,
-        alignment: Alignment.topCenter,
-        child: SizedBox(
-          width: 150,
-          height: 225,
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const CircleAvatar(
-                      radius: 14,
-                      backgroundColor: Color(0xFFE0E0E0),
-                      child: Icon(Icons.person, size: 16, color: Colors.white),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'YOUR NAME',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          Text(
-                            title.toUpperCase(),
-                            style: const TextStyle(
-                              color: Color(0xFF777777),
-                              fontSize: 8.5,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                Container(height: 1, color: const Color(0xFFE2E2E2)),
-                const SizedBox(height: 12),
-                const LineBlock(widthFactor: 0.92),
-                const SizedBox(height: 6),
-                const LineBlock(widthFactor: 0.82),
-                const SizedBox(height: 6),
-                const LineBlock(widthFactor: 0.66),
-                const SizedBox(height: 12),
-                const SectionRow(label: 'PROFILE'),
-                const SizedBox(height: 8),
-                const LineBlock(widthFactor: 1),
-                const SizedBox(height: 6),
-                const LineBlock(widthFactor: 0.88),
-                const SizedBox(height: 12),
-                const SectionRow(label: 'SKILLS'),
-                const SizedBox(height: 8),
-                const DotLine(),
-                const SizedBox(height: 4),
-                const DotLine(),
-                const SizedBox(height: 4),
-                const DotLine(widthFactor: 0.75),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// A horizontal line block for the template preview.
-class LineBlock extends StatelessWidget {
-  const LineBlock({super.key, required this.widthFactor});
-
-  final double widthFactor;
-
-  @override
-  Widget build(BuildContext context) {
-    return FractionallySizedBox(
-      widthFactor: widthFactor,
-      child: Container(height: 4, decoration: _lineDecoration),
-    );
-  }
-}
-
-/// A dot + line block for the template preview.
-class DotLine extends StatelessWidget {
-  const DotLine({super.key, this.widthFactor = 0.9});
-
-  final double widthFactor;
-
-  @override
-  Widget build(BuildContext context) {
-    return FractionallySizedBox(
-      widthFactor: widthFactor,
-      child: Row(
-        children: [
-          const Icon(Icons.circle, size: 4, color: Color(0xFFCFCFCF)),
-          const SizedBox(width: 6),
-          Expanded(child: Container(height: 4, decoration: _lineDecoration)),
-        ],
-      ),
-    );
-  }
-}
-
-/// A section row with a circle label for the template preview.
-class SectionRow extends StatelessWidget {
-  const SectionRow({super.key, required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.black,
-          ),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800),
-        ),
-      ],
-    );
-  }
-}
-
-/// Metadata for a CV template.
-class TemplateMeta {
-  const TemplateMeta({required this.title, required this.subtitle});
-
-  final String title;
-  final String subtitle;
-}
-
-const _lineDecoration = BoxDecoration(
-  color: Color(0xFFD8D8D8),
-  borderRadius: BorderRadius.all(Radius.circular(99)),
-);

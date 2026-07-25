@@ -242,7 +242,7 @@ class _ApplyConfirmationDialogState extends State<ApplyConfirmationDialog> {
                 clipBehavior: Clip.antiAlias,
                 child: InkWell(
                   onTap: () {
-                    unawaited(HapticFeedback.mediumImpact());
+                    unawaited(HapticFeedback.lightImpact());
                     final cl = _coverLetterCtrl.text.trim();
                     Get.back<String?>(result: cl.isEmpty ? '' : cl);
                   },

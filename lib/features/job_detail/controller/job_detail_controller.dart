@@ -79,7 +79,9 @@ class JobDetailController extends GetxController {
   String get sourceLevel => _source?.level ?? '';
 
   void toggleSaved() {
-    _savedJobs.toggleSave(_source!);
+    final source = _source;
+    if (source == null) return;
+    _savedJobs.toggleSave(source);
   }
 
   void toggleAboutRole() {
@@ -87,17 +89,19 @@ class JobDetailController extends GetxController {
   }
 
   void shareJob() {
+    final source = _source;
+    if (source == null) return;
     final j = job;
     SharePlus.instance.share(
       ShareParams(
         text:
-            '${j?.title ?? ''} at ${j?.companyName ?? ''}\nhttps://jobodia.app/jobs/${_source!.id}',
+            '${j?.title ?? ''} at ${j?.companyName ?? ''}\nhttps://jobodia.app/jobs/${source.id}',
       ),
     );
   }
 
   Future<void> applyForJob() async {
-    if (isApplied) {
+    if (_source == null || isApplied) {
       return;
     }
     applyError.value = null;
@@ -127,6 +131,8 @@ class JobDetailController extends GetxController {
   void clearApplyError() => applyError.value = null;
 
   void _recordApplication(String? coverLetter) {
-    _applications.apply(_source!, coverLetter: coverLetter);
+    final source = _source;
+    if (source == null) return;
+    _applications.apply(source, coverLetter: coverLetter);
   }
 }

@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -237,6 +237,7 @@ class NotificationsScreen extends GetView<NotificationsController> {
                       : Icons.arrow_back_rounded,
                   iconColor: palette.iconPrimary,
                   style: AdaptiveButtonStyle.glass,
+                  size: AdaptiveButtonSize.large,
                   minSize: const Size(44, 44),
                   useSmoothRectangleBorder: false,
                 ),
@@ -250,6 +251,7 @@ class NotificationsScreen extends GetView<NotificationsController> {
                     horizontal: 24,
                     vertical: 12,
                   ),
+                  size: AdaptiveButtonSize.large,
                   minSize: const Size(150, 44),
                   useSmoothRectangleBorder: false, // Fully rounded pill shape
                 ),
@@ -259,6 +261,7 @@ class NotificationsScreen extends GetView<NotificationsController> {
                   icon: Icons.done_all_rounded,
                   iconColor: palette.iconPrimary,
                   style: AdaptiveButtonStyle.glass,
+                  size: AdaptiveButtonSize.large,
                   minSize: const Size(44, 44),
                   useSmoothRectangleBorder: false,
                 ),

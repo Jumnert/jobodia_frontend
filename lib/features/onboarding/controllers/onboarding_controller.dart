@@ -14,8 +14,21 @@ class OnboardingController extends GetxController {
   final GetStorage _storage;
   late final PageController pageController;
   final RxInt currentPage = 0.obs;
+  bool _isPreviewMode = false;
 
   bool get isLastPage => currentPage.value == totalPages - 1;
+
+  /// Enables a non-persistent preview launched from Settings.
+  void configurePreview(bool value) {
+    if (_isPreviewMode == value) return;
+    _isPreviewMode = value;
+    if (!value) return;
+
+    currentPage.value = 0;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (pageController.hasClients) pageController.jumpToPage(0);
+    });
+  }
 
   @override
   void onInit() {
@@ -27,7 +40,7 @@ class OnboardingController extends GetxController {
 
   void onPageChanged(int index) {
     currentPage.value = index;
-    _storage.write(_pageIndexKey, index);
+    if (!_isPreviewMode) _storage.write(_pageIndexKey, index);
   }
 
   void goNext() {
@@ -44,6 +57,10 @@ class OnboardingController extends GetxController {
   }
 
   Future<void> completeOnboarding() async {
+    if (_isPreviewMode) {
+      Get.back<void>();
+      return;
+    }
     await _storage.write(hasSeenOnboardingKey, true);
     await _storage.remove(_pageIndexKey);
     Get.offAllNamed(AppRoutes.login);

@@ -134,7 +134,7 @@ class SearchJobCard extends StatelessWidget {
           trailingIcon: CupertinoIcons.hand_thumbsdown,
           isDestructiveAction: true,
           onPressed: () {
-            unawaited(HapticFeedback.heavyImpact());
+            unawaited(HapticFeedback.lightImpact());
             Navigator.of(context).pop();
             homeController.dismiss(job);
           },

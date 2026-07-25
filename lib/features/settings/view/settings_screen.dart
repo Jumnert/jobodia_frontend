@@ -1,13 +1,19 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
+import 'package:jobodia_frontend/core/widgets/quiet_glass_button.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 import 'package:jobodia_frontend/features/settings/controller/feedback_controller.dart';
 import 'package:jobodia_frontend/features/settings/controller/theme_controller.dart';
 import 'package:jobodia_frontend/features/settings/view/widgets/settings_helpers.dart';
+import 'package:jobodia_frontend/features/settings/view/widgets/theme_picker.dart';
 import 'package:jobodia_frontend/features/feature_discovery/controller/feature_discovery_controller.dart';
+import 'package:jobodia_frontend/features/onboarding/controllers/onboarding_controller.dart';
+import 'package:jobodia_frontend/features/onboarding/views/onboarding_view.dart';
+import 'package:jobodia_frontend/features/splash/view/splash_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key, this.showBottomNav = true});
@@ -19,20 +25,24 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  static const _faceIdKey = 'mockFaceIdEnabled';
+  bool _faceIdEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _faceIdEnabled = GetStorage().read<bool>(_faceIdKey) ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDark
-        ? const Color(0xFF101214)
-        : const Color(0xFFF5F5F5);
-    final foregroundColor = isDark ? Colors.white : Colors.black;
-    final sectionColor = isDark
-        ? const Color(0xFFB7BDC3)
-        : const Color(0xFF6F7378);
-    final groupColor = isDark ? const Color(0xFF1A1D20) : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF2A2E33)
-        : const Color(0xFFE9E9E9);
+    final palette = context.palette;
+    final backgroundColor = palette.scaffold;
+    final foregroundColor = palette.textPrimary;
+    final sectionColor = palette.textSecondary;
+    final groupColor = palette.surface;
+    final borderColor = palette.border;
 
     return AdaptiveScaffold(
       body: Material(
@@ -71,6 +81,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         onTap: () => _showPinDialog(context),
                       ),
                       SettingsTile(
+                        icon: Icons.face_rounded,
+                        title: 'Face ID',
+                        subtitle: 'Fast biometric unlock (preview)',
+                        foregroundColor: foregroundColor,
+                        mutedColor: sectionColor,
+                        trailing: AdaptiveSwitch(
+                          value: _faceIdEnabled,
+                          onChanged: (value) => _setFaceId(context, value),
+                        ),
+                      ),
+                      SettingsTile(
+                        icon: Icons.workspace_premium_rounded,
+                        title: 'Plans & pricing',
+                        subtitle: 'Free, Plus and Pro',
+                        showChevron: true,
+                        foregroundColor: foregroundColor,
+                        mutedColor: sectionColor,
+                        onTap: () => Get.toNamed<void>(AppRoutes.pricing),
+                      ),
+                      SettingsTile(
                         icon: Icons.explore_rounded,
                         title: 'Discover Features',
                         showChevron: true,
@@ -99,6 +129,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             Get.find<ThemeController>().toggleTheme(val);
                           },
                         ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  SectionTitle('Visual theme', color: sectionColor),
+                  const SizedBox(height: 8),
+                  const ThemePicker(),
+                  const SizedBox(height: 18),
+                  SectionTitle('App profile icon', color: sectionColor),
+                  const SizedBox(height: 8),
+                  const _ProfileIconPicker(),
+                  const SizedBox(height: 24),
+                  SectionTitle('Testing', color: sectionColor),
+                  const SizedBox(height: 8),
+                  SettingsGroup(
+                    color: groupColor,
+                    borderColor: borderColor,
+                    children: [
+                      SettingsTile(
+                        icon: Icons.play_circle_outline_rounded,
+                        title: 'Onboarding preview',
+                        subtitle: 'Preview the first-run experience',
+                        showChevron: true,
+                        foregroundColor: foregroundColor,
+                        mutedColor: sectionColor,
+                        onTap: _openOnboardingPreview,
+                      ),
+                      SettingsTile(
+                        icon: Icons.rocket_launch_rounded,
+                        title: 'Splash screen preview',
+                        subtitle: 'Replay the app launch experience',
+                        showChevron: true,
+                        foregroundColor: foregroundColor,
+                        mutedColor: sectionColor,
+                        onTap: _openSplashPreview,
                       ),
                     ],
                   ),
@@ -161,22 +226,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               right: 20,
               child: Row(
                 children: [
-                  AdaptiveButton.icon(
-                    onPressed: () => Get.back<void>(),
-                    icon: PlatformInfo.isIOS
-                        ? Icons.arrow_back_ios_new_rounded
-                        : Icons.arrow_back_rounded,
-                    iconColor: foregroundColor,
-                    style: AdaptiveButtonStyle.glass,
-                    minSize: const Size(44, 44),
-                    useSmoothRectangleBorder: false,
-                  ),
+                  QuietGlassBackButton(onPressed: () => Get.back<void>()),
                   const Spacer(),
                   AdaptiveButton(
                     onPressed: () {},
                     label: 'Settings',
                     textColor: foregroundColor,
                     style: AdaptiveButtonStyle.glass,
+                    size: AdaptiveButtonSize.large,
                     minSize: const Size(150, 44),
                     useSmoothRectangleBorder: false,
                   ),
@@ -186,6 +243,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     icon: Icons.report_problem_rounded,
                     iconColor: foregroundColor,
                     style: AdaptiveButtonStyle.glass,
+                    size: AdaptiveButtonSize.large,
                     minSize: const Size(44, 44),
                     useSmoothRectangleBorder: false,
                   ),
@@ -195,6 +253,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  void _setFaceId(BuildContext context, bool value) {
+    if (!value) {
+      setState(() => _faceIdEnabled = false);
+      GetStorage().write(_faceIdKey, false);
+      return;
+    }
+    AdaptiveAlertDialog.show(
+      context: context,
+      title: 'Allow Face ID?',
+      message:
+          'This is a preview setting. Device authentication will be connected later.',
+      icon: 'faceid',
+      actions: [
+        AlertAction(
+          title: 'Not now',
+          style: AlertActionStyle.cancel,
+          onPressed: () {},
+        ),
+        AlertAction(
+          title: 'Allow',
+          style: AlertActionStyle.primary,
+          onPressed: () {
+            if (!mounted) return;
+            setState(() => _faceIdEnabled = true);
+            GetStorage().write(_faceIdKey, true);
+          },
+        ),
+      ],
+    );
+  }
+
+  void _openOnboardingPreview() {
+    Get.to<void>(
+      () => const OnboardingView(previewMode: true),
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<OnboardingController>()) {
+          Get.put(OnboardingController());
+        }
+      }),
+    );
+  }
+
+  void _openSplashPreview() {
+    Get.to<void>(
+      () => SplashScreen(
+        onFinished: () => Get.back<void>(),
+        child: const SizedBox.shrink(),
+      ),
+      transition: Transition.fadeIn,
     );
   }
 
@@ -232,9 +342,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _clearCache(BuildContext context) {
     final storage = GetStorage();
     final themeValue = storage.read(ThemeController.themeKey);
+    final presetValue = storage.read(ThemeController.presetKey);
     final seenOnboarding = storage.read('hasSeenOnboarding');
     storage.erase();
     if (themeValue != null) storage.write(ThemeController.themeKey, themeValue);
+    if (presetValue != null) {
+      storage.write(ThemeController.presetKey, presetValue);
+    }
     if (seenOnboarding != null) {
       storage.write('hasSeenOnboarding', seenOnboarding);
     }
@@ -393,6 +507,88 @@ class _SettingsScreenState extends State<SettingsScreen> {
       'Long-press the job card and select "Report" from the context menu. Describe the issue and submit.',
     ),
   ];
+}
+
+class _ProfileIconPicker extends StatelessWidget {
+  const _ProfileIconPicker();
+
+  static const _icons = [
+    'assets/images/profile_icons/aqua_orbit.png',
+    'assets/images/profile_icons/briefcase.png',
+    'assets/images/profile_icons/rocket.png',
+    'assets/images/profile_icons/compass.png',
+    'assets/images/profile_icons/document.png',
+    'assets/images/profile_icons/idea.png',
+    'assets/images/profile_icons/summit.png',
+    'assets/images/profile_icons/ai_orb.png',
+    'assets/images/profile_icons/handshake.png',
+    'assets/images/profile_icons/gem.png',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<ThemeController>();
+    final palette = context.palette;
+    return SizedBox(
+      height: 72,
+      child: Obx(
+        () => ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: _icons.length,
+          separatorBuilder: (_, _) => const SizedBox(width: 10),
+          itemBuilder: (context, index) {
+            final selected = controller.profileIconIndex.value == index;
+            return GestureDetector(
+              onTap: () => AdaptiveAlertDialog.show(
+                context: context,
+                title: 'Use this profile icon?',
+                message:
+                    'It will appear in the app header and on your profile.',
+                icon: 'person.crop.circle',
+                actions: [
+                  AlertAction(
+                    title: 'Cancel',
+                    style: AlertActionStyle.cancel,
+                    onPressed: () {},
+                  ),
+                  AlertAction(
+                    title: 'Use icon',
+                    style: AlertActionStyle.primary,
+                    onPressed: () => controller.selectProfileIcon(index),
+                  ),
+                ],
+              ),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                width: 64,
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: selected ? AppColors.brandTeal : palette.border,
+                    width: selected ? 3 : 1,
+                  ),
+                ),
+                child: ClipOval(
+                  child: Image.asset(
+                    _icons[index],
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => ColoredBox(
+                      color: palette.surfaceMuted,
+                      child: Icon(
+                        Icons.person_rounded,
+                        color: palette.iconMuted,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
 }
 
 class _FeedbackSheet extends StatefulWidget {

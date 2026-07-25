@@ -1,8 +1,8 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
+import 'package:jobodia_frontend/core/widgets/quiet_glass_button.dart';
 import 'package:share_plus/share_plus.dart';
 import 'widgets/selected_plan_card.dart';
 import 'widgets/pricing_card.dart';
@@ -68,13 +68,14 @@ class _PricingScreenState extends State<PricingScreen> {
   List<PricingPlan> _plans({required bool yearly}) {
     return [
       PricingPlan(
-        name: 'Starter',
+        name: 'Free',
         tabLabel: 'Free',
         price: '0',
         period: 'forever',
         description: 'Start your job search with core tools and a clean CV.',
         cta: 'Get started',
         icon: Icons.rocket_launch_outlined,
+        mascotAsset: 'assets/images/pricing/free_mascot.png',
         delivery: 'Currently In Use',
         features: const [
           'Browse recommended jobs',
@@ -84,13 +85,14 @@ class _PricingScreenState extends State<PricingScreen> {
         ],
       ),
       PricingPlan(
-        name: 'Pro',
-        tabLabel: 'Pro',
+        name: 'Plus',
+        tabLabel: 'Plus',
         price: yearly ? '79' : '8',
         period: yearly ? 'year' : 'month',
         description: 'Upgrade your CV, cover letters, and interview prep.',
         cta: 'Upgrade now',
         icon: Icons.workspace_premium_outlined,
+        mascotAsset: 'assets/images/pricing/plus_mascot.png',
         delivery: 'Best value',
         features: const [
           'Unlimited saved jobs',
@@ -100,13 +102,14 @@ class _PricingScreenState extends State<PricingScreen> {
         ],
       ),
       PricingPlan(
-        name: 'Career Plus',
-        tabLabel: 'Plus',
+        name: 'Pro',
+        tabLabel: 'Pro',
         price: yearly ? '149' : '15',
         period: yearly ? 'year' : 'month',
         description: 'Get a guided plan from profile setup to interviews.',
-        cta: 'Choose Plus',
+        cta: 'Choose Pro',
         icon: Icons.school_outlined,
+        mascotAsset: 'assets/images/pricing/pro_mascot.png',
         delivery: 'Full guidance',
         features: const [
           'Everything in Pro',
@@ -126,11 +129,7 @@ class _PageHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        AdaptiveButton.icon(
-          onPressed: Get.back,
-          icon: Icons.chevron_left_rounded,
-          style: AdaptiveButtonStyle.plain,
-        ),
+        QuietGlassBackButton(onPressed: Get.back),
         const Expanded(
           child: Text(
             'Pricing Plan',
@@ -350,6 +349,7 @@ class PricingPlan {
     required this.description,
     required this.cta,
     required this.icon,
+    required this.mascotAsset,
     required this.delivery,
     required this.features,
   });
@@ -361,6 +361,7 @@ class PricingPlan {
   final String description;
   final String cta;
   final IconData icon;
+  final String mascotAsset;
   final String delivery;
   final List<String> features;
 }

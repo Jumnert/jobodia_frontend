@@ -102,7 +102,7 @@ class ChatHistoryDrawer extends StatelessWidget {
                           ),
                         ),
                         onDismissed: (_) {
-                          unawaited(HapticFeedback.heavyImpact());
+                          unawaited(HapticFeedback.lightImpact());
                           controller.deleteSession(index);
                         },
                         child: _HistoryTile(

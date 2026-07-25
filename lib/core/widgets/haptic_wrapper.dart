@@ -21,10 +21,10 @@ class HapticWrapper extends StatelessWidget {
         HapticFeedback.lightImpact();
         break;
       case HapticType.medium:
-        HapticFeedback.mediumImpact();
+        HapticFeedback.lightImpact();
         break;
       case HapticType.heavy:
-        HapticFeedback.heavyImpact();
+        HapticFeedback.lightImpact();
         break;
       case HapticType.selection:
         HapticFeedback.selectionClick();

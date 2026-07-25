@@ -151,7 +151,7 @@ class WorkInfoStep extends StatelessWidget {
                             (skill) => InputChip(
                               label: Text(skill),
                               onDeleted: () {
-                                unawaited(HapticFeedback.heavyImpact());
+                                unawaited(HapticFeedback.lightImpact());
                                 controller.removeSkill(skill);
                               },
                               backgroundColor: palette.surfaceMuted,

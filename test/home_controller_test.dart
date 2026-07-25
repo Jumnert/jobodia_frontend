@@ -67,7 +67,8 @@ void main() {
       c.selectedTab.value = 0;
       c.selectLevel('Senior');
       final filtered = c.filteredJobs;
-      expect(filtered.length, 5);
+      final expectedCount = c.jobs.where((job) => job.level == 'Senior').length;
+      expect(filtered.length, expectedCount);
       expect(filtered.every((j) => j.level == 'Senior'), isTrue);
     });
 

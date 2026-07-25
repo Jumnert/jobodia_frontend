@@ -312,8 +312,8 @@ lib/features/<feature>/
 │                                                                      │
 │   Bottom Navigation Tabs:                                            │
 │   🏠 Home Feed ──── Search, Filter, Save, Apply, Share, Report      │
-│   📄 CV Builder ─── 3-step wizard → Preview → Export PDF            │
-│   🤖 AI Chat ────── Career assistant with session history           │
+│   📄 CV Builder ─── 5-step wizard → Real PDF preview → Export       │
+│   🤖 AI Chat ────── DeepSeek V4 Flash + session history             │
 │   🎤 Interview ──── Mock interview, Flashcards, Recruiter msgs     │
 │                                                                      │
 │   Overflow Menu (top bar):                                           │
@@ -571,6 +571,30 @@ flutter test
 ---
 
 ## Running the App
+
+### DeepSeek AI chat
+
+The chatbot defaults to `deepseek-v4-flash` in non-thinking mode with a
+500-token output cap. For private device testing, edit the ignored `.env` file
+in the project root:
+
+```dotenv
+DEEPSEEK_API_KEY=your_deepseek_api_key
+DEEPSEEK_MODEL=deepseek-v4-flash
+JOBODIA_AI_PROXY_URL=
+```
+
+Pass that file explicitly when running or building:
+
+```bash
+flutter run -d <device_id> --dart-define-from-file=.env
+flutter build ipa --release --dart-define-from-file=.env
+```
+
+The key will work in the exported IPA, but a key compiled into a mobile app can
+be extracted. Do not distribute that build. For TestFlight/App Store builds,
+keep `DEEPSEEK_API_KEY` empty and set `JOBODIA_AI_PROXY_URL` to a server-side
+endpoint that stores the real DeepSeek key securely.
 
 ```bash
 # Android emulator or device

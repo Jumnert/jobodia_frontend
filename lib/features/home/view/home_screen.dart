@@ -1,9 +1,11 @@
 import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
+import 'package:jobodia_frontend/app/theme/app_theme.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/error_state.dart';
 import 'package:jobodia_frontend/core/widgets/paginated_list_view.dart';
@@ -16,6 +18,7 @@ import 'package:jobodia_frontend/features/home/view/widgets/job_feed_card.dart';
 import 'package:jobodia_frontend/features/job_detail/controller/job_detail_controller.dart';
 import 'package:jobodia_frontend/features/job_detail/view/job_detail_screen.dart';
 import 'package:jobodia_frontend/features/saved_jobs/controller/saved_jobs_controller.dart';
+import 'package:jobodia_frontend/features/settings/controller/theme_controller.dart';
 
 import 'package:share_plus/share_plus.dart';
 
@@ -28,12 +31,16 @@ class HomeScreen extends GetView<AuthController> {
     final user = controller.currentUser.value;
     final palette = context.palette;
     final homeController = Get.find<HomeController>();
+    if (homeController.selectedTab.value != 0) {
+      homeController.selectTab(0);
+    }
 
     return Scaffold(
       backgroundColor: palette.scaffold,
       extendBody: true,
       body: Stack(
         children: [
+          const Positioned.fill(child: _ThemeBackdrop()),
           Positioned.fill(
             child: Obx(() {
               if (homeController.hasError.value) {
@@ -53,22 +60,6 @@ class HomeScreen extends GetView<AuthController> {
 
               final page = homeController.visiblePage;
               final jobs = page.jobs;
-
-              if (jobs.isEmpty) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(32, 0, 32, 24),
-                    child: Text(
-                      'No jobs match your search.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: palette.textSecondary,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                );
-              }
 
               final pagedJobs = jobs;
 
@@ -91,13 +82,37 @@ class HomeScreen extends GetView<AuthController> {
                   hasMore: page.hasMore,
                   isLoadingMore: homeController.isLoadingMore.value,
                   onLoadMore: homeController.loadMore,
-                  itemCount: pagedJobs.length,
+                  itemCount: pagedJobs.isEmpty ? 2 : pagedJobs.length + 1,
                   itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: _JobListingHeader(
+                          jobCount: homeController.filteredJobs.length,
+                        ),
+                      );
+                    }
+
+                    if (pagedJobs.isEmpty) {
+                      return _EmptyJobListing(
+                        hasSearch: homeController.searchQuery.value
+                            .trim()
+                            .isNotEmpty,
+                        hasFilters: homeController.hasActiveFilters,
+                        onReset: () {
+                          homeController.clearSearch();
+                          homeController.clearFilters();
+                          homeController.selectTab(0);
+                        },
+                      );
+                    }
+
+                    final jobIndex = index - 1;
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.only(bottom: 16),
                       child: _JobFeedContextMenu(
-                        job: pagedJobs[index],
-                        colorIndex: index,
+                        job: pagedJobs[jobIndex],
+                        colorIndex: jobIndex,
                       ),
                     );
                   },
@@ -118,6 +133,475 @@ class HomeScreen extends GetView<AuthController> {
         ],
       ),
     );
+  }
+}
+
+class _JobListingHeader extends StatelessWidget {
+  const _JobListingHeader({required this.jobCount});
+
+  final int jobCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Find your next move',
+          style: TextStyle(
+            color: palette.textPrimary,
+            fontSize: 25,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.8,
+            height: 1.05,
+          ),
+        ),
+        const SizedBox(height: 7),
+        Text(
+          '$jobCount opportunities picked for you',
+          style: TextStyle(
+            color: palette.textSecondary,
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _EmptyJobListing extends StatelessWidget {
+  const _EmptyJobListing({
+    required this.hasSearch,
+    required this.hasFilters,
+    required this.onReset,
+  });
+
+  final bool hasSearch;
+  final bool hasFilters;
+  final VoidCallback onReset;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    const title = 'No jobs found';
+    final subtitle = hasSearch || hasFilters
+        ? 'Try clearing your search and filters to see every opportunity.'
+        : 'There are no opportunities to show right now.';
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 2),
+      padding: const EdgeInsets.fromLTRB(24, 32, 24, 28),
+      decoration: BoxDecoration(
+        color: palette.surface.withValues(alpha: 0.88),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: palette.border),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 58,
+            height: 58,
+            decoration: BoxDecoration(
+              color: AppColors.brandTeal.withValues(alpha: 0.11),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.travel_explore_rounded,
+              color: AppColors.brandTeal,
+              size: 28,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: palette.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 7),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: palette.textSecondary,
+              fontSize: 13,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 18),
+          FilledButton.icon(
+            onPressed: onReset,
+            style: FilledButton.styleFrom(
+              backgroundColor: palette.textPrimary,
+              foregroundColor: palette.scaffold,
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            icon: const Icon(Icons.refresh_rounded, size: 18),
+            label: const Text(
+              'Show all jobs',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Kept as an internal preview component for design testing in development.
+// ignore: unused_element
+class _ThemePickerDialog extends StatelessWidget {
+  const _ThemePickerDialog({
+    required this.controller,
+    required this.onSelected,
+  });
+
+  final ThemeController controller;
+  final ValueChanged<AppThemePreset> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Dialog(
+      backgroundColor: palette.surface,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Choose your look',
+                          style: TextStyle(
+                            color: palette.textPrimary,
+                            fontSize: 21,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.4,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'You can change it anytime by holding the background.',
+                          style: TextStyle(
+                            color: palette.textSecondary,
+                            fontSize: 13,
+                            height: 1.35,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Close',
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close_rounded),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              SizedBox(
+                height: 190,
+                child: Obx(() {
+                  final selectedPreset = controller.preset.value;
+                  return ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: AppThemePreset.values.length,
+                    separatorBuilder: (_, _) => const SizedBox(width: 12),
+                    itemBuilder: (context, index) {
+                      final preset = AppThemePreset.values[index];
+                      return SizedBox(
+                        width: 210,
+                        child: _ThemePreviewCard(
+                          preset: preset,
+                          isSelected: selectedPreset == preset,
+                          onTap: () => onSelected(preset),
+                        ),
+                      );
+                    },
+                  );
+                }),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ThemePreviewCard extends StatelessWidget {
+  const _ThemePreviewCard({
+    required this.preset,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final AppThemePreset preset;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: '${preset.label} theme',
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? preset.accent.withValues(alpha: 0.12)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isSelected ? preset.accent : palette.border,
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              AspectRatio(
+                aspectRatio: 1.55,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(13),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      _ThemeBackdrop(preset: preset, preview: true),
+                      Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 27,
+                              height: 7,
+                              decoration: BoxDecoration(
+                                color: preset.accent,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            const Spacer(),
+                            ...List.generate(
+                              2,
+                              (index) => Container(
+                                height: 17,
+                                margin: const EdgeInsets.only(top: 5),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.78),
+                                  borderRadius: BorderRadius.circular(6),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0x17000000),
+                                      blurRadius: 4,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (isSelected)
+                        Positioned(
+                          top: 7,
+                          right: 7,
+                          child: Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              color: preset.accent,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.check_rounded,
+                              size: 12,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                preset.label,
+                maxLines: 1,
+                style: TextStyle(
+                  color: palette.textPrimary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                preset.description,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: palette.textTertiary, fontSize: 9),
+              ),
+              const SizedBox(height: 5),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ThemeBackdrop extends StatelessWidget {
+  const _ThemeBackdrop({this.preset, this.preview = false});
+
+  final AppThemePreset? preset;
+  final bool preview;
+
+  @override
+  Widget build(BuildContext context) {
+    final activePreset =
+        preset ??
+        (Get.isRegistered<ThemeController>()
+            ? Get.find<ThemeController>().preset.value
+            : AppThemePreset.defaultTheme);
+    final isDark = context.isDark;
+    final colors = _backgroundColors(activePreset, isDark);
+    return IgnorePointer(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: colors,
+          ),
+        ),
+        child: CustomPaint(
+          painter: _BackdropGlowPainter(
+            accent: activePreset.accent,
+            dark: isDark,
+            preview: preview,
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Color> _backgroundColors(AppThemePreset preset, bool dark) {
+    return switch ((preset, dark)) {
+      (AppThemePreset.defaultTheme, false) => const [
+        Color(0xFFF8FBFC),
+        Color(0xFFF2F5F7),
+      ],
+      (AppThemePreset.defaultTheme, true) => const [
+        Color(0xFF111719),
+        Color(0xFF101214),
+      ],
+      (AppThemePreset.golden, false) => const [
+        Color(0xFFFFFDF5),
+        Color(0xFFFFF1C8),
+      ],
+      (AppThemePreset.golden, true) => const [
+        Color(0xFF211A0D),
+        Color(0xFF151109),
+      ],
+      (AppThemePreset.midnight, false) => const [
+        Color(0xFFF5F7FF),
+        Color(0xFFE5EAFE),
+      ],
+      (AppThemePreset.midnight, true) => const [
+        Color(0xFF111A38),
+        Color(0xFF080D1B),
+      ],
+      (AppThemePreset.rose, false) => const [
+        Color(0xFFFFFAFC),
+        Color(0xFFF9E4EB),
+      ],
+      (AppThemePreset.rose, true) => const [
+        Color(0xFF291720),
+        Color(0xFF1C1016),
+      ],
+      (AppThemePreset.forest, false) => const [
+        Color(0xFFF8FCF9),
+        Color(0xFFE3F2E9),
+      ],
+      (AppThemePreset.forest, true) => const [
+        Color(0xFF12231B),
+        Color(0xFF0B1712),
+      ],
+      (AppThemePreset.lavender, false) => const [
+        Color(0xFFFCFAFF),
+        Color(0xFFEDE6FA),
+      ],
+      (AppThemePreset.lavender, true) => const [
+        Color(0xFF20182E),
+        Color(0xFF151020),
+      ],
+    };
+  }
+}
+
+class _BackdropGlowPainter extends CustomPainter {
+  const _BackdropGlowPainter({
+    required this.accent,
+    required this.dark,
+    required this.preview,
+  });
+
+  final Color accent;
+  final bool dark;
+  final bool preview;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..shader =
+          RadialGradient(
+            colors: [
+              accent.withValues(alpha: dark ? 0.18 : 0.14),
+              accent.withValues(alpha: 0),
+            ],
+          ).createShader(
+            Rect.fromCircle(
+              center: Offset(size.width * 0.86, size.height * 0.14),
+              radius: size.width * (preview ? 0.72 : 0.9),
+            ),
+          );
+    canvas.drawCircle(
+      Offset(size.width * 0.86, size.height * 0.14),
+      size.width * (preview ? 0.72 : 0.9),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _BackdropGlowPainter oldDelegate) {
+    return accent != oldDelegate.accent ||
+        dark != oldDelegate.dark ||
+        preview != oldDelegate.preview;
   }
 }
 
@@ -175,7 +659,7 @@ class _JobFeedContextMenu extends StatelessWidget {
               trailingIcon: CupertinoIcons.hand_thumbsdown,
               isDestructiveAction: true,
               onPressed: () {
-                unawaited(HapticFeedback.heavyImpact());
+                unawaited(HapticFeedback.lightImpact());
                 Navigator.of(context).pop();
                 homeController.dismiss(job);
               },

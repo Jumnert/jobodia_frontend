@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
@@ -33,7 +33,8 @@ class CustomButton extends StatelessWidget {
       enabled: !isDisabled,
       color: backgroundColor ?? AppColors.primary,
       borderRadius: BorderRadius.circular(48),
-      minSize: const Size.fromHeight(48),
+      size: AdaptiveButtonSize.large,
+      minSize: const Size.fromHeight(44),
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 250),
         switchInCurve: Curves.easeInOutCubic,

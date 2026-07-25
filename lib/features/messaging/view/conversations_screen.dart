@@ -1,9 +1,9 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jobodia_frontend/core/constants/app_colors.dart';
-import 'package:jobodia_frontend/features/messaging/controller/messaging_controller.dart';
 import 'package:intl/intl.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
+import 'package:jobodia_frontend/core/widgets/quiet_glass_button.dart';
+import 'package:jobodia_frontend/features/messaging/controller/messaging_controller.dart';
 
 class ConversationsScreen extends StatelessWidget {
   const ConversationsScreen({super.key});
@@ -11,117 +11,184 @@ class ConversationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    final ctrl = Get.put(MessagingController());
+    final controller = Get.isRegistered<MessagingController>()
+        ? Get.find<MessagingController>()
+        : Get.put(MessagingController());
 
-    return AdaptiveScaffold(
-      appBar: const AdaptiveAppBar(title: 'Messages', useNativeToolbar: false),
-      body: Obx(() {
-        if (ctrl.conversations.isEmpty) {
-          return Center(
-            child: Text(
-              'No messages yet',
-              style: TextStyle(color: palette.textSecondary),
-            ),
-          );
-        }
-
-        return ListView.separated(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          itemCount: ctrl.conversations.length,
-          separatorBuilder: (_, _) => Divider(color: palette.border, height: 1),
-          itemBuilder: (context, index) {
-            final c = ctrl.conversations[index];
-            return ListTile(
-              onTap: () {
-                ctrl.openConversation(c.id);
-                Get.toNamed<void>('/conversation-detail', arguments: c);
-              },
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 8,
-              ),
-              leading: Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: AppColors.brandTeal.withAlpha(40),
-                    child: Text(
-                      c.recruiterName[0],
-                      style: const TextStyle(
-                        color: AppColors.brandTeal,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    ),
-                  ),
-                  if (c.unreadCount > 0)
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: AppColors.error,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(
-                          '${c.unreadCount}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              title: Text(
-                c.recruiterName,
-                style: TextStyle(
-                  color: palette.textPrimary,
-                  fontWeight: c.unreadCount > 0
-                      ? FontWeight.w800
-                      : FontWeight.w600,
-                  fontSize: 16,
+    return Scaffold(
+      backgroundColor: palette.scaffold,
+      body: Stack(
+        children: [
+          Obx(() {
+            if (controller.conversations.isEmpty) {
+              return Center(
+                child: Text(
+                  'No messages yet',
+                  style: TextStyle(color: palette.textSecondary),
                 ),
+              );
+            }
+            return ListView.separated(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                MediaQuery.paddingOf(context).top + 78,
+                16,
+                104,
               ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 2),
-                  Text(
-                    '${c.jobTitle} @ ${c.recruiterCompany}',
-                    style: TextStyle(
-                      color: AppColors.brandTeal,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
+              itemCount: controller.conversations.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 6),
+              itemBuilder: (context, index) {
+                final conversation = controller.conversations[index];
+                return Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(18),
+                    onTap: () {
+                      controller.openConversation(conversation.id);
+                      Get.toNamed<void>(
+                        '/conversation-detail',
+                        arguments: conversation,
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 11,
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 25,
+                            backgroundColor: AppColors.brandTeal.withValues(
+                              alpha: 0.14,
+                            ),
+                            child: Text(
+                              conversation.recruiterName.characters.first,
+                              style: const TextStyle(
+                                color: AppColors.brandTeal,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 19,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 13),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        conversation.recruiterCompany,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: palette.textPrimary,
+                                          fontSize: 15,
+                                          fontWeight:
+                                              conversation.unreadCount > 0
+                                              ? FontWeight.w800
+                                              : FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      DateFormat.MMMd().format(
+                                        conversation.lastMessageTime,
+                                      ),
+                                      style: TextStyle(
+                                        color: palette.textTertiary,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  conversation.lastMessage,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: palette.textSecondary,
+                                    fontSize: 13,
+                                    fontWeight: conversation.unreadCount > 0
+                                        ? FontWeight.w600
+                                        : FontWeight.w400,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (conversation.unreadCount > 0) ...[
+                            const SizedBox(width: 10),
+                            Container(
+                              constraints: const BoxConstraints(minWidth: 20),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 3,
+                              ),
+                              decoration: const BoxDecoration(
+                                color: AppColors.brandTeal,
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(999),
+                                ),
+                              ),
+                              child: Text(
+                                '${conversation.unreadCount}',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    c.lastMessage,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: c.unreadCount > 0
-                          ? palette.textPrimary
-                          : palette.textSecondary,
-                      fontWeight: c.unreadCount > 0
-                          ? FontWeight.w500
-                          : FontWeight.w400,
-                    ),
-                  ),
-                ],
-              ),
-              trailing: Text(
-                DateFormat.MMMd().format(c.lastMessageTime),
-                style: TextStyle(color: palette.textTertiary, fontSize: 12),
-              ),
+                );
+              },
             );
-          },
-        );
-      }),
+          }),
+          Positioned(
+            top: MediaQuery.paddingOf(context).top + 12,
+            left: 20,
+            right: 20,
+            child: Row(
+              children: [
+                QuietGlassBackButton(onPressed: Get.back),
+                const Spacer(),
+                Container(
+                  height: 44,
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: palette.surface.withValues(alpha: 0.78),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: palette.border),
+                  ),
+                  child: Text(
+                    'Messages',
+                    style: TextStyle(
+                      color: palette.textPrimary,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                const Spacer(),
+                QuietGlassIconButton(
+                  icon: Icons.search_rounded,
+                  tooltip: 'Search messages',
+                  onPressed: () {},
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

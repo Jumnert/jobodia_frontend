@@ -13,7 +13,6 @@ import 'package:jobodia_frontend/features/interview/controller/flashcards_contro
 import 'package:jobodia_frontend/features/interview/controller/interview_schedule_controller.dart';
 import 'package:jobodia_frontend/features/notifications/controller/notifications_controller.dart';
 import 'package:jobodia_frontend/features/pricing/controller/pricing_controller.dart';
-import 'package:jobodia_frontend/features/preferences/controller/preferences_controller.dart';
 import 'package:jobodia_frontend/features/saved_jobs/controller/saved_jobs_controller.dart';
 import 'package:jobodia_frontend/features/search/controller/search_controller.dart';
 import 'package:jobodia_frontend/features/settings/controller/theme_controller.dart';
@@ -33,7 +32,6 @@ class InitialBinding extends Bindings {
     Get.put(NotesController(), permanent: true);
     Get.put(SavedJobsController(), permanent: true);
     Get.put(ApplicationsController(), permanent: true);
-    Get.put(PreferencesController(), permanent: true);
     Get.put(NotificationsController(), permanent: true);
     Get.put(CvBuilderController(), permanent: true);
     Get.put(JobSearchController(), permanent: true);

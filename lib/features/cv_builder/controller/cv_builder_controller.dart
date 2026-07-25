@@ -22,6 +22,7 @@ class CvBuilderController extends GetxController {
     : _picker = picker ?? ImagePicker();
 
   static const savedCvKey = 'savedCv';
+  static const totalSteps = 5;
 
   final ImagePicker _picker;
 
@@ -56,48 +57,6 @@ class CvBuilderController extends GetxController {
   ].obs;
 
   final isParsing = false.obs;
-
-  Future<void> importResume() async {
-    isParsing.value = true;
-    try {
-      final parser = jobodia_frontend_service.ResumeParserService();
-      final data = await parser.parseResumeMock();
-
-      fullNameController.text = data['fullName'] as String;
-      emailController.text = data['email'] as String;
-      phoneController.text = data['phone'] as String;
-      locationController.text = data['location'] as String;
-      titleController.text = data['title'] as String;
-      summaryController.text = data['summary'] as String;
-
-      educations.clear();
-      final eduForm = CvEducationForm();
-      eduForm.schoolController.text = data['school'] as String;
-      eduForm.degreeController.text = data['degree'] as String;
-      eduForm.startController.text = data['eduStart'] as String;
-      eduForm.endController.text = data['eduEnd'] as String;
-      educations.add(eduForm);
-
-      workExperiences.clear();
-      final workForm = CvWorkExperienceForm();
-      workForm.companyController.text = data['company'] as String;
-      workForm.roleController.text = data['role'] as String;
-      workForm.startController.text = data['workStart'] as String;
-      workForm.endController.text = data['workEnd'] as String;
-      workForm.descriptionController.text = data['workDesc'] as String;
-      workExperiences.add(workForm);
-
-      skills.assignAll((data['skills'] as List<dynamic>).cast<String>());
-
-      Get.snackbar(
-        'Success',
-        'Resume parsed and auto-filled successfully!',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } finally {
-      isParsing.value = false;
-    }
-  }
 
   /// Parses [text] with the real regex parser, fills the form with whatever
   /// fields were extracted, and shows a snackbar summarising the result.
@@ -156,6 +115,87 @@ class CvBuilderController extends GetxController {
       'Your profile details were copied into the form.',
       snackPosition: SnackPosition.BOTTOM,
     );
+  }
+
+  /// Populates every CV section with a realistic one-page example so the
+  /// complete editing and export experience can be evaluated quickly.
+  void fillWithSampleCv() {
+    fullNameController.text = 'Sophea Dara';
+    emailController.text = 'sophea.dara@example.com';
+    phoneController.text = '+855 12 345 678';
+    locationController.text = 'Phnom Penh, Cambodia';
+    titleController.text = 'Senior Product Designer';
+    summaryController.text =
+        'Product designer with 6+ years of experience turning complex fintech '
+        'and marketplace workflows into simple mobile experiences. I combine '
+        'customer research, systems thinking, and close engineering partnership '
+        'to ship accessible products that improve activation and retention.';
+    skills.assignAll(const [
+      'Product strategy',
+      'UX research',
+      'Interaction design',
+      'Design systems',
+      'Figma',
+      'Prototyping',
+      'Usability testing',
+      'Data analysis',
+      'Accessibility',
+      'Agile delivery',
+    ]);
+
+    for (final entry in workExperiences) {
+      entry.dispose();
+    }
+    final currentRole = CvWorkExperienceForm()
+      ..roleController.text = 'Senior Product Designer'
+      ..companyController.text = 'Mekong Digital Bank'
+      ..startController.text = 'Mar 2022'
+      ..endController.text = 'Present'
+      ..descriptionController.text =
+          'Led end-to-end design for mobile onboarding used by 180,000+ customers, increasing completed applications by 31%.\n'
+          'Built and governed a 90-component design system that reduced design-to-development time by 28%.\n'
+          'Partnered with research, product, compliance, and engineering across three cross-functional squads.';
+    final previousRole = CvWorkExperienceForm()
+      ..roleController.text = 'Product Designer'
+      ..companyController.text = 'Jobodia Labs'
+      ..startController.text = 'Jun 2019'
+      ..endController.text = 'Feb 2022'
+      ..descriptionController.text =
+          'Redesigned job discovery and application tracking, improving weekly active use by 24%.\n'
+          'Ran 40+ customer interviews and usability studies across candidate and recruiter journeys.\n'
+          'Introduced accessibility reviews that brought core flows to WCAG 2.1 AA standards.';
+    workExperiences.assignAll([currentRole, previousRole]);
+
+    for (final entry in educations) {
+      entry.dispose();
+    }
+    final degree = CvEducationForm()
+      ..schoolController.text = 'Royal University of Phnom Penh'
+      ..degreeController.text = 'B.A. Media and Communication'
+      ..startController.text = '2015'
+      ..endController.text = '2019'
+      ..descriptionController.text =
+          'Graduated with distinction. Focused on human-centered communication and digital media.';
+    final certificate = CvEducationForm()
+      ..schoolController.text = 'Interaction Design Foundation'
+      ..degreeController.text = 'UX Management Specialization'
+      ..startController.text = '2021'
+      ..endController.text = '2022'
+      ..descriptionController.text =
+          'Coursework in design leadership, accessibility, and evidence-based product decisions.';
+    educations.assignAll([degree, certificate]);
+
+    selectedTemplateIndex.value = 1;
+    stepIndex.value = totalSteps - 1;
+    generateError.value = '';
+    if (!Get.testMode) {
+      Get.snackbar(
+        'Sample CV ready',
+        'Every section is filled. Review it or jump through the steps to test the full-page resume.',
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+    }
   }
 
   /// Applies a partial field map (only keys present are written). Shared by
@@ -236,10 +276,49 @@ class CvBuilderController extends GetxController {
   }
 
   void nextStep() {
-    if (stepIndex.value < 2) {
+    final error = _validateStep(stepIndex.value);
+    if (error != null) {
+      generateError.value = error;
+      return;
+    }
+    generateError.value = '';
+
+    if (stepIndex.value < totalSteps - 1) {
       stepIndex.value++;
     } else {
       generateCv();
+    }
+  }
+
+  String? _validateStep(int step) {
+    switch (step) {
+      case 0:
+        if (fullNameController.text.trim().isEmpty) {
+          return 'Add your full name to continue.';
+        }
+        if (emailController.text.trim().isEmpty &&
+            phoneController.text.trim().isEmpty) {
+          return 'Add an email address or phone number so employers can contact you.';
+        }
+        return null;
+      case 1:
+        if (titleController.text.trim().isEmpty) {
+          return 'Add the professional title you want employers to see.';
+        }
+        return null;
+      case 2:
+        return _workEntryError();
+      case 3:
+        final educationError = _educationEntryError();
+        if (educationError != null) return educationError;
+        final hasWork = workExperiences.any((entry) => entry.hasContent);
+        final hasEducation = educations.any((entry) => entry.hasContent);
+        if (!hasWork && !hasEducation) {
+          return 'Add at least one work experience or education entry.';
+        }
+        return null;
+      default:
+        return null;
     }
   }
 
@@ -270,10 +349,55 @@ class CvBuilderController extends GetxController {
     if (fullNameController.text.trim().isEmpty) {
       return 'Add your full name before generating the CV.';
     }
+    if (emailController.text.trim().isEmpty &&
+        phoneController.text.trim().isEmpty) {
+      return 'Add an email address or phone number before generating the CV.';
+    }
+    if (titleController.text.trim().isEmpty) {
+      return 'Add a professional title before generating the CV.';
+    }
+    final workError = _workEntryError();
+    if (workError != null) return workError;
+    final educationError = _educationEntryError();
+    if (educationError != null) return educationError;
     final hasWork = workExperiences.any((e) => e.hasContent);
     final hasEducation = educations.any((e) => e.hasContent);
     if (!hasWork && !hasEducation) {
       return 'Add at least one work experience or education entry.';
+    }
+    return null;
+  }
+
+  String? _workEntryError() {
+    for (var index = 0; index < workExperiences.length; index++) {
+      final entry = workExperiences[index];
+      if (!entry.hasContent) continue;
+      if (entry.roleController.text.trim().isEmpty ||
+          entry.companyController.text.trim().isEmpty) {
+        return 'Complete the role and company for experience ${index + 1}.';
+      }
+      if (entry.startDate != null &&
+          entry.endDate != null &&
+          entry.endDate!.isBefore(entry.startDate!)) {
+        return 'The end date for experience ${index + 1} must be after its start date.';
+      }
+    }
+    return null;
+  }
+
+  String? _educationEntryError() {
+    for (var index = 0; index < educations.length; index++) {
+      final entry = educations[index];
+      if (!entry.hasContent) continue;
+      if (entry.schoolController.text.trim().isEmpty ||
+          entry.degreeController.text.trim().isEmpty) {
+        return 'Complete the school and degree for education ${index + 1}.';
+      }
+      if (entry.startDate != null &&
+          entry.endDate != null &&
+          entry.endDate!.isBefore(entry.startDate!)) {
+        return 'The end date for education ${index + 1} must be after its start date.';
+      }
     }
     return null;
   }
@@ -300,6 +424,9 @@ class CvBuilderController extends GetxController {
     );
   }
 
+  /// Snapshot used by the design step to render the same PDF as final export.
+  CvData buildDraftCv() => _buildCvData();
+
   void _persist(CvData cv) {
     final secure = SecureStorageService.to;
     secure.writeSecure(savedCvKey, jsonEncode(cv.toJson()));
@@ -314,16 +441,72 @@ class CvBuilderController extends GetxController {
         final cv = CvData.fromJson(map);
         generatedCv.value = cv;
         isGenerated.value = true;
+        _restoreEditableFields(cv);
       }
     } on Object catch (e, st) {
       AppLogger.error('Failed to load CV from secure storage', e, st);
     }
   }
 
+  void _restoreEditableFields(CvData cv) {
+    if (fullNameController.text.trim().isNotEmpty) return;
+
+    fullNameController.text = cv.fullName;
+    titleController.text = cv.title;
+    emailController.text = cv.email;
+    phoneController.text = cv.phone;
+    locationController.text = cv.location;
+    summaryController.text = cv.summary;
+    selectedTemplateIndex.value = cv.templateIndex;
+    skills.assignAll(cv.skills);
+    headshotBytes.value = cv.headshotBytes;
+
+    for (final entry in workExperiences) {
+      entry.dispose();
+    }
+    workExperiences.assignAll(
+      cv.workExperiences.isEmpty
+          ? [CvWorkExperienceForm()]
+          : cv.workExperiences.map((item) {
+              final form = CvWorkExperienceForm();
+              form.roleController.text = item.role;
+              form.companyController.text = item.company;
+              form.startController.text = item.start;
+              form.endController.text = item.end;
+              form.descriptionController.text = item.description;
+              return form;
+            }),
+    );
+
+    for (final entry in educations) {
+      entry.dispose();
+    }
+    educations.assignAll(
+      cv.educations.isEmpty
+          ? [CvEducationForm()]
+          : cv.educations.map((item) {
+              final form = CvEducationForm();
+              form.schoolController.text = item.school;
+              form.degreeController.text = item.degree;
+              form.startController.text = item.start;
+              form.endController.text = item.end;
+              form.descriptionController.text = item.description;
+              return form;
+            }),
+    );
+  }
+
   void previousStep() {
     if (stepIndex.value > 0) {
+      generateError.value = '';
       stepIndex.value--;
     }
+  }
+
+  void goToStep(int step) {
+    if (step < 0 || step >= totalSteps) return;
+    generateError.value = '';
+    stepIndex.value = step;
   }
 
   void selectTemplate(int index) {
@@ -412,8 +595,10 @@ class CvBuilderController extends GetxController {
   }
 
   void addSkill() {
-    final skill = skillController.text.trim();
-    if (skill.isEmpty || skills.contains(skill)) {
+    final skill = InputSanitizer.sanitizeText(skillController.text);
+    if (skill.isEmpty ||
+        skills.length >= 15 ||
+        skills.any((item) => item.toLowerCase() == skill.toLowerCase())) {
       return;
     }
 

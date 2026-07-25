@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/features/assessments/model/assessment_model.dart';
 import 'package:uuid/uuid.dart';

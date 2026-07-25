@@ -185,7 +185,7 @@ class _ReportContentState extends State<_ReportContent> {
               label: 'Proceed to Report',
               onPressed: () {
                 if (!(_formKey.currentState?.validate() ?? false)) return;
-                unawaited(HapticFeedback.mediumImpact());
+                unawaited(HapticFeedback.lightImpact());
                 controller.submit(
                   jobId: jobId,
                   jobTitle: jobTitle,

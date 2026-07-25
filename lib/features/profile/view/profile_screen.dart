@@ -1,10 +1,11 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/utils/safe_image_loader.dart';
 import 'package:jobodia_frontend/core/widgets/animated_scale_button.dart';
+import 'package:jobodia_frontend/core/widgets/quiet_glass_button.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
 import 'package:jobodia_frontend/features/cv_builder/model/cv_data.dart';
 import 'package:jobodia_frontend/features/profile/controller/profile_controller.dart';
@@ -39,38 +40,50 @@ class ProfileScreen extends GetView<ProfileController> {
                         topInset: topInset,
                       ),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 36),
+                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 40),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Obx(
-                              () => ProfileAboutSection(
-                                about: controller.profile.about,
-                                isExpanded: controller.isAboutExpanded.value,
-                                onReadMore: controller.toggleAbout,
+                              () => _ProfileSectionCard(
+                                icon: Icons.person_outline_rounded,
+                                child: ProfileAboutSection(
+                                  about: controller.profile.about,
+                                  isExpanded: controller.isAboutExpanded.value,
+                                  onReadMore: controller.toggleAbout,
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 18),
+                            const SizedBox(height: 12),
                             Obx(() {
                               final skills = controller.profile.skills;
                               if (skills.isEmpty) {
                                 return const SizedBox.shrink();
                               }
-                              return _SkillsSection(skills: skills);
+                              return _ProfileSectionCard(
+                                icon: Icons.auto_awesome_rounded,
+                                child: _SkillsSection(skills: skills),
+                              );
                             }),
-                            const SizedBox(height: 18),
+                            const SizedBox(height: 12),
                             Obx(() {
                               final links = controller.profile.portfolioLinks;
                               if (links.isEmpty) return const SizedBox.shrink();
-                              return _PortfolioSection(links: links);
+                              return _ProfileSectionCard(
+                                icon: Icons.language_rounded,
+                                child: _PortfolioSection(links: links),
+                              );
                             }),
-                            const SizedBox(height: 18),
+                            const SizedBox(height: 12),
                             Obx(
-                              () => ExperienceTimeline(
-                                experiences: controller.profile.experiences,
+                              () => _ProfileSectionCard(
+                                icon: Icons.work_outline_rounded,
+                                child: ExperienceTimeline(
+                                  experiences: controller.profile.experiences,
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 18),
+                            const SizedBox(height: 12),
                             Obx(() {
                               final cv = Get.find<CvBuilderController>()
                                   .generatedCv
@@ -92,22 +105,14 @@ class ProfileScreen extends GetView<ProfileController> {
               right: 20,
               child: Row(
                 children: [
-                  AdaptiveButton.icon(
-                    onPressed: () => Get.back<void>(),
-                    icon: PlatformInfo.isIOS
-                        ? Icons.arrow_back_ios_new_rounded
-                        : Icons.arrow_back_rounded,
-                    iconColor: palette.iconPrimary,
-                    style: AdaptiveButtonStyle.glass,
-                    minSize: const Size(44, 44),
-                    useSmoothRectangleBorder: false,
-                  ),
+                  QuietGlassBackButton(onPressed: () => Get.back<void>()),
                   const Spacer(),
                   AdaptiveButton.icon(
                     onPressed: () => Get.toNamed<void>(AppRoutes.settings),
                     icon: Icons.settings_outlined,
                     iconColor: palette.iconPrimary,
                     style: AdaptiveButtonStyle.glass,
+                    size: AdaptiveButtonSize.large,
                     minSize: const Size(44, 44),
                     useSmoothRectangleBorder: false,
                   ),
@@ -117,6 +122,7 @@ class ProfileScreen extends GetView<ProfileController> {
                     icon: Icons.bar_chart_rounded,
                     iconColor: palette.iconPrimary,
                     style: AdaptiveButtonStyle.glass,
+                    size: AdaptiveButtonSize.large,
                     minSize: const Size(44, 44),
                     useSmoothRectangleBorder: false,
                   ),
@@ -142,8 +148,8 @@ class _ProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     // Cover runs from the very top (behind the status bar + toolbar).
-    final coverHeight = topInset + 150;
-    const avatarSize = 104.0;
+    final coverHeight = topInset + 176;
+    const avatarSize = 108.0;
 
     return Obx(() {
       final profile = controller.profile;
@@ -194,16 +200,48 @@ class _ProfileHeader extends StatelessWidget {
                   left: 0,
                   right: 0,
                   height: coverHeight,
-                  child: const DecoratedBox(
-                    decoration: BoxDecoration(
+                  child: DecoratedBox(
+                    decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          AppColors.accentPurple,
-                          AppColors.accentPurpleDark,
+                          Color(0xFF101820),
+                          Color(0xFF1C4D55),
+                          AppColors.brandTeal,
                         ],
                       ),
+                    ),
+                    child: Stack(
+                      children: [
+                        Positioned(
+                          right: -36,
+                          top: -52,
+                          child: Container(
+                            width: 170,
+                            height: 170,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withValues(alpha: 0.08),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          left: -55,
+                          bottom: -70,
+                          child: Container(
+                            width: 190,
+                            height: 190,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.12),
+                                width: 32,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -216,7 +254,7 @@ class _ProfileHeader extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -226,9 +264,10 @@ class _ProfileHeader extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: palette.textPrimary,
-                    fontSize: 23,
+                    fontSize: 25,
                     fontWeight: FontWeight.w800,
-                    height: 1.1,
+                    height: 1.05,
+                    letterSpacing: -0.6,
                   ),
                 ),
               ),
@@ -249,11 +288,128 @@ class _ProfileHeader extends StatelessWidget {
           Text(
             profile.role,
             textAlign: TextAlign.center,
-            style: TextStyle(color: palette.textSecondary, fontSize: 14),
+            style: TextStyle(
+              color: palette.textSecondary,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 13),
+              decoration: BoxDecoration(
+                color: palette.surface,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: palette.border),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  _ProfileMetric(
+                    value: '${profile.experiences.length}',
+                    label: 'Experience',
+                  ),
+                  Container(width: 1, height: 30, color: palette.divider),
+                  _ProfileMetric(
+                    value: '${profile.skills.length}',
+                    label: 'Skills',
+                  ),
+                  Container(width: 1, height: 30, color: palette.divider),
+                  _ProfileMetric(
+                    value: '${profile.portfolioLinks.length}',
+                    label: 'Projects',
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       );
     });
+  }
+}
+
+class _ProfileMetric extends StatelessWidget {
+  const _ProfileMetric({required this.value, required this.label});
+
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: TextStyle(
+              color: palette.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              color: palette.textTertiary,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileSectionCard extends StatelessWidget {
+  const _ProfileSectionCard({required this.icon, required this.child});
+
+  final IconData icon;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 17),
+      decoration: BoxDecoration(
+        color: palette.surface,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: palette.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.035),
+            blurRadius: 18,
+            offset: const Offset(0, 7),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: 0,
+            top: 0,
+            child: Icon(
+              icon,
+              size: 19,
+              color: AppColors.brandTeal.withValues(alpha: 0.65),
+            ),
+          ),
+          Padding(padding: const EdgeInsets.only(right: 26), child: child),
+        ],
+      ),
+    );
   }
 }
 
@@ -286,14 +442,16 @@ class _SkillsSection extends StatelessWidget {
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.primary.withAlpha(22),
+                color: AppColors.brandTeal.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.primary.withAlpha(60)),
+                border: Border.all(
+                  color: AppColors.brandTeal.withValues(alpha: 0.24),
+                ),
               ),
               child: Text(
                 skill,
                 style: const TextStyle(
-                  color: AppColors.primary,
+                  color: AppColors.brandTeal,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
@@ -356,7 +514,7 @@ class _PortfolioSection extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.link_rounded,
-                      color: AppColors.primary,
+                      color: AppColors.brandTeal,
                       size: 18,
                     ),
                     const SizedBox(width: 10),

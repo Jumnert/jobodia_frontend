@@ -35,7 +35,16 @@ class SelectedPlanCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(plan.icon, color: Colors.white, size: 24),
+              SizedBox(
+                width: 52,
+                height: 52,
+                child: Image.asset(
+                  plan.mascotAsset,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, _, _) =>
+                      Icon(plan.icon, color: Colors.white, size: 28),
+                ),
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -143,7 +152,7 @@ class SelectedPlanCard extends StatelessWidget {
             children: [
               FilledButton(
                 onPressed: () {
-                  unawaited(HapticFeedback.mediumImpact());
+                  unawaited(HapticFeedback.lightImpact());
                   final pricingCtrl = Get.find<PricingController>();
                   final cycleLabel = billingCycle == BillingCycle.yearly
                       ? 'yearly'
@@ -161,7 +170,14 @@ class SelectedPlanCard extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(plan.icon, size: 40, color: AppColors.primary),
+                          SizedBox(
+                            width: 72,
+                            height: 72,
+                            child: Image.asset(
+                              plan.mascotAsset,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
                           const SizedBox(height: 12),
                           Text(
                             '${plan.name} Plan',

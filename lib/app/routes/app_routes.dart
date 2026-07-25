@@ -18,7 +18,6 @@ abstract final class AppRoutes {
   static const privacyPolicy = '/privacy-policy';
   static const report = '/report';
   static const editProfile = '/edit-profile';
-  static const preferencesWizard = '/preferences-wizard';
   static const companyProfile = '/company-profile';
   static const applicationAnalytics = '/application-analytics';
   static const statistics = '/statistics';

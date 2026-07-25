@@ -21,13 +21,13 @@ class OnboardingPageIndicator extends StatelessWidget {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeOutCubic,
-          margin: const EdgeInsets.symmetric(horizontal: 5),
-          width: isActive ? 18 : 6,
-          height: 6,
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          width: isActive ? 17 : 5,
+          height: 5,
           decoration: BoxDecoration(
             color: isActive
-                ? AppColors.accentPurple
-                : Colors.white.withValues(alpha: 0.42),
+                ? AppColors.primary
+                : AppColors.hint.withValues(alpha: 0.55),
             borderRadius: BorderRadius.circular(999),
           ),
         );

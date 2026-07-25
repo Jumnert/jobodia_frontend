@@ -24,8 +24,7 @@ class ParseResult {
 /// Pure-Dart, regex-based resume parser. No AI/ML, no network, no plugins.
 ///
 /// Extracts seven scored fields from plain text: name, email, phone, location,
-/// skills, one work entry, and one education entry. Sample data is kept for the
-/// "Use sample data" path.
+/// skills, one work entry, and one education entry.
 class ResumeParserService {
   /// Number of scored fields used to compute [ParseResult.confidence].
   static const int scoredFieldCount = 7;
@@ -328,32 +327,6 @@ class ResumeParserService {
     }
     return _DateRange(start: dates.trim(), end: '');
   }
-
-  /// Hardcoded sample resume used by the "Use sample data" path.
-  Map<String, dynamic> sampleData() => {
-    'fullName': 'Alex Johnson',
-    'email': 'alex.j@example.com',
-    'phone': '+1 234 567 890',
-    'location': 'San Francisco, CA',
-    'title': 'Senior Flutter Developer',
-    'summary':
-        'Experienced software engineer specializing in Flutter and mobile app development.',
-    'school': 'Stanford University',
-    'degree': 'B.S. Computer Science',
-    'eduStart': '2016',
-    'eduEnd': '2020',
-    'company': 'Tech Corp',
-    'role': 'Senior Mobile Developer',
-    'workStart': '2020',
-    'workEnd': 'Present',
-    'workDesc':
-        'Lead developer for main consumer app. Increased retention by 20%.',
-    'skills': ['Flutter', 'Dart', 'Firebase', 'REST APIs'],
-  };
-
-  /// Thin wrapper kept so existing call sites that used the old mock still
-  /// compile. Returns [sampleData].
-  Future<Map<String, dynamic>> parseResumeMock() async => sampleData();
 }
 
 /// A single parsed work/education entry.

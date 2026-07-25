@@ -6,8 +6,10 @@ import 'package:jobodia_frontend/app/bindings/initial_binding.dart';
 import 'package:jobodia_frontend/app/routes/app_pages.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/app/theme/app_theme.dart';
+import 'package:jobodia_frontend/core/widgets/seasonal_atmosphere.dart';
 import 'package:jobodia_frontend/features/onboarding/controllers/onboarding_controller.dart';
 import 'package:jobodia_frontend/features/settings/controller/theme_controller.dart';
+import 'package:jobodia_frontend/features/splash/view/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,22 +18,14 @@ Future<void> main() async {
   runApp(const JobodiaApp());
 }
 
-/// Tears down any native iOS 26 tab bar that an earlier build/session may have
-/// installed at the native root view controller.
-///
-/// `IOS26NativeSearchTabBar.enable()` swaps the app's native root for a
-/// `UITabBarController`, and that swap survives a hot restart (only a full
-/// process kill or an explicit `disable()` clears it). The package's own
-/// `disable()` is gated behind a Dart flag that resets on restart, so we invoke
-/// the platform method directly to guarantee a single, Flutter-managed
-/// navigation bar. On a fresh launch (or non-iOS) this is a harmless no-op.
+/// Ensures Flutter owns navigation again after an Adaptive UI hot restart.
 Future<void> _clearLingeringNativeTabBar() async {
   try {
     await const MethodChannel(
       'adaptive_platform_ui/native_tab_bar',
     ).invokeMethod<void>('disableNativeTabBar');
   } on Object {
-    // No native tab bar installed — nothing to clear.
+    // No native tab bar was installed.
   }
 }
 
@@ -43,6 +37,7 @@ class JobodiaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final preset = ThemeController.readStoredPreset();
     return GetMaterialApp(
       title: 'Jobodia',
       debugShowCheckedModeBanner: false,
@@ -53,19 +48,25 @@ class JobodiaApp extends StatelessWidget {
         page: () => const _UnknownRouteScreen(),
       ),
       getPages: AppPages.pages,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
+      theme: AppTheme.forPreset(preset),
+      darkTheme: AppTheme.forPreset(preset, brightness: Brightness.dark),
       themeMode: _resolveThemeMode(),
-      // Make native adaptive_platform_ui components (glass buttons, popup
-      // menus, tab bar) follow the app's theme instead of the device's system
-      // appearance. Those widgets read MediaQuery.platformBrightness, so we
-      // override it to match the active app theme.
+      // Keep Adaptive UI components aligned with Jobodia's in-app theme.
       builder: (context, child) {
         final brightness = Theme.of(context).brightness;
         final media = MediaQuery.of(context);
-        return MediaQuery(
-          data: media.copyWith(platformBrightness: brightness),
-          child: child ?? const SizedBox.shrink(),
+        final appChild = child ?? const SizedBox.shrink();
+        final themeController = Get.find<ThemeController>();
+        return Obx(
+          () => MediaQuery(
+            data: media.copyWith(platformBrightness: brightness),
+            child: SplashScreen(
+              child: SeasonalAtmosphere(
+                preset: themeController.preset.value,
+                child: appChild,
+              ),
+            ),
+          ),
         );
       },
     );

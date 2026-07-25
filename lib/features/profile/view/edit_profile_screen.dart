@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -93,7 +93,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   void _removeSkill(int index) {
-    unawaited(HapticFeedback.heavyImpact());
+    unawaited(HapticFeedback.lightImpact());
     setState(() => _skills.removeAt(index));
   }
 
@@ -102,7 +102,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   void _removePortfolioLink(int index) {
-    unawaited(HapticFeedback.heavyImpact());
+    unawaited(HapticFeedback.lightImpact());
     setState(() {
       _portfolioControllers[index].dispose();
       _portfolioControllers.removeAt(index);
@@ -114,7 +114,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   void _removeExperience(int index) {
-    unawaited(HapticFeedback.heavyImpact());
+    unawaited(HapticFeedback.lightImpact());
     setState(() {
       _expControllers[index].dispose();
       _expControllers.removeAt(index);

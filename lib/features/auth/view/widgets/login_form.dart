@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -8,7 +7,6 @@ import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/custom_button.dart';
 import 'package:jobodia_frontend/core/widgets/custom_text_field.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
-import 'package:jobodia_frontend/features/auth/view/widgets/social_login_section.dart';
 
 /// Login form UI. Validation and actions live in AuthController.
 class LoginForm extends GetView<AuthController> {
@@ -16,6 +14,7 @@ class LoginForm extends GetView<AuthController> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -72,59 +71,26 @@ class LoginForm extends GetView<AuthController> {
                   },
           ),
         ),
-        const SizedBox(height: 18),
-        const SocialLoginSection(title: 'Or Log in with'),
-        const SizedBox(height: 22),
+        const SizedBox(height: 24),
         Wrap(
           alignment: WrapAlignment.center,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            const Text(
+            Text(
               "Don't have an account? ",
-              style: TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: palette.textSecondary),
             ),
             GestureDetector(
               onTap: () => controller.changeAuthTab(1),
-              child: const Text(
+              child: Text(
                 'Register',
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: palette.textPrimary,
                   fontWeight: FontWeight.w700,
                 ),
               ),
             ),
           ],
-        ),
-        if (kDebugMode) ...[
-          const SizedBox(height: 26),
-          const _TemporaryTestNavigation(),
-        ],
-      ],
-    );
-  }
-}
-
-class _TemporaryTestNavigation extends StatelessWidget {
-  const _TemporaryTestNavigation();
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 4,
-      runSpacing: 2,
-      children: [
-        TextButton(
-          onPressed: () => Get.toNamed(AppRoutes.aboutUs),
-          child: const Text('About Us'),
-        ),
-        TextButton(
-          onPressed: () => Get.toNamed(AppRoutes.privacyPolicy),
-          child: const Text('Privacy & Policy'),
-        ),
-        TextButton(
-          onPressed: () => Get.toNamed(AppRoutes.report),
-          child: const Text('Report'),
         ),
       ],
     );
@@ -152,7 +118,7 @@ class _PasswordVisibilityButton extends StatelessWidget {
         child: Icon(
           isVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
           key: ValueKey(isVisible),
-          color: AppColors.textSecondary,
+          color: context.palette.textSecondary,
         ),
       ),
     );

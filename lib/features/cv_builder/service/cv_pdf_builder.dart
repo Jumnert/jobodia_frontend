@@ -8,8 +8,8 @@ import 'package:jobodia_frontend/features/cv_builder/model/cv_data.dart';
 /// the exported PDF so they stay visually matched.
 const _accents = <PdfColor>[
   PdfColor.fromInt(0xFF0EA5A4), // Classic — teal
-  PdfColor.fromInt(0xFF2B5DF0), // Balanced — blue
-  PdfColor.fromInt(0xFF202428), // Modern — near-black band
+  PdfColor.fromInt(0xFF18A999), // Editorial — green
+  PdfColor.fromInt(0xFF173E3C), // Impact — deep green
 ];
 
 PdfColor accentForTemplate(int index) =>
@@ -22,7 +22,13 @@ Future<Uint8List> buildCvPdf(CvData cv) async {
     cv.templateIndex >= 0 && cv.templateIndex < _accents.length,
     'templateIndex ${cv.templateIndex} out of range 0..${_accents.length - 1}',
   );
-  final doc = pw.Document();
+  final doc = pw.Document(
+    title: '${cv.fullName} — CV',
+    author: cv.fullName,
+    creator: 'Jobodia CV Builder',
+    subject: cv.title,
+    keywords: cv.skills.join(', '),
+  );
   final image = cv.hasHeadshot ? pw.MemoryImage(cv.headshotBytes!) : null;
   final accent = accentForTemplate(cv.templateIndex);
 
@@ -50,47 +56,82 @@ Future<Uint8List> buildCvPdf(CvData cv) async {
 }
 
 // ---------------------------------------------------------------------------
-// Classic — single column, centered header, teal section underlines.
+// Classic — editorial single column with a structured masthead.
 // ---------------------------------------------------------------------------
 pw.Widget _classic(CvData cv, pw.MemoryImage? image, PdfColor accent) {
   return pw.Padding(
     padding: const pw.EdgeInsets.all(36),
     child: pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.center,
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        if (image != null)
-          pw.Container(
-            width: 86,
-            height: 86,
-            margin: const pw.EdgeInsets.only(bottom: 12),
-            decoration: pw.BoxDecoration(
-              shape: pw.BoxShape.circle,
-              image: pw.DecorationImage(image: image, fit: pw.BoxFit.cover),
-            ),
-          ),
-        pw.Text(
-          cv.fullName.isEmpty ? 'Your Name' : cv.fullName,
-          style: pw.TextStyle(fontSize: 26, fontWeight: pw.FontWeight.bold),
-        ),
-        if (cv.title.isNotEmpty)
-          pw.Padding(
-            padding: const pw.EdgeInsets.only(top: 4),
-            child: pw.Text(
-              cv.title.toUpperCase(),
-              style: pw.TextStyle(
-                fontSize: 12,
-                color: accent,
-                letterSpacing: 2,
-                fontWeight: pw.FontWeight.bold,
+        pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Expanded(
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    cv.fullName.isEmpty ? 'Your Name' : cv.fullName,
+                    style: pw.TextStyle(
+                      fontSize: 30,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  if (cv.title.isNotEmpty)
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.only(top: 5),
+                      child: pw.Text(
+                        cv.title.toUpperCase(),
+                        style: pw.TextStyle(
+                          fontSize: 11,
+                          color: accent,
+                          letterSpacing: 1.8,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
-          ),
-        pw.SizedBox(height: 8),
-        pw.Text(
-          _contactLine(cv),
-          style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+            pw.SizedBox(width: 20),
+            if (image != null)
+              pw.Container(
+                width: 64,
+                height: 76,
+                decoration: pw.BoxDecoration(
+                  borderRadius: pw.BorderRadius.circular(5),
+                  image: pw.DecorationImage(image: image, fit: pw.BoxFit.cover),
+                ),
+              )
+            else
+              pw.SizedBox(
+                width: 170,
+                child: pw.Text(
+                  _contactLine(cv).replaceAll('  |  ', '\n'),
+                  textAlign: pw.TextAlign.right,
+                  style: const pw.TextStyle(
+                    fontSize: 9.5,
+                    lineSpacing: 3,
+                    color: PdfColors.grey700,
+                  ),
+                ),
+              ),
+          ],
         ),
-        pw.SizedBox(height: 20),
+        if (image != null) ...[
+          pw.SizedBox(height: 8),
+          pw.Text(
+            _contactLine(cv),
+            style: const pw.TextStyle(fontSize: 9.5, color: PdfColors.grey700),
+          ),
+        ],
+        pw.Container(
+          margin: const pw.EdgeInsets.only(top: 14, bottom: 18),
+          height: 3,
+          width: 52,
+          color: accent,
+        ),
         if (cv.summary.isNotEmpty) ...[
           _classicSection('Profile', accent),
           pw.Text(cv.summary, style: const pw.TextStyle(fontSize: 11)),
@@ -127,18 +168,22 @@ pw.Widget _classic(CvData cv, pw.MemoryImage? image, PdfColor accent) {
 pw.Widget _classicSection(String label, PdfColor accent) {
   return pw.Container(
     width: double.infinity,
-    margin: const pw.EdgeInsets.only(bottom: 8),
-    padding: const pw.EdgeInsets.only(bottom: 4),
-    decoration: pw.BoxDecoration(
-      border: pw.Border(bottom: pw.BorderSide(color: accent, width: 1.4)),
-    ),
-    child: pw.Text(
-      label.toUpperCase(),
-      style: pw.TextStyle(
-        fontSize: 12,
-        letterSpacing: 1.5,
-        fontWeight: pw.FontWeight.bold,
-      ),
+    margin: const pw.EdgeInsets.only(bottom: 9),
+    child: pw.Row(
+      children: [
+        pw.Container(width: 7, height: 7, color: accent),
+        pw.SizedBox(width: 8),
+        pw.Text(
+          label.toUpperCase(),
+          style: pw.TextStyle(
+            fontSize: 11,
+            letterSpacing: 1.6,
+            fontWeight: pw.FontWeight.bold,
+          ),
+        ),
+        pw.SizedBox(width: 10),
+        pw.Expanded(child: pw.Container(height: 0.6, color: PdfColors.grey400)),
+      ],
     ),
   );
 }
@@ -190,18 +235,63 @@ pw.Widget _classicEntry(
         if (description.isNotEmpty)
           pw.Padding(
             padding: const pw.EdgeInsets.only(top: 3),
-            child: pw.Text(
-              description,
-              style: const pw.TextStyle(fontSize: 10, lineSpacing: 2),
-            ),
+            child: _achievementText(description),
           ),
       ],
     ),
   );
 }
 
+pw.Widget _achievementText(String description) {
+  final lines = description
+      .split(RegExp(r'\r?\n'))
+      .map((line) => line.trim().replaceFirst(RegExp(r'^[•\-–]\s*'), ''))
+      .where((line) => line.isNotEmpty)
+      .toList();
+
+  if (lines.length <= 1) {
+    return pw.Text(
+      description.trim(),
+      style: const pw.TextStyle(fontSize: 10, lineSpacing: 2),
+    );
+  }
+
+  return pw.Column(
+    crossAxisAlignment: pw.CrossAxisAlignment.start,
+    children: lines
+        .map(
+          (line) => pw.Padding(
+            padding: const pw.EdgeInsets.only(bottom: 2),
+            child: pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Padding(
+                  padding: const pw.EdgeInsets.only(top: 4, right: 6),
+                  child: pw.Container(
+                    width: 3,
+                    height: 3,
+                    decoration: const pw.BoxDecoration(
+                      color: PdfColors.grey800,
+                      shape: pw.BoxShape.circle,
+                    ),
+                  ),
+                ),
+                pw.Expanded(
+                  child: pw.Text(
+                    line,
+                    style: const pw.TextStyle(fontSize: 10, lineSpacing: 2),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        )
+        .toList(),
+  );
+}
+
 // ---------------------------------------------------------------------------
-// Balanced — split column: tinted left sidebar + main content column.
+// Editorial — deep sidebar with a clean reading column.
 // ---------------------------------------------------------------------------
 pw.Widget _balanced(CvData cv, pw.MemoryImage? image, PdfColor accent) {
   return pw.Row(
@@ -210,7 +300,7 @@ pw.Widget _balanced(CvData cv, pw.MemoryImage? image, PdfColor accent) {
       // Sidebar
       pw.Container(
         width: 180,
-        color: PdfColor.fromInt(0xFFF1F5FB),
+        color: PdfColor.fromInt(0xFF102D2B),
         padding: const pw.EdgeInsets.all(20),
         child: pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -232,9 +322,10 @@ pw.Widget _balanced(CvData cv, pw.MemoryImage? image, PdfColor accent) {
                 ),
               ),
             _sidebarHeading('Contact', accent),
-            if (cv.email.isNotEmpty) _sidebarText(cv.email),
-            if (cv.phone.isNotEmpty) _sidebarText(cv.phone),
-            if (cv.location.isNotEmpty) _sidebarText(cv.location),
+            if (cv.email.isNotEmpty) _sidebarText(cv.email, PdfColors.white),
+            if (cv.phone.isNotEmpty) _sidebarText(cv.phone, PdfColors.white),
+            if (cv.location.isNotEmpty)
+              _sidebarText(cv.location, PdfColors.white),
             if (cv.skills.isNotEmpty) ...[
               pw.SizedBox(height: 16),
               _sidebarHeading('Skills', accent),
@@ -256,7 +347,10 @@ pw.Widget _balanced(CvData cv, pw.MemoryImage? image, PdfColor accent) {
                       pw.Expanded(
                         child: pw.Text(
                           s,
-                          style: const pw.TextStyle(fontSize: 10),
+                          style: const pw.TextStyle(
+                            fontSize: 10,
+                            color: PdfColors.white,
+                          ),
                         ),
                       ),
                     ],
@@ -335,9 +429,9 @@ pw.Widget _sidebarHeading(String label, PdfColor accent) => pw.Padding(
   ),
 );
 
-pw.Widget _sidebarText(String text) => pw.Padding(
+pw.Widget _sidebarText(String text, PdfColor color) => pw.Padding(
   padding: const pw.EdgeInsets.only(bottom: 4),
-  child: pw.Text(text, style: const pw.TextStyle(fontSize: 9.5)),
+  child: pw.Text(text, style: pw.TextStyle(fontSize: 9.5, color: color)),
 );
 
 pw.Widget _mainHeading(String label, PdfColor accent) => pw.Container(
@@ -418,6 +512,7 @@ pw.Widget _modern(CvData cv, pw.MemoryImage? image, PdfColor accent) {
           ],
         ),
       ),
+      pw.Container(height: 6, width: double.infinity, color: PdfColors.grey300),
       pw.Padding(
         padding: const pw.EdgeInsets.all(28),
         child: pw.Column(
@@ -482,10 +577,14 @@ pw.Widget _modernHeading(String label, PdfColor accent) => pw.Padding(
 pw.Widget _chip(String label, PdfColor accent) => pw.Container(
   padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
   decoration: pw.BoxDecoration(
-    color: PdfColor(accent.red, accent.green, accent.blue, 0.12),
+    color: PdfColors.grey100,
+    border: pw.Border.all(color: accent, width: 0.6),
     borderRadius: pw.BorderRadius.circular(10),
   ),
-  child: pw.Text(label, style: pw.TextStyle(fontSize: 9.5, color: accent)),
+  child: pw.Text(
+    label,
+    style: const pw.TextStyle(fontSize: 9.5, color: PdfColors.grey900),
+  ),
 );
 
 String _contactLine(CvData cv) {
@@ -493,5 +592,5 @@ String _contactLine(CvData cv) {
     cv.email,
     cv.phone,
     cv.location,
-  ].where((e) => e.isNotEmpty).join('  •  ');
+  ].where((e) => e.isNotEmpty).join('  |  ');
 }

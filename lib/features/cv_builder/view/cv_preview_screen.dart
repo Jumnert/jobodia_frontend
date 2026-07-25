@@ -1,22 +1,19 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/confirmation_dialog.dart';
+import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
 import 'package:jobodia_frontend/features/cv_builder/model/cv_data.dart';
+import 'package:jobodia_frontend/features/cv_builder/service/cv_photo_export_service.dart';
 import 'package:jobodia_frontend/features/cv_builder/service/cv_pdf_builder.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 
-/// Accent color per template index, matched to the PDF accents.
-const _accents = <Color>[
-  Color(0xFF0EA5A4), // Classic — teal
-  Color(0xFF2B5DF0), // Balanced — blue
-  Color(0xFF202428), // Modern — near-black band
-];
-
-Color _accentFor(int index) => _accents[index.clamp(0, _accents.length - 1)];
-
+/// Displays the exact PDF bytes that will be printed or shared.
 class CvPreviewScreen extends GetView<CvBuilderController> {
   const CvPreviewScreen({super.key});
 
@@ -24,40 +21,53 @@ class CvPreviewScreen extends GetView<CvBuilderController> {
   Widget build(BuildContext context) {
     final palette = context.palette;
     return AdaptiveScaffold(
-      appBar: const AdaptiveAppBar(title: 'Your CV', useNativeToolbar: false),
+      useHeroBackButton: false,
+      appBar: AdaptiveAppBar(title: 'CV preview', useNativeToolbar: false),
       body: Obx(() {
         final cv = controller.generatedCv.value;
         if (cv == null) {
-          return Center(
-            child: Text(
-              'No CV generated yet.',
-              style: TextStyle(color: palette.textSecondary),
-            ),
-          );
+          return _EmptyPreview(onBack: Get.back<void>);
         }
+
+        final filename = _filenameFor(cv);
         return Column(
           children: [
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                decoration: BoxDecoration(
+                  color: palette.surfaceMuted,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: palette.border),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: PdfPreview(
+                  build: (_) => buildCvPdf(cv),
+                  initialPageFormat: PdfPageFormat.a4,
+                  canChangeOrientation: false,
+                  canChangePageFormat: false,
+                  allowPrinting: false,
+                  allowSharing: false,
+                  useActions: false,
+                  maxPageWidth: 700,
+                  pdfFileName: filename,
+                  loadingWidget: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const CircularProgressIndicator(),
+                        const SizedBox(height: 14),
+                        Text(
+                          'Building your PDF…',
+                          style: TextStyle(color: palette.textSecondary),
+                        ),
+                      ],
+                    ),
                   ),
-                  clipBehavior: Clip.antiAlias,
-                  child: _CvTemplate(cv: cv),
                 ),
               ),
             ),
-            _ActionBar(cv: cv),
+            _PreviewActions(cv: cv, filename: filename),
           ],
         );
       }),
@@ -65,10 +75,19 @@ class CvPreviewScreen extends GetView<CvBuilderController> {
   }
 }
 
-class _ActionBar extends StatelessWidget {
-  const _ActionBar({required this.cv});
+class _PreviewActions extends StatefulWidget {
+  const _PreviewActions({required this.cv, required this.filename});
 
   final CvData cv;
+  final String filename;
+
+  @override
+  State<_PreviewActions> createState() => _PreviewActionsState();
+}
+
+class _PreviewActionsState extends State<_PreviewActions> {
+  bool _busy = false;
+  String? _busyAction;
 
   @override
   Widget build(BuildContext context) {
@@ -86,31 +105,76 @@ class _ActionBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () => _exportPdf(context, share: false),
+          SizedBox(
+            width: 50,
+            height: 50,
+            child: OutlinedButton(
+              onPressed: _busy ? null : Get.back<void>,
               style: OutlinedButton.styleFrom(
                 foregroundColor: palette.textPrimary,
-                side: BorderSide(color: palette.textPrimary),
-                minimumSize: const Size.fromHeight(48),
-                shape: const StadiumBorder(),
+                side: BorderSide(color: palette.border),
+                padding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
               ),
-              icon: const Icon(Icons.download_rounded),
-              label: const Text('Download PDF'),
+              child: const Icon(Icons.edit_outlined),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: _busy ? null : _saveToPhotos,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: palette.textPrimary,
+                side: BorderSide(color: palette.border),
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+              icon: _busy && _busyAction == 'photos'
+                  ? SizedBox(
+                      width: 17,
+                      height: 17,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: palette.textPrimary,
+                      ),
+                    )
+                  : const Icon(Icons.photo_library_outlined, size: 20),
+              label: const Text(
+                'Save to Photos',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
           Expanded(
             child: FilledButton.icon(
-              onPressed: () => _exportPdf(context, share: true),
+              onPressed: _busy ? null : _sharePdf,
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: AppColors.brandTeal,
                 foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(48),
-                shape: const StadiumBorder(),
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
               ),
-              icon: const Icon(Icons.ios_share_rounded),
-              label: const Text('Share'),
+              icon: _busy && _busyAction == 'share'
+                  ? const SizedBox(
+                      width: 17,
+                      height: 17,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.ios_share_rounded, size: 20),
+              label: const Text(
+                'Share PDF',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
             ),
           ),
         ],
@@ -118,631 +182,166 @@ class _ActionBar extends StatelessWidget {
     );
   }
 
-  Future<void> _exportPdf(BuildContext context, {required bool share}) async {
+  Future<void> _sharePdf() async {
+    final confirmed = await showConfirmationDialog(
+      title: 'Share your CV?',
+      message:
+          'This PDF contains your personal details and may include your photo. Continue to the device share sheet?',
+      confirmLabel: 'Share PDF',
+      cancelLabel: 'Cancel',
+    );
+    if (!confirmed) return;
+
+    setState(() {
+      _busy = true;
+      _busyAction = 'share';
+    });
     try {
-      final bytes = await buildCvPdf(cv);
-      final safeName = cv.fullName.trim().isEmpty
-          ? 'cv'
-          : cv.fullName.trim().replaceAll(RegExp(r'[^A-Za-z0-9]+'), '_');
-      final filename = '${safeName}_cv.pdf';
-      if (!context.mounted) return;
-      if (share) {
-        final confirmed = await showConfirmationDialog(
-          title: 'Share CV',
-          message:
-              'Your CV contains personal information (name, email, phone, '
-              "photo). This will be shared via your device's share sheet. "
-              'Continue?',
-          confirmLabel: 'Share',
-          cancelLabel: 'Cancel',
-        );
-        if (confirmed != true) return;
-        await Printing.sharePdf(bytes: bytes, filename: filename);
-      } else {
-        await Printing.layoutPdf(onLayout: (_) async => bytes, name: filename);
-      }
+      final Uint8List bytes = await buildCvPdf(widget.cv);
+      await Printing.sharePdf(bytes: bytes, filename: widget.filename);
     } on Object {
       Get.snackbar(
         'Export failed',
-        'Could not generate the PDF. Please try again.',
+        'The PDF could not be exported. Please try again.',
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
       );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _busyAction = null;
+        });
+      }
+    }
+  }
+
+  Future<void> _saveToPhotos() async {
+    final confirmed = await showConfirmationDialog(
+      title: 'Save CV pages to Photos?',
+      message:
+          'Jobodia will ask for permission, then convert each PDF page to a high-resolution image and add it to the “Jobodia CVs” album.',
+      confirmLabel: 'Continue',
+      cancelLabel: 'Cancel',
+    );
+    if (!confirmed) return;
+
+    setState(() {
+      _busy = true;
+      _busyAction = 'photos';
+    });
+    try {
+      final bytes = await buildCvPdf(widget.cv);
+      final result = await const CvPhotoExportService().savePdfPages(
+        pdfBytes: bytes,
+        fileStem: _fileStemFor(widget.cv),
+      );
+
+      switch (result.status) {
+        case CvPhotoExportStatus.saved:
+          Get.snackbar(
+            'Saved to Photos',
+            '${result.pageCount} CV page${result.pageCount == 1 ? '' : 's'} saved to the Jobodia CVs album.',
+            snackPosition: SnackPosition.BOTTOM,
+            margin: const EdgeInsets.all(16),
+          );
+        case CvPhotoExportStatus.denied:
+          Get.snackbar(
+            'Photo access not allowed',
+            'Allow photo access when prompted to save your CV pages.',
+            snackPosition: SnackPosition.BOTTOM,
+            margin: const EdgeInsets.all(16),
+          );
+        case CvPhotoExportStatus.permanentlyDenied:
+          final openSettings = await showConfirmationDialog(
+            title: 'Allow access in Settings',
+            message:
+                'Photo access is disabled for Jobodia. Open Settings to allow adding your CV pages to Photos.',
+            confirmLabel: 'Open Settings',
+            cancelLabel: 'Not now',
+          );
+          if (openSettings) {
+            await openAppSettings();
+          }
+        case CvPhotoExportStatus.unsupported:
+          Get.snackbar(
+            'Not supported here',
+            'Saving to Photos is available on Android and iOS. You can still share the PDF.',
+            snackPosition: SnackPosition.BOTTOM,
+            margin: const EdgeInsets.all(16),
+          );
+      }
+    } on Object {
+      Get.snackbar(
+        'Could not save to Photos',
+        'The CV pages were not saved. Check available storage and try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _busyAction = null;
+        });
+      }
     }
   }
 }
 
-class _CvTemplate extends StatelessWidget {
-  const _CvTemplate({required this.cv});
+class _EmptyPreview extends StatelessWidget {
+  const _EmptyPreview({required this.onBack});
 
-  final CvData cv;
-
-  @override
-  Widget build(BuildContext context) {
-    switch (cv.templateIndex) {
-      case 1:
-        return _BalancedTemplate(cv: cv);
-      case 2:
-        return _ModernTemplate(cv: cv);
-      default:
-        return _ClassicTemplate(cv: cv);
-    }
-  }
-}
-
-String _contactLine(CvData cv) =>
-    [cv.email, cv.phone, cv.location].where((e) => e.isNotEmpty).join('  •  ');
-
-Widget _headshotCircle(CvData cv, double radius, {Color? border}) {
-  return Container(
-    width: radius * 2,
-    height: radius * 2,
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      color: const Color(0xFFE0E0E0),
-      border: border == null ? null : Border.all(color: border, width: 2),
-      image: cv.hasHeadshot
-          ? DecorationImage(
-              image: MemoryImage(cv.headshotBytes!),
-              fit: BoxFit.cover,
-            )
-          : null,
-    ),
-    child: cv.hasHeadshot
-        ? null
-        : const Icon(Icons.person, color: Colors.white, size: 28),
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Classic — single column, centered header, teal underlined sections.
-// ---------------------------------------------------------------------------
-class _ClassicTemplate extends StatelessWidget {
-  const _ClassicTemplate({required this.cv});
-
-  final CvData cv;
+  final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
-    final accent = _accentFor(cv.templateIndex);
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (cv.hasHeadshot) ...[
-            _headshotCircle(cv, 40),
-            const SizedBox(height: 12),
-          ],
-          Text(
-            cv.fullName.isEmpty ? 'Your Name' : cv.fullName,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              color: Colors.black,
-            ),
-          ),
-          if (cv.title.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                cv.title.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 12,
-                  letterSpacing: 2,
-                  fontWeight: FontWeight.w700,
-                  color: accent,
-                ),
-              ),
-            ),
-          const SizedBox(height: 8),
-          Text(
-            _contactLine(cv),
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 11, color: Color(0xFF666666)),
-          ),
-          const SizedBox(height: 20),
-          if (cv.summary.isNotEmpty) ...[
-            _ClassicSection(label: 'Profile', accent: accent),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                cv.summary,
-                style: const TextStyle(fontSize: 12, color: Colors.black87),
-              ),
+    final palette = context.palette;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.description_outlined,
+              size: 56,
+              color: palette.iconMuted,
             ),
             const SizedBox(height: 16),
-          ],
-          if (cv.workExperiences.isNotEmpty) ...[
-            _ClassicSection(label: 'Experience', accent: accent),
-            ...cv.workExperiences.map(
-              (w) => _EntryBlock(
-                title: w.role,
-                subtitle: w.company,
-                dates: w.dateRange,
-                description: w.description,
-              ),
-            ),
-            const SizedBox(height: 6),
-          ],
-          if (cv.educations.isNotEmpty) ...[
-            _ClassicSection(label: 'Education', accent: accent),
-            ...cv.educations.map(
-              (e) => _EntryBlock(
-                title: e.degree,
-                subtitle: e.school,
-                dates: e.dateRange,
-                description: e.description,
-              ),
-            ),
-            const SizedBox(height: 6),
-          ],
-          if (cv.skills.isNotEmpty) ...[
-            _ClassicSection(label: 'Skills', accent: accent),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: cv.skills
-                    .map((s) => _SkillChip(label: s, accent: accent))
-                    .toList(),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _ClassicSection extends StatelessWidget {
-  const _ClassicSection({required this.label, required this.accent});
-
-  final String label;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.only(bottom: 4),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: accent, width: 1.4)),
-      ),
-      child: Text(
-        label.toUpperCase(),
-        style: const TextStyle(
-          fontSize: 12,
-          letterSpacing: 1.5,
-          fontWeight: FontWeight.w800,
-          color: Colors.black,
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Balanced — tinted sidebar (contact + skills) and main content column.
-// ---------------------------------------------------------------------------
-class _BalancedTemplate extends StatelessWidget {
-  const _BalancedTemplate({required this.cv});
-
-  final CvData cv;
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = _accentFor(cv.templateIndex);
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            width: 130,
-            color: const Color(0xFFF1F5FB),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (cv.hasHeadshot) ...[
-                  Center(child: _headshotCircle(cv, 42, border: accent)),
-                  const SizedBox(height: 16),
-                ],
-                _SidebarHeading(label: 'Contact', accent: accent),
-                if (cv.email.isNotEmpty) _SidebarText(cv.email),
-                if (cv.phone.isNotEmpty) _SidebarText(cv.phone),
-                if (cv.location.isNotEmpty) _SidebarText(cv.location),
-                if (cv.skills.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  _SidebarHeading(label: 'Skills', accent: accent),
-                  ...cv.skills.map(
-                    (s) => Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 5,
-                            height: 5,
-                            margin: const EdgeInsets.only(top: 5, right: 6),
-                            decoration: BoxDecoration(
-                              color: accent,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              s,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    cv.fullName.isEmpty ? 'Your Name' : cv.fullName,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.black,
-                    ),
-                  ),
-                  if (cv.title.isNotEmpty)
-                    Text(
-                      cv.title,
-                      style: TextStyle(fontSize: 13, color: accent),
-                    ),
-                  const SizedBox(height: 16),
-                  if (cv.summary.isNotEmpty) ...[
-                    _MainHeading(label: 'Profile', accent: accent),
-                    Text(
-                      cv.summary,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                  ],
-                  if (cv.workExperiences.isNotEmpty) ...[
-                    _MainHeading(label: 'Experience', accent: accent),
-                    ...cv.workExperiences.map(
-                      (w) => _EntryBlock(
-                        title: w.role,
-                        subtitle: w.company,
-                        dates: w.dateRange,
-                        description: w.description,
-                      ),
-                    ),
-                  ],
-                  if (cv.educations.isNotEmpty) ...[
-                    _MainHeading(label: 'Education', accent: accent),
-                    ...cv.educations.map(
-                      (e) => _EntryBlock(
-                        title: e.degree,
-                        subtitle: e.school,
-                        dates: e.dateRange,
-                        description: e.description,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SidebarHeading extends StatelessWidget {
-  const _SidebarHeading({required this.label, required this.accent});
-
-  final String label;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Text(
-        label.toUpperCase(),
-        style: TextStyle(
-          fontSize: 11,
-          letterSpacing: 1.2,
-          fontWeight: FontWeight.w800,
-          color: accent,
-        ),
-      ),
-    );
-  }
-}
-
-class _SidebarText extends StatelessWidget {
-  const _SidebarText(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 9.5, color: Colors.black87),
-      ),
-    );
-  }
-}
-
-class _MainHeading extends StatelessWidget {
-  const _MainHeading({required this.label, required this.accent});
-
-  final String label;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Container(width: 16, height: 3, color: accent),
-          const SizedBox(width: 6),
-          Text(
-            label.toUpperCase(),
-            style: const TextStyle(
-              fontSize: 12,
-              letterSpacing: 1.2,
-              fontWeight: FontWeight.w800,
-              color: Colors.black,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Modern — full-width dark header band, compact body.
-// ---------------------------------------------------------------------------
-class _ModernTemplate extends StatelessWidget {
-  const _ModernTemplate({required this.cv});
-
-  final CvData cv;
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = _accentFor(cv.templateIndex);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: double.infinity,
-          color: accent,
-          padding: const EdgeInsets.all(22),
-          child: Row(
-            children: [
-              if (cv.hasHeadshot) ...[
-                _headshotCircle(cv, 36, border: Colors.white),
-                const SizedBox(width: 16),
-              ],
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      cv.fullName.isEmpty ? 'Your Name' : cv.fullName,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    if (cv.title.isNotEmpty)
-                      Text(
-                        cv.title.toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: Colors.white70,
-                          letterSpacing: 2,
-                        ),
-                      ),
-                    const SizedBox(height: 6),
-                    Text(
-                      _contactLine(cv),
-                      style: const TextStyle(
-                        fontSize: 9.5,
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(22),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (cv.summary.isNotEmpty) ...[
-                _ModernHeading(label: 'Profile', accent: accent),
-                Text(
-                  cv.summary,
-                  style: const TextStyle(fontSize: 12, color: Colors.black87),
-                ),
-                const SizedBox(height: 14),
-              ],
-              if (cv.skills.isNotEmpty) ...[
-                _ModernHeading(label: 'Skills', accent: accent),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: cv.skills
-                      .map((s) => _SkillChip(label: s, accent: accent))
-                      .toList(),
-                ),
-                const SizedBox(height: 14),
-              ],
-              if (cv.workExperiences.isNotEmpty) ...[
-                _ModernHeading(label: 'Experience', accent: accent),
-                ...cv.workExperiences.map(
-                  (w) => _EntryBlock(
-                    title: w.role,
-                    subtitle: w.company,
-                    dates: w.dateRange,
-                    description: w.description,
-                  ),
-                ),
-              ],
-              if (cv.educations.isNotEmpty) ...[
-                _ModernHeading(label: 'Education', accent: accent),
-                ...cv.educations.map(
-                  (e) => _EntryBlock(
-                    title: e.degree,
-                    subtitle: e.school,
-                    dates: e.dateRange,
-                    description: e.description,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ModernHeading extends StatelessWidget {
-  const _ModernHeading({required this.label, required this.accent});
-
-  final String label;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        label.toUpperCase(),
-        style: TextStyle(
-          fontSize: 13,
-          letterSpacing: 1.5,
-          fontWeight: FontWeight.w800,
-          color: accent,
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Shared entry + chip widgets.
-// ---------------------------------------------------------------------------
-class _EntryBlock extends StatelessWidget {
-  const _EntryBlock({
-    required this.title,
-    required this.subtitle,
-    required this.dates,
-    required this.description,
-  });
-
-  final String title;
-  final String subtitle;
-  final String dates;
-  final String description;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              if (dates.isNotEmpty)
-                Text(
-                  dates,
-                  style: const TextStyle(fontSize: 9, color: Color(0xFF777777)),
-                ),
-            ],
-          ),
-          if (subtitle.isNotEmpty)
             Text(
-              subtitle,
-              style: const TextStyle(
-                fontSize: 10.5,
-                fontStyle: FontStyle.italic,
-                color: Color(0xFF555555),
+              'No CV generated yet',
+              style: TextStyle(
+                color: palette.textPrimary,
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
               ),
             ),
-          if (description.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 3),
-              child: Text(
-                description,
-                style: const TextStyle(
-                  fontSize: 10,
-                  height: 1.4,
-                  color: Colors.black87,
-                ),
-              ),
+            const SizedBox(height: 8),
+            Text(
+              'Return to the builder and complete the required details.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: palette.textSecondary),
             ),
-        ],
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: onBack,
+              child: const Text('Back to builder'),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _SkillChip extends StatelessWidget {
-  const _SkillChip({required this.label, required this.accent});
+String _filenameFor(CvData cv) {
+  return '${_fileStemFor(cv)}.pdf';
+}
 
-  final String label;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Text(label, style: TextStyle(fontSize: 9.5, color: accent)),
-    );
-  }
+String _fileStemFor(CvData cv) {
+  final safeName = cv.fullName.trim().isEmpty
+      ? 'jobodia_cv'
+      : cv.fullName.trim().replaceAll(RegExp(r'[^A-Za-z0-9]+'), '_');
+  return '${safeName}_CV';
 }

@@ -40,10 +40,17 @@ dependencies:
   flutter_secure_storage: ^10.3.1
   share_plus: 13.1.0
   image_picker: 1.2.2
+  permission_handler: ^12.0.3
+  device_info_plus: ^13.2.0
+  saver_gallery: ^5.1.0
   intl: ^0.20.2
   pdf: 3.13.0
   printing: 5.15.0
   uuid: ^4.5.3
+  http: ^1.6.0
+  file_selector: ^1.1.0
+  read_pdf_text: ^0.3.1
+  archive: ^4.0.9
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -74,7 +81,12 @@ flutter:
   assets:
     - assets/icons/google.png
     - assets/icons/github.png
+    - assets/images/branding/
     - assets/images/onboarding/
+    - assets/images/ai_chat/
+    - assets/images/themes/
+    - assets/images/profile_icons/
+    - assets/images/pricing/
     - assets/data/
 
   # An image asset can refer to one or more resolution-specific "variants", see

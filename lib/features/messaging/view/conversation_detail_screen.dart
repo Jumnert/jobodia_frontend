@@ -1,7 +1,7 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
+import 'package:jobodia_frontend/core/widgets/quiet_glass_button.dart';
 import 'package:jobodia_frontend/features/messaging/controller/messaging_controller.dart';
 import 'package:jobodia_frontend/features/messaging/model/messaging_models.dart';
 
@@ -30,6 +30,7 @@ class _ConversationDetailScreenState extends State<ConversationDetailScreen> {
 
     ctrl.sendMessage(conversationId, text);
     _textCtrl.clear();
+    FocusManager.instance.primaryFocus?.unfocus();
   }
 
   @override
@@ -38,50 +39,87 @@ class _ConversationDetailScreenState extends State<ConversationDetailScreen> {
     final ctrl = Get.find<MessagingController>();
     final c = Get.arguments as ConversationModel;
 
-    return AdaptiveScaffold(
-      appBar: AdaptiveAppBar(
-        useNativeToolbar: false,
-        appBar: AppBar(
-          backgroundColor: palette.surface,
-          elevation: 0,
-          leading: AdaptiveButton.icon(
-            onPressed: Get.back,
-            icon: Icons.chevron_left_rounded,
-            iconColor: palette.iconPrimary,
-            style: AdaptiveButtonStyle.plain,
-          ),
-          title: Row(
+    return Scaffold(
+      backgroundColor: palette.scaffold,
+      body: Stack(
+        children: [
+          Column(
             children: [
-              CircleAvatar(
-                radius: 16,
-                backgroundColor: AppColors.brandTeal.withAlpha(40),
-                child: Text(
-                  c.recruiterName[0],
-                  style: const TextStyle(
-                    color: AppColors.brandTeal,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+              SizedBox(height: MediaQuery.paddingOf(context).top + 70),
+              Expanded(
+                child: Obx(
+                  () => ListView.separated(
+                    controller: _scrollCtrl,
+                    reverse: true,
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                    itemCount:
+                        ctrl.currentMessages.length +
+                        (ctrl.isTyping.value ? 1 : 0),
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      if (ctrl.isTyping.value && index == 0) {
+                        return _TypingIndicator(palette: palette);
+                      }
+
+                      final actualIndex = ctrl.isTyping.value
+                          ? index - 1
+                          : index;
+                      final msg = ctrl.currentMessages[actualIndex];
+
+                      return _MessageBubble(message: msg, palette: palette);
+                    },
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+
+              // Input Area
+              Container(
+                padding: const EdgeInsets.fromLTRB(
+                  16,
+                  10,
+                  16,
+                  12,
+                ).copyWith(bottom: MediaQuery.of(context).padding.bottom + 12),
+                decoration: BoxDecoration(
+                  color: palette.surface,
+                  border: Border(top: BorderSide(color: palette.border)),
+                ),
+                child: Row(
                   children: [
-                    Text(
-                      c.recruiterName,
-                      style: TextStyle(
-                        color: palette.textPrimary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                    Expanded(
+                      child: TextField(
+                        controller: _textCtrl,
+                        style: TextStyle(color: palette.textPrimary),
+                        decoration: InputDecoration(
+                          hintText: 'Type a message...',
+                          hintStyle: TextStyle(color: palette.textSecondary),
+                          filled: true,
+                          fillColor: palette.surfaceMuted,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                        ),
+                        onSubmitted: (_) => _sendMessage(ctrl, c.id),
                       ),
                     ),
-                    Text(
-                      '${c.jobTitle} @ ${c.recruiterCompany}',
-                      style: TextStyle(
-                        color: palette.textSecondary,
-                        fontSize: 11,
+                    const SizedBox(width: 12),
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: AppColors.brandTeal,
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.send_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        onPressed: () => _sendMessage(ctrl, c.id),
                       ),
                     ),
                   ],
@@ -89,79 +127,36 @@ class _ConversationDetailScreenState extends State<ConversationDetailScreen> {
               ),
             ],
           ),
-        ),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Obx(
-              () => ListView.separated(
-                controller: _scrollCtrl,
-                reverse: true,
-                padding: const EdgeInsets.all(20),
-                itemCount:
-                    ctrl.currentMessages.length + (ctrl.isTyping.value ? 1 : 0),
-                separatorBuilder: (_, _) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  if (ctrl.isTyping.value && index == 0) {
-                    return _TypingIndicator(palette: palette);
-                  }
-
-                  final actualIndex = ctrl.isTyping.value ? index - 1 : index;
-                  final msg = ctrl.currentMessages[actualIndex];
-
-                  return _MessageBubble(message: msg, palette: palette);
-                },
-              ),
-            ),
-          ),
-
-          // Input Area
-          Container(
-            padding: const EdgeInsets.all(
-              16,
-            ).copyWith(bottom: MediaQuery.of(context).padding.bottom + 16),
-            decoration: BoxDecoration(
-              color: palette.surface,
-              border: Border(top: BorderSide(color: palette.border)),
-            ),
+          Positioned(
+            top: MediaQuery.paddingOf(context).top + 12,
+            left: 20,
+            right: 20,
             child: Row(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _textCtrl,
-                    style: TextStyle(color: palette.textPrimary),
-                    decoration: InputDecoration(
-                      hintText: 'Type a message...',
-                      hintStyle: TextStyle(color: palette.textSecondary),
-                      filled: true,
-                      fillColor: palette.surfaceMuted,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
+                QuietGlassBackButton(onPressed: Get.back),
+                const SizedBox(width: 10),
+                Container(
+                  height: 44,
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: palette.surface.withValues(alpha: 0.84),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: palette.border),
+                  ),
+                  child: Text(
+                    'Messages',
+                    style: TextStyle(
+                      color: palette.textPrimary,
+                      fontWeight: FontWeight.w800,
                     ),
-                    onSubmitted: (_) => _sendMessage(ctrl, c.id),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Container(
-                  decoration: const BoxDecoration(
-                    color: AppColors.brandTeal,
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.send_rounded,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                    onPressed: () => _sendMessage(ctrl, c.id),
-                  ),
+                const Spacer(),
+                QuietGlassIconButton(
+                  icon: Icons.more_horiz_rounded,
+                  tooltip: 'Conversation options',
+                  onPressed: () {},
                 ),
               ],
             ),
@@ -190,7 +185,8 @@ class _MessageBubble extends StatelessWidget {
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isMe ? AppColors.brandTeal : palette.surfaceMuted,
+          color: isMe ? palette.textPrimary : palette.surface,
+          border: isMe ? null : Border.all(color: palette.border),
           borderRadius: BorderRadius.circular(20).copyWith(
             bottomRight: isMe
                 ? const Radius.circular(4)
@@ -203,7 +199,7 @@ class _MessageBubble extends StatelessWidget {
         child: Text(
           message.text,
           style: TextStyle(
-            color: isMe ? Colors.white : palette.textPrimary,
+            color: isMe ? palette.scaffold : palette.textPrimary,
             fontSize: 15,
             height: 1.4,
           ),

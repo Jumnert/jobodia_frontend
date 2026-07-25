@@ -7,6 +7,8 @@ import 'package:get_storage/get_storage.dart';
 import 'package:jobodia_frontend/features/ai_chat/controller/ai_chat_controller.dart';
 import 'package:jobodia_frontend/features/ai_chat/model/chat_message_model.dart';
 import 'package:jobodia_frontend/features/ai_chat/model/chat_session.dart';
+import 'package:jobodia_frontend/features/ai_chat/model/resume_analysis.dart';
+import 'package:jobodia_frontend/features/ai_chat/service/deepseek_chat_service.dart';
 import 'package:jobodia_frontend/services/secure_storage_service.dart';
 
 /// Mock path_provider so GetStorage can initialize in tests.
@@ -37,6 +39,44 @@ void _setupSecureStorageMock() {
       });
 }
 
+class _RatingService extends DeepSeekChatService {
+  _RatingService() : super(apiKey: 'test-key');
+
+  @override
+  Future<ResumeAnalysis> analyzeResume({
+    required String resumeText,
+    String? targetRole,
+    String? jobDescription,
+  }) async {
+    return ResumeAnalysis(
+      summary: 'A solid resume with clear opportunities to improve impact.',
+      categories: ResumeAnalysis.expectedCategories.entries
+          .map(
+            (entry) => ResumeScoreCategory(
+              id: entry.key,
+              label: entry.value.$1,
+              score: entry.value.$2 - 1,
+              maxScore: entry.value.$2,
+              reason: 'Evidence-based rating.',
+            ),
+          )
+          .toList(),
+      strengths: const ['Clear technical skills'],
+      priorityFixes: const [
+        ResumePriorityFix(
+          title: 'Add measurable results',
+          why: 'Impact is unclear.',
+          action: 'Add truthful metrics where available.',
+        ),
+      ],
+      rewrites: const [],
+      missingInformation: const [],
+      targetRole: targetRole,
+      targetRoleFit: 'Good fit.',
+    );
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -56,7 +96,7 @@ void main() {
   late AiChatController ctrl;
 
   setUp(() {
-    ctrl = AiChatController();
+    ctrl = AiChatController(allowMockFallback: true);
   });
 
   tearDown(() {
@@ -146,6 +186,36 @@ void main() {
 
       expect(ctrl.messages, isEmpty);
     });
+  });
+
+  test('model selector switches between Flash and Pro', () {
+    expect(ctrl.selectedModel.value, JobodiaAiModel.flash);
+
+    ctrl.selectModel(JobodiaAiModel.pro);
+
+    expect(ctrl.selectedModel.value, JobodiaAiModel.pro);
+  });
+
+  test('resume upload creates a structured scorecard message', () async {
+    final ratingController = AiChatController(chatService: _RatingService());
+    addTearDown(ratingController.dispose);
+
+    await ratingController.analyzeResume(
+      attachment: const ResumeAttachment(
+        fileName: 'unique-rating-resume.pdf',
+        extension: 'pdf',
+        sizeBytes: 2000,
+      ),
+      resumeText:
+          'Unique candidate resume 71A9. Flutter Developer at Example Company.',
+      targetRole: 'Flutter Developer',
+    );
+
+    expect(ratingController.messages, hasLength(2));
+    expect(ratingController.messages.first.resumeAttachment, isNotNull);
+    expect(ratingController.messages.last.resumeAnalysis, isNotNull);
+    expect(ratingController.messages.last.resumeAnalysis?.maximumScore, 100);
+    expect(ratingController.suggestions, contains('Rewrite my summary'));
   });
 
   group('sessions', () {

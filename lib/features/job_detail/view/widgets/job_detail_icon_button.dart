@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 
 class JobDetailIconButton extends StatelessWidget {
@@ -27,6 +27,7 @@ class JobDetailIconButton extends StatelessWidget {
       color: backgroundColor ?? Colors.black.withValues(alpha: 0.38),
       style: AdaptiveButtonStyle.glass,
       borderRadius: BorderRadius.circular(100),
+      size: AdaptiveButtonSize.large,
       minSize: const Size(44, 44),
     );
     return tooltip != null ? Tooltip(message: tooltip!, child: button) : button;

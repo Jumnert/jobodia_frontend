@@ -5,7 +5,9 @@
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Jobodia needs access to your photos so you can add a headshot to your CV.</string>
+	<string>Jobodia uses your photo library when you choose a headshot for your CV.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Jobodia needs permission to save your finished CV pages to Photos.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Jobodia needs camera access so you can take a headshot for your CV.</string>
 	<key>CFBundleDevelopmentRegion</key>

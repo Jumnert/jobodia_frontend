@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
+import 'package:jobodia_frontend/features/home/controller/main_nav_controller.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/home_search_bar.dart';
 import 'package:jobodia_frontend/features/search/controller/search_controller.dart';
 import 'package:jobodia_frontend/features/search/view/widgets/filter_bottom_sheet.dart';
@@ -30,6 +31,7 @@ class SearchScreen extends StatelessWidget {
     final searchHistory = Get.isRegistered<JobSearchController>()
         ? Get.find<JobSearchController>()
         : Get.put(JobSearchController());
+    final mainNav = Get.find<MainNavController>();
 
     return Scaffold(
       backgroundColor: palette.scaffold,
@@ -43,59 +45,66 @@ class SearchScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Search',
-                        style: TextStyle(
-                          color: palette.textPrimary,
-                          fontSize: 28,
-                          fontWeight: FontWeight.w900,
-                        ),
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: 1),
+                    duration: const Duration(milliseconds: 480),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, value, child) => Opacity(
+                      opacity: value,
+                      child: Transform.translate(
+                        offset: Offset(0, -24 * (1 - value)),
+                        child: child,
                       ),
-                      Obx(() {
-                        if (homeController.searchQuery.value.isNotEmpty ||
-                            homeController.hasActiveFilters) {
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Obx(
+                            () => HomeSearchBar(
+                              value: homeController.searchQuery.value,
+                              onChanged: homeController.updateSearchQuery,
+                              onSubmitted: (q) {
+                                searchHistory.addSearch(q);
+                                homeController.updateSearchQuery(q);
+                              },
+                              onClear: homeController.clearSearch,
+                              onFilterPressed: () => FilterBottomSheet.show(
+                                context,
+                                homeController,
+                              ),
+                              hasActiveFilters: homeController.hasActiveFilters,
+                              expandsOnFocus: true,
+                              isExpanded: mainNav.selectedTab.value == 3,
+                              salaryRangeLabel:
+                                  homeController.hasCustomSalaryRange
+                                  ? '${_formatSalary(homeController.minSalaryFilter.value)}–${_formatSalary(homeController.maxSalaryFilter.value)}'
+                                  : null,
+                            ),
+                          ),
+                        ),
+                        Obx(() {
+                          if (homeController.searchQuery.value.isEmpty &&
+                              !homeController.hasActiveFilters) {
+                            return const SizedBox.shrink();
+                          }
                           return IconButton(
                             icon: const Icon(
                               Icons.notifications_active_outlined,
                               color: AppColors.brandTeal,
                             ),
                             tooltip: 'Save as alert',
-                            onPressed: () {
-                              showModalBottomSheet<void>(
-                                context: context,
-                                isScrollControlled: true,
-                                backgroundColor: Colors.transparent,
-                                builder: (_) => CreateAlertSheet(
-                                  initialKeyword:
-                                      homeController.searchQuery.value,
-                                ),
-                              );
-                            },
+                            onPressed: () => showModalBottomSheet<void>(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (_) => CreateAlertSheet(
+                                initialKeyword:
+                                    homeController.searchQuery.value,
+                              ),
+                            ),
                           );
-                        }
-                        return const SizedBox.shrink();
-                      }),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  Obx(
-                    () => HomeSearchBar(
-                      value: homeController.searchQuery.value,
-                      onChanged: homeController.updateSearchQuery,
-                      onSubmitted: (q) {
-                        searchHistory.addSearch(q);
-                        homeController.updateSearchQuery(q);
-                      },
-                      onClear: homeController.clearSearch,
-                      onFilterPressed: () =>
-                          FilterBottomSheet.show(context, homeController),
-                      hasActiveFilters: homeController.hasActiveFilters,
-                      salaryRangeLabel: homeController.hasCustomSalaryRange
-                          ? '${_formatSalary(homeController.minSalaryFilter.value)}–${_formatSalary(homeController.maxSalaryFilter.value)}'
-                          : null,
+                        }),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 18),

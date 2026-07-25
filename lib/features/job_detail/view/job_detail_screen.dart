@@ -1,8 +1,9 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
+import 'package:jobodia_frontend/core/widgets/quiet_glass_button.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
 import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
 import 'package:jobodia_frontend/features/job_detail/controller/job_detail_controller.dart';
@@ -23,23 +24,59 @@ class JobDetailScreen extends GetView<JobDetailController> {
   Widget build(BuildContext context) {
     final palette = context.palette;
 
-    return Obx(
-      () => AdaptiveScaffold(
+    return Obx(() {
+      if (controller.jobNotFound.value || controller.job == null) {
+        return Scaffold(
+          backgroundColor: palette.scaffold,
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  QuietGlassBackButton(onPressed: Get.back),
+                  const Spacer(),
+                  Center(
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.work_off_outlined,
+                          size: 48,
+                          color: palette.iconMuted,
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          'Job unavailable',
+                          style: TextStyle(
+                            color: palette.textPrimary,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'This listing may have expired or been removed.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: palette.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Spacer(),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+      return AdaptiveScaffold(
         extendBodyBehindAppBar: true,
         enableToolbarGradient: false,
         appBar: AdaptiveAppBar(
           useNativeToolbar: true,
-          leading: AdaptiveButton.child(
+          leading: QuietGlassBackButton(
             onPressed: Get.back,
-            style: AdaptiveButtonStyle.glass,
-            size: AdaptiveButtonSize.large,
-            minSize: const Size(44, 44),
-            useSmoothRectangleBorder: false,
-            child: const Icon(
-              Icons.chevron_left_rounded,
-              color: Colors.white,
-              size: 35,
-            ),
+            foregroundColor: Colors.white,
           ),
           actions: [
             AdaptiveAppBarAction(
@@ -73,8 +110,8 @@ class JobDetailScreen extends GetView<JobDetailController> {
             ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 
@@ -102,6 +139,16 @@ class _SalaryRangeBar extends StatelessWidget {
     final salary = controller.sourceSalary;
     if (salary.isEmpty) return const SizedBox.shrink();
 
+    if (!Get.isRegistered<HomeController>()) {
+      return Text(
+        salary,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: palette.textPrimary,
+        ),
+      );
+    }
     final homeCtrl = Get.find<HomeController>();
     final globalMin = homeCtrl.minAvailableSalary;
     final globalMax = homeCtrl.maxAvailableSalary;
