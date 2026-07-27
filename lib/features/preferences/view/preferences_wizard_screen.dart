@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -56,11 +55,12 @@ class _WizardBody extends GetView<PreferencesController> {
             if (step > 0)
               Tooltip(
                 message: 'Back',
-                child: AdaptiveButton.icon(
+                child: IconButton(
                   onPressed: controller.goBack,
-                  icon: Icons.arrow_back_rounded,
-                  iconColor: palette.iconPrimary,
-                  style: AdaptiveButtonStyle.plain,
+                  icon: Icon(
+                    Icons.arrow_back_rounded,
+                    color: palette.iconPrimary,
+                  ),
                 ),
               )
             else

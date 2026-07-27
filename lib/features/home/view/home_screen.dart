@@ -31,9 +31,6 @@ class HomeScreen extends GetView<AuthController> {
     final user = controller.currentUser.value;
     final palette = context.palette;
     final homeController = Get.find<HomeController>();
-    if (homeController.selectedTab.value != 0) {
-      homeController.selectTab(0);
-    }
 
     return Scaffold(
       backgroundColor: palette.scaffold,

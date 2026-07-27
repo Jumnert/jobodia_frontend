@@ -1,4 +1,3 @@
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -15,10 +14,10 @@ class JobAlertsScreen extends StatelessWidget {
     final palette = context.palette;
     final ctrl = Get.find<JobAlertController>();
 
-    return AdaptiveScaffold(
-      appBar: const AdaptiveAppBar(
-        title: 'Job Alerts',
-        useNativeToolbar: false,
+    return Scaffold(
+      backgroundColor: palette.scaffold,
+      appBar: AppBar(
+        title: const Text('Job Alerts'),
       ),
       body: Obx(() {
         if (ctrl.alerts.isEmpty) {
@@ -99,10 +98,10 @@ class JobAlertsScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        AdaptiveSwitch(
+                        Switch(
                           value: alert.isActive,
                           onChanged: (_) => ctrl.toggleAlert(alert.id),
-                          activeColor: AppColors.brandTeal,
+                          activeTrackColor: AppColors.brandTeal,
                         ),
                       ],
                     ),

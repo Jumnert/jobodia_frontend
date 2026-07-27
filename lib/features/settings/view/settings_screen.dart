@@ -1,9 +1,9 @@
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
+import 'package:jobodia_frontend/core/widgets/adaptive_dialog.dart';
 import 'package:jobodia_frontend/core/widgets/quiet_glass_button.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 import 'package:jobodia_frontend/features/settings/controller/feedback_controller.dart';
@@ -44,7 +44,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final groupColor = palette.surface;
     final borderColor = palette.border;
 
-    return AdaptiveScaffold(
+    return Scaffold(
       body: Material(
         color: backgroundColor,
         child: Stack(
@@ -86,7 +86,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         subtitle: 'Fast biometric unlock (preview)',
                         foregroundColor: foregroundColor,
                         mutedColor: sectionColor,
-                        trailing: AdaptiveSwitch(
+                        trailing: Switch(
                           value: _faceIdEnabled,
                           onChanged: (value) => _setFaceId(context, value),
                         ),
@@ -122,7 +122,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         title: 'Dark mode',
                         foregroundColor: foregroundColor,
                         mutedColor: sectionColor,
-                        trailing: AdaptiveSwitch(
+                        trailing: Switch(
                           value: isDark,
                           onChanged: (val) {
                             if (!Get.isRegistered<ThemeController>()) return;
@@ -228,24 +228,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   QuietGlassBackButton(onPressed: () => Get.back<void>()),
                   const Spacer(),
-                  AdaptiveButton(
+                  QuietGlassIconButton(
                     onPressed: () {},
-                    label: 'Settings',
-                    textColor: foregroundColor,
-                    style: AdaptiveButtonStyle.glass,
-                    size: AdaptiveButtonSize.large,
-                    minSize: const Size(150, 44),
-                    useSmoothRectangleBorder: false,
+                    icon: Icons.settings_outlined,
+                    foregroundColor: foregroundColor,
                   ),
                   const Spacer(),
-                  AdaptiveButton.icon(
+                  QuietGlassIconButton(
                     onPressed: () => Get.toNamed<void>(AppRoutes.report),
                     icon: Icons.report_problem_rounded,
-                    iconColor: foregroundColor,
-                    style: AdaptiveButtonStyle.glass,
-                    size: AdaptiveButtonSize.large,
-                    minSize: const Size(44, 44),
-                    useSmoothRectangleBorder: false,
+                    foregroundColor: foregroundColor,
                   ),
                 ],
               ),
@@ -262,21 +254,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
       GetStorage().write(_faceIdKey, false);
       return;
     }
-    AdaptiveAlertDialog.show(
+    AdaptiveDialog.show(
       context: context,
       title: 'Allow Face ID?',
       message:
           'This is a preview setting. Device authentication will be connected later.',
-      icon: 'faceid',
       actions: [
-        AlertAction(
+        DialogAction(
           title: 'Not now',
-          style: AlertActionStyle.cancel,
+          style: DialogActionStyle.cancel,
           onPressed: () {},
         ),
-        AlertAction(
+        DialogAction(
           title: 'Allow',
-          style: AlertActionStyle.primary,
+          style: DialogActionStyle.primary,
           onPressed: () {
             if (!mounted) return;
             setState(() => _faceIdEnabled = true);
@@ -318,20 +309,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showLogoutDialog(BuildContext context) {
-    AdaptiveAlertDialog.show(
+    AdaptiveDialog.show(
       context: context,
       title: 'Log out',
       message: 'Are you sure you want to log out?',
-      icon: 'rectangle.portrait.and.arrow.right',
       actions: [
-        AlertAction(
+        DialogAction(
           title: 'Cancel',
-          style: AlertActionStyle.cancel,
+          style: DialogActionStyle.cancel,
           onPressed: () {},
         ),
-        AlertAction(
+        DialogAction(
           title: 'Log out',
-          style: AlertActionStyle.destructive,
+          style: DialogActionStyle.destructive,
           // The dialog pops itself before invoking this callback.
           onPressed: () => Get.find<AuthController>().logout(),
         ),
@@ -369,11 +359,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // button was tapped via this flag because there can be three actions.
     var tapped = 'cancel';
 
-    final result = await AdaptiveAlertDialog.inputShow(
+    final result = await AdaptiveDialog.inputShow(
       context: context,
       title: existingPin != null ? 'Change PIN' : 'Set PIN',
-      icon: 'lock.fill',
-      input: const AdaptiveAlertDialogInput(
+      input: const AdaptiveDialogInput(
         placeholder: 'Enter 4-digit PIN',
         keyboardType: TextInputType.number,
         obscureText: true,
@@ -381,19 +370,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       actions: [
         if (existingPin != null)
-          AlertAction(
+          DialogAction(
             title: 'Remove PIN',
-            style: AlertActionStyle.destructive,
+            style: DialogActionStyle.destructive,
             onPressed: () => tapped = 'remove',
           ),
-        AlertAction(
+        DialogAction(
           title: 'Cancel',
-          style: AlertActionStyle.cancel,
+          style: DialogActionStyle.cancel,
           onPressed: () => tapped = 'cancel',
         ),
-        AlertAction(
+        DialogAction(
           title: 'Save',
-          style: AlertActionStyle.primary,
+          style: DialogActionStyle.primary,
           onPressed: () => tapped = 'save',
         ),
       ],
@@ -539,21 +528,20 @@ class _ProfileIconPicker extends StatelessWidget {
           itemBuilder: (context, index) {
             final selected = controller.profileIconIndex.value == index;
             return GestureDetector(
-              onTap: () => AdaptiveAlertDialog.show(
+              onTap: () => AdaptiveDialog.show(
                 context: context,
                 title: 'Use this profile icon?',
                 message:
                     'It will appear in the app header and on your profile.',
-                icon: 'person.crop.circle',
                 actions: [
-                  AlertAction(
+                  DialogAction(
                     title: 'Cancel',
-                    style: AlertActionStyle.cancel,
+                    style: DialogActionStyle.cancel,
                     onPressed: () {},
                   ),
-                  AlertAction(
+                  DialogAction(
                     title: 'Use icon',
-                    style: AlertActionStyle.primary,
+                    style: DialogActionStyle.primary,
                     onPressed: () => controller.selectProfileIcon(index),
                   ),
                 ],

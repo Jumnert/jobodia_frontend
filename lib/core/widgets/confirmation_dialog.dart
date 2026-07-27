@@ -1,23 +1,8 @@
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 /// Shows a confirmation dialog with a title, message, and confirm/cancel
 /// buttons. Returns `true` if the user confirms, `false` otherwise.
-///
-/// Renders via [AdaptiveAlertDialog] so it adopts platform-native styling
-/// (and iOS 26 Liquid Glass where available). The adaptive dialog pops itself
-/// when an action is tapped, so the confirm/cancel choice is captured through
-/// a local flag rather than a dialog result.
-///
-/// ```dart
-/// final confirmed = await showConfirmationDialog(
-///   title: 'Delete session',
-///   message: 'This action cannot be undone.',
-///   confirmLabel: 'Delete',
-///   isDestructive: true,
-/// );
-/// if (confirmed) { ... }
-/// ```
 Future<bool> showConfirmationDialog({
   required String title,
   required String message,
@@ -29,24 +14,31 @@ Future<bool> showConfirmationDialog({
   if (context == null) return false;
 
   var confirmed = false;
-  await AdaptiveAlertDialog.show(
+  await showDialog<void>(
     context: context,
-    title: title,
-    message: message,
-    actions: [
-      AlertAction(
-        title: cancelLabel,
-        style: AlertActionStyle.cancel,
-        onPressed: () => confirmed = false,
-      ),
-      AlertAction(
-        title: confirmLabel,
-        style: isDestructive
-            ? AlertActionStyle.destructive
-            : AlertActionStyle.primary,
-        onPressed: () => confirmed = true,
-      ),
-    ],
+    builder: (context) => AlertDialog(
+      title: Text(title),
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () {
+            confirmed = false;
+            Navigator.of(context).pop();
+          },
+          child: Text(cancelLabel),
+        ),
+        TextButton(
+          onPressed: () {
+            confirmed = true;
+            Navigator.of(context).pop();
+          },
+          style: isDestructive
+              ? TextButton.styleFrom(foregroundColor: Colors.red)
+              : null,
+          child: Text(confirmLabel),
+        ),
+      ],
+    ),
   );
   return confirmed;
 }

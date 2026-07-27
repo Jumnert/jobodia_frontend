@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -61,13 +60,12 @@ class ApplicationsScreen extends StatelessWidget {
         ? Get.find<HomeController>()
         : Get.put(HomeController());
 
-    return AdaptiveScaffold(
-      appBar: AdaptiveAppBar(
-        title: 'Applications',
-        useNativeToolbar: false,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Applications'),
         actions: [
-          AdaptiveAppBarAction(
-            icon: Icons.analytics_outlined,
+          IconButton(
+            icon: const Icon(Icons.analytics_outlined),
             onPressed: () => Get.toNamed(AppRoutes.applicationAnalytics),
           ),
         ],

@@ -1,5 +1,4 @@
 import 'package:jobodia_frontend/features/cv_builder/model/cv_form_classes.dart';
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -598,18 +597,11 @@ class CompactInput extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        AdaptiveTextField(
+        TextField(
           controller: controller,
           onSubmitted: onSubmitted,
           keyboardType: keyboardType,
-          placeholder: hintText,
           style: TextStyle(color: palette.textPrimary),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-          cupertinoDecoration: BoxDecoration(
-            color: palette.surface,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: palette.border),
-          ),
           decoration: InputDecoration(
             hintText: hintText,
             filled: true,
@@ -646,19 +638,12 @@ class MultiLineField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return AdaptiveTextField(
+    return TextField(
       controller: controller,
       minLines: 3,
       maxLines: 5,
       maxLength: maxLength,
-      placeholder: hintText,
       style: TextStyle(color: palette.textPrimary),
-      padding: const EdgeInsets.all(14),
-      cupertinoDecoration: BoxDecoration(
-        color: palette.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: palette.border),
-      ),
       decoration: InputDecoration(
         hintText: hintText,
         filled: true,

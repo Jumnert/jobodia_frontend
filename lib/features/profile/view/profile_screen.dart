@@ -1,4 +1,3 @@
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
@@ -14,14 +13,19 @@ import 'package:jobodia_frontend/features/profile/view/widgets/profile_about_sec
 import 'package:jobodia_frontend/features/profile/model/profile_model.dart';
 
 class ProfileScreen extends GetView<ProfileController> {
-  const ProfileScreen({super.key});
+  const ProfileScreen({this.embedded = false, super.key});
+
+  /// Whether this screen is embedded as a bottom-nav tab rather than pushed
+  /// as a standalone route. When embedded, the floating back button is
+  /// hidden since there is nothing to pop back to within the tab shell.
+  final bool embedded;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
     final topInset = MediaQuery.paddingOf(context).top;
 
-    return AdaptiveScaffold(
+    return Scaffold(
       body: Container(
         color: palette.scaffold,
         child: Stack(
@@ -105,26 +109,21 @@ class ProfileScreen extends GetView<ProfileController> {
               right: 20,
               child: Row(
                 children: [
-                  QuietGlassBackButton(onPressed: () => Get.back<void>()),
+                  if (!embedded)
+                    QuietGlassBackButton(onPressed: () => Get.back<void>())
+                  else
+                    const SizedBox(width: 44, height: 44),
                   const Spacer(),
-                  AdaptiveButton.icon(
+                  QuietGlassIconButton(
                     onPressed: () => Get.toNamed<void>(AppRoutes.settings),
                     icon: Icons.settings_outlined,
-                    iconColor: palette.iconPrimary,
-                    style: AdaptiveButtonStyle.glass,
-                    size: AdaptiveButtonSize.large,
-                    minSize: const Size(44, 44),
-                    useSmoothRectangleBorder: false,
+                    foregroundColor: palette.iconPrimary,
                   ),
                   const SizedBox(width: 8),
-                  AdaptiveButton.icon(
+                  QuietGlassIconButton(
                     onPressed: () => Get.toNamed<void>(AppRoutes.statistics),
                     icon: Icons.bar_chart_rounded,
-                    iconColor: palette.iconPrimary,
-                    style: AdaptiveButtonStyle.glass,
-                    size: AdaptiveButtonSize.large,
-                    minSize: const Size(44, 44),
-                    useSmoothRectangleBorder: false,
+                    foregroundColor: palette.iconPrimary,
                   ),
                 ],
               ),

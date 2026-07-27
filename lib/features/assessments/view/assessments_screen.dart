@@ -1,4 +1,3 @@
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -13,8 +12,8 @@ class AssessmentsScreen extends StatelessWidget {
     final palette = context.palette;
     final ctrl = Get.put(AssessmentController());
 
-    return AdaptiveScaffold(
-      appBar: AdaptiveAppBar(title: 'Certifications', useNativeToolbar: false),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Certifications')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(

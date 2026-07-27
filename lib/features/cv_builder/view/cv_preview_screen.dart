@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/confirmation_dialog.dart';
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
 import 'package:jobodia_frontend/features/cv_builder/model/cv_data.dart';
 import 'package:jobodia_frontend/features/cv_builder/service/cv_photo_export_service.dart';
@@ -20,9 +19,8 @@ class CvPreviewScreen extends GetView<CvBuilderController> {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return AdaptiveScaffold(
-      useHeroBackButton: false,
-      appBar: AdaptiveAppBar(title: 'CV preview', useNativeToolbar: false),
+    return Scaffold(
+      appBar: AppBar(title: const Text('CV preview')),
       body: Obx(() {
         final cv = controller.generatedCv.value;
         if (cv == null) {

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -30,15 +29,14 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
         ? Get.find<HomeController>()
         : Get.put(HomeController());
 
-    return AdaptiveScaffold(
-      appBar: AdaptiveAppBar(
-        title: 'Saved Jobs',
-        useNativeToolbar: false,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Saved Jobs'),
         actions: [
           if (_comparisonSet.isNotEmpty)
-            AdaptiveAppBarAction(
-              title: 'Clear',
+            TextButton(
               onPressed: () => setState(() => _comparisonSet.clear()),
+              child: const Text('Clear'),
             ),
         ],
       ),

@@ -339,6 +339,18 @@ class AuthController extends GetxController with FormValidationMixin {
     Get.offAllNamed(AppRoutes.login);
   }
 
+  /// Skip login for demo purposes - creates a guest user session.
+  void skipLogin() {
+    currentUser.value = UserModel(
+      id: 'guest',
+      name: 'Guest User',
+      email: 'guest@jobodia.demo',
+      role: 'Candidate',
+      avatarUrl: null,
+    );
+    Get.offAllNamed(AppRoutes.home);
+  }
+
   void _showErrorSnackBar(String title, String message) {
     errorMessage.value = message;
     Get.snackbar(

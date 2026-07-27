@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:jobodia_frontend/core/widgets/quiet_glass_button.dart';
 import 'package:jobodia_frontend/features/ai_chat/controller/ai_chat_controller.dart';
 import 'package:jobodia_frontend/features/ai_chat/model/chat_message_model.dart';
@@ -23,7 +22,6 @@ class AiChatScreen extends GetView<AiChatController> {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final isDark = context.isDark;
-    final fg = isDark ? Colors.white : palette.iconPrimary;
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
     final keyboardVisible = MediaQuery.viewInsetsOf(context).bottom > 0;
     final isIOS = defaultTargetPlatform == TargetPlatform.iOS;
@@ -34,9 +32,8 @@ class AiChatScreen extends GetView<AiChatController> {
         : 12.0 + bottomPadding;
     final topInset = MediaQuery.paddingOf(context).top;
 
-    return AdaptiveScaffold(
-      scaffoldKey: _scaffoldKey,
-      useHeroBackButton: false,
+    return Scaffold(
+      key: _scaffoldKey,
       endDrawer: ChatHistoryDrawer(controller: controller),
       body: Container(
         color: palette.scaffold,
@@ -69,24 +66,42 @@ class AiChatScreen extends GetView<AiChatController> {
               child: Row(
                 children: [
                   Obx(
-                    () => AdaptivePopupMenuButton.widget<JobodiaAiModel>(
-                      tint: fg,
-                      buttonStyle: PopupButtonStyle.plain,
-                      items: const [
-                        AdaptivePopupMenuItem(
-                          label: 'Jobodia Flash · Everyday',
-                          icon: 'bolt.fill',
+                    () => PopupMenuButton<JobodiaAiModel>(
+                      color: palette.surface,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      offset: const Offset(0, 48),
+                      itemBuilder: (context) => [
+                        PopupMenuItem<JobodiaAiModel>(
                           value: JobodiaAiModel.flash,
+                          child: Row(
+                            children: [
+                              BotAvatar(size: 22, model: JobodiaAiModel.flash),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Jobodia Flash · Everyday',
+                                style: TextStyle(color: palette.textPrimary),
+                              ),
+                            ],
+                          ),
                         ),
-                        AdaptivePopupMenuItem(
-                          label: 'Jobodia Pro · Thinking',
-                          icon: 'brain.head.profile',
+                        PopupMenuItem<JobodiaAiModel>(
                           value: JobodiaAiModel.pro,
+                          child: Row(
+                            children: [
+                              BotAvatar(size: 22, model: JobodiaAiModel.pro),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Jobodia Pro · Thinking',
+                                style: TextStyle(color: palette.textPrimary),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
-                      onSelected: (_, entry) {
-                        final model = entry.value;
-                        if (model != null) controller.selectModel(model);
+                      onSelected: (model) {
+                        controller.selectModel(model);
                       },
                       child: _ModelSelectorPill(
                         model: controller.selectedModel.value,

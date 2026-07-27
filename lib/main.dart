@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:jobodia_frontend/app/bindings/initial_binding.dart';
@@ -10,23 +10,12 @@ import 'package:jobodia_frontend/core/widgets/seasonal_atmosphere.dart';
 import 'package:jobodia_frontend/features/onboarding/controllers/onboarding_controller.dart';
 import 'package:jobodia_frontend/features/settings/controller/theme_controller.dart';
 import 'package:jobodia_frontend/features/splash/view/splash_screen.dart';
+import 'package:jobodia_frontend/theme/theme.dart' as forui_theme;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await _clearLingeringNativeTabBar();
   await GetStorage.init();
   runApp(const JobodiaApp());
-}
-
-/// Ensures Flutter owns navigation again after an Adaptive UI hot restart.
-Future<void> _clearLingeringNativeTabBar() async {
-  try {
-    await const MethodChannel(
-      'adaptive_platform_ui/native_tab_bar',
-    ).invokeMethod<void>('disableNativeTabBar');
-  } on Object {
-    // No native tab bar was installed.
-  }
 }
 
 /// App entry widget. GetMaterialApp enables GetX navigation and bindings.
@@ -51,7 +40,6 @@ class JobodiaApp extends StatelessWidget {
       theme: AppTheme.forPreset(preset),
       darkTheme: AppTheme.forPreset(preset, brightness: Brightness.dark),
       themeMode: _resolveThemeMode(),
-      // Keep Adaptive UI components aligned with Jobodia's in-app theme.
       builder: (context, child) {
         final brightness = Theme.of(context).brightness;
         final media = MediaQuery.of(context);
@@ -60,10 +48,19 @@ class JobodiaApp extends StatelessWidget {
         return Obx(
           () => MediaQuery(
             data: media.copyWith(platformBrightness: brightness),
-            child: SplashScreen(
-              child: SeasonalAtmosphere(
-                preset: themeController.preset.value,
-                child: appChild,
+            child: FTheme(
+              data: brightness == Brightness.light
+                  ? forui_theme.lightTheme
+                  : forui_theme.darkTheme,
+              child: FToaster(
+                child: FTooltipGroup(
+                  child: SplashScreen(
+                    child: SeasonalAtmosphere(
+                      preset: themeController.preset.value,
+                      child: appChild,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -75,9 +72,10 @@ class JobodiaApp extends StatelessWidget {
   ThemeMode _resolveThemeMode() {
     try {
       final isDark = GetStorage().read<bool>(ThemeController.themeKey);
-      return isDark == true ? ThemeMode.dark : ThemeMode.light;
+      // Default to dark mode when no preference has been saved yet.
+      return isDark == false ? ThemeMode.light : ThemeMode.dark;
     } on Exception {
-      return ThemeMode.light;
+      return ThemeMode.dark;
     }
   }
 

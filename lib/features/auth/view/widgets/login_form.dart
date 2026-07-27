@@ -71,7 +71,16 @@ class LoginForm extends GetView<AuthController> {
                   },
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 12),
+        TextButton(
+          onPressed: () {
+            unawaited(HapticFeedback.lightImpact());
+            controller.skipLogin();
+          },
+          style: TextButton.styleFrom(foregroundColor: palette.textSecondary),
+          child: const Text('Skip login'),
+        ),
+        const SizedBox(height: 12),
         Wrap(
           alignment: WrapAlignment.center,
           crossAxisAlignment: WrapCrossAlignment.center,

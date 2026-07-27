@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -170,10 +169,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           Navigator.of(context).pop();
         }
       },
-      child: AdaptiveScaffold(
-        appBar: const AdaptiveAppBar(
-          title: 'Edit Profile',
-          useNativeToolbar: false,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Edit Profile'),
         ),
         body: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(

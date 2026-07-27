@@ -6,7 +6,6 @@ import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/constants/app_spacing.dart';
 import 'package:jobodia_frontend/core/widgets/animated_scale_button.dart';
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:jobodia_frontend/features/applications/controller/applications_controller.dart';
 import 'package:jobodia_frontend/features/applications/model/job_application.dart';
 import 'package:jobodia_frontend/features/company/controller/company_controller.dart';
@@ -22,7 +21,7 @@ class StatisticsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
 
-    return AdaptiveScaffold(
+    return Scaffold(
       body: ColoredBox(
         color: palette.scaffold,
         child: SafeArea(
@@ -130,11 +129,7 @@ class _PageHeader extends StatelessWidget {
           children: [
             IconButton(
               onPressed: () => Get.back<void>(),
-              icon: Icon(
-                PlatformInfo.isIOS
-                    ? Icons.arrow_back_ios_new_rounded
-                    : Icons.arrow_back_rounded,
-              ),
+              icon: const Icon(Icons.arrow_back_rounded),
               color: palette.iconPrimary,
               tooltip: 'Back',
             ),

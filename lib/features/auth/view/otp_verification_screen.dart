@@ -1,4 +1,3 @@
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -90,11 +89,13 @@ class _OtpHeader extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  AdaptiveButton.icon(
+                  IconButton(
                     onPressed: controller.goBackToLogin,
-                    icon: Icons.arrow_back_rounded,
-                    iconColor: Colors.white,
-                    style: AdaptiveButtonStyle.bordered,
+                    icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.white.withValues(alpha: 0.15),
+                      shape: const CircleBorder(),
+                    ),
                   ),
                   const Spacer(),
                   Text(

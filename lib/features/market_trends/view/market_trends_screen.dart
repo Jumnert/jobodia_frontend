@@ -1,4 +1,3 @@
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -13,36 +12,35 @@ class MarketTrendsScreen extends StatelessWidget {
     final palette = context.palette;
     final ctrl = Get.put(MarketTrendsController());
 
-    return AdaptiveScaffold(
-      appBar: AdaptiveAppBar(
-        useNativeToolbar: false,
-        appBar: AppBar(
-          backgroundColor: palette.surface,
-          elevation: 0,
-          centerTitle: true,
-          leading: AdaptiveButton.icon(
-            onPressed: Get.back,
-            icon: Icons.chevron_left_rounded,
-            iconColor: palette.iconPrimary,
-            style: AdaptiveButtonStyle.plain,
+    return Scaffold(
+      backgroundColor: palette.scaffold,
+      appBar: AppBar(
+        backgroundColor: palette.surface,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          onPressed: Get.back,
+          icon: Icon(
+            Icons.chevron_left_rounded,
+            color: palette.iconPrimary,
           ),
-          title: Column(
-            children: [
-              Text(
-                'Job Market Insights',
-                style: TextStyle(
-                  color: palette.textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                ),
+        ),
+        title: Column(
+          children: [
+            Text(
+              'Job Market Insights',
+              style: TextStyle(
+                color: palette.textPrimary,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
               ),
-              const SizedBox(height: 2),
-              Text(
-                'Updated weekly',
-                style: TextStyle(color: palette.textSecondary, fontSize: 12),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'Updated weekly',
+              style: TextStyle(color: palette.textSecondary, fontSize: 12),
+            ),
+          ],
         ),
       ),
       body: Obx(() {

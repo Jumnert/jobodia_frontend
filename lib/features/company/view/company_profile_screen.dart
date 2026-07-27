@@ -1,4 +1,3 @@
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
@@ -23,8 +22,9 @@ class CompanyProfileScreen extends StatelessWidget {
     final palette = context.palette;
 
     if (company == null) {
-      return AdaptiveScaffold(
-        appBar: const AdaptiveAppBar(title: 'Company', useNativeToolbar: false),
+      return Scaffold(
+        backgroundColor: palette.scaffold,
+        appBar: AppBar(title: const Text('Company')),
         body: Center(
           child: Text(
             'Company not found',
@@ -40,8 +40,9 @@ class CompanyProfileScreen extends StatelessWidget {
 
     final openPositions = companyCtrl.jobsForCompany(company, homeCtrl.jobs);
 
-    return AdaptiveScaffold(
-      appBar: AdaptiveAppBar(title: company.name, useNativeToolbar: false),
+    return Scaffold(
+      backgroundColor: palette.scaffold,
+      appBar: AppBar(title: Text(company.name)),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),

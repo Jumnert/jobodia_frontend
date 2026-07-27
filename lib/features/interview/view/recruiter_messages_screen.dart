@@ -1,4 +1,3 @@
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -20,11 +19,12 @@ class RecruiterMessagesScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                AdaptiveButton.icon(
+                IconButton(
                   onPressed: Get.back,
-                  icon: Icons.chevron_left_rounded,
-                  iconColor: palette.iconPrimary,
-                  style: AdaptiveButtonStyle.plain,
+                  icon: Icon(
+                    Icons.chevron_left_rounded,
+                    color: palette.iconPrimary,
+                  ),
                 ),
                 Expanded(
                   child: Text(

@@ -1,4 +1,3 @@
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -17,8 +16,8 @@ class AssessmentQuizScreen extends StatelessWidget {
       return const Scaffold(body: Center(child: Text('No quiz active')));
     }
 
-    return AdaptiveScaffold(
-      appBar: AdaptiveAppBar(title: assessment.title, useNativeToolbar: false),
+    return Scaffold(
+      appBar: AppBar(title: Text(assessment.title)),
       body: Obx(() {
         final qIndex = ctrl.currentQuestionIndex.value;
         final question = ctrl.mockQuestions[qIndex];

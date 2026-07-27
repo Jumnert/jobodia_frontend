@@ -1,4 +1,3 @@
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -18,10 +17,10 @@ class CompanyReviewsScreen extends StatelessWidget {
     final ctrl = Get.put(CompanyReviewsController());
     final companyName = Get.arguments as String? ?? 'Google';
 
-    return AdaptiveScaffold(
-      appBar: AdaptiveAppBar(
-        title: '$companyName Reviews',
-        useNativeToolbar: false,
+    return Scaffold(
+      backgroundColor: palette.scaffold,
+      appBar: AppBar(
+        title: Text('$companyName Reviews'),
       ),
       body: Obx(() {
         final reviews = ctrl.reviewsForCompany(companyName);

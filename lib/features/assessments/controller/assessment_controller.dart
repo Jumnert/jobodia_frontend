@@ -1,5 +1,5 @@
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:get/get.dart';
+import 'package:jobodia_frontend/core/widgets/adaptive_dialog.dart';
 import 'package:jobodia_frontend/features/assessments/model/assessment_model.dart';
 import 'package:uuid/uuid.dart';
 
@@ -110,16 +110,16 @@ class AssessmentController extends GetxController {
 
     final context = Get.context;
     if (context != null) {
-      AdaptiveAlertDialog.show(
+      AdaptiveDialog.show(
         context: context,
         title: passed ? 'Congratulations!' : 'Keep Practicing',
         message:
             'You scored ${score.toStringAsFixed(0)}%.\n'
             '${passed ? "You earned a new badge!" : "You need 70% to pass."}',
         actions: [
-          AlertAction(
+          DialogAction(
             title: 'OK',
-            style: AlertActionStyle.primary,
+            style: DialogActionStyle.primary,
             onPressed: () {},
           ),
         ],

@@ -243,7 +243,7 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.search,
       page: () => const SearchScreen(),
-      transition: Transition.cupertino,
+      transition: Transition.fadeIn,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
       middlewares: [AuthMiddleware()],

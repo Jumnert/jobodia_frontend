@@ -1,25 +1,19 @@
 PODS:
-  - adaptive_platform_ui (0.1.0):
-    - Flutter
   - Flutter (1.0.0)
   - read_pdf_text (0.0.1):
     - Flutter
 
 DEPENDENCIES:
-  - adaptive_platform_ui (from `.symlinks/plugins/adaptive_platform_ui/ios`)
   - Flutter (from `Flutter`)
   - read_pdf_text (from `.symlinks/plugins/read_pdf_text/ios`)
 
 EXTERNAL SOURCES:
-  adaptive_platform_ui:
-    :path: ".symlinks/plugins/adaptive_platform_ui/ios"
   Flutter:
     :path: Flutter
   read_pdf_text:
     :path: ".symlinks/plugins/read_pdf_text/ios"
 
 SPEC CHECKSUMS:
-  adaptive_platform_ui: f54f620666d1797636f9ef06f49137ef2cc13611
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   read_pdf_text: 7b045befb4ce44f6bb6c281a956ff2436fd6822a
 

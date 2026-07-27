@@ -1,14 +1,9 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
-import 'package:jobodia_frontend/core/utils/safe_image_loader.dart';
 import 'package:jobodia_frontend/core/widgets/quiet_glass_button.dart';
 import 'package:jobodia_frontend/features/home/controller/main_nav_controller.dart';
 import 'package:jobodia_frontend/features/notifications/controller/notifications_controller.dart';
-import 'package:jobodia_frontend/features/profile/controller/profile_controller.dart';
-import 'package:jobodia_frontend/features/profile/view/profile_screen.dart';
-import 'package:jobodia_frontend/features/settings/controller/theme_controller.dart';
 
 class HomeTopBar extends StatelessWidget {
   const HomeTopBar({
@@ -30,14 +25,22 @@ class HomeTopBar extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        AdaptiveButton(
+        TextButton(
           onPressed: () {},
-          label: 'Hi, $name',
-          textColor: foreground,
-          style: AdaptiveButtonStyle.glass,
-          size: AdaptiveButtonSize.large,
-          minSize: const Size(150, 44),
-          useSmoothRectangleBorder: false,
+          style: TextButton.styleFrom(
+            foregroundColor: foreground,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(22),
+            ),
+          ),
+          child: Text(
+            'Hi, $name',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
         const Spacer(),
         Stack(
@@ -46,14 +49,13 @@ class HomeTopBar extends StatelessWidget {
             Semantics(
               label: 'Notifications',
               button: true,
-              child: AdaptiveButton.icon(
+              child: IconButton(
                 onPressed: onNotifications,
-                icon: Icons.notifications_none_rounded,
-                iconColor: foreground,
-                style: AdaptiveButtonStyle.glass,
-                size: AdaptiveButtonSize.large,
-                minSize: const Size(44, 44),
-                useSmoothRectangleBorder: false,
+                icon: Icon(Icons.notifications_none_rounded, color: foreground),
+                style: IconButton.styleFrom(
+                  backgroundColor: palette.surfaceMuted.withValues(alpha: 0.76),
+                  shape: const CircleBorder(),
+                ),
               ),
             ),
             Obx(() {
@@ -91,65 +93,6 @@ class HomeTopBar extends StatelessWidget {
           tooltip: 'Chat with Jobodia AI',
           lightHaptic: true,
           onPressed: () => Get.find<MainNavController>().goToTab(2),
-        ),
-        const SizedBox(width: 8),
-        Semantics(
-          label: 'Profile',
-          button: true,
-          child: Hero(
-            tag: 'user-avatar',
-            child: AdaptiveButton.child(
-              onPressed: () => Get.to(
-                () => const ProfileScreen(),
-                binding: BindingsBuilder(
-                  () => Get.lazyPut<ProfileController>(ProfileController.new),
-                ),
-              ),
-              style: AdaptiveButtonStyle.glass,
-              size: AdaptiveButtonSize.large,
-              minSize: const Size(44, 44),
-              useSmoothRectangleBorder: false,
-              padding: EdgeInsets.zero,
-              child: SizedBox(
-                width: 36,
-                height: 36,
-                child: ClipOval(
-                  child: Obx(() {
-                    const icons = [
-                      'aqua_orbit.png',
-                      'briefcase.png',
-                      'rocket.png',
-                      'compass.png',
-                      'document.png',
-                      'idea.png',
-                      'summit.png',
-                      'ai_orb.png',
-                      'handshake.png',
-                      'gem.png',
-                    ];
-                    if (Get.isRegistered<ThemeController>()) {
-                      final index =
-                          Get.find<ThemeController>().profileIconIndex.value;
-                      return Image.asset(
-                        'assets/images/profile_icons/${icons[index]}',
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => Icon(
-                          Icons.person_outline_rounded,
-                          color: foreground,
-                        ),
-                      );
-                    }
-                    return SafeImageLoader(
-                      url: avatarUrl ?? 'https://i.pravatar.cc/150?img=32',
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          Icon(Icons.person_outline_rounded, color: foreground),
-                    );
-                  }),
-                ),
-              ),
-            ),
-          ),
         ),
       ],
     );

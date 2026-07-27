@@ -1,8 +1,8 @@
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/empty_state.dart';
+import 'package:jobodia_frontend/core/widgets/quiet_glass_button.dart';
 import 'package:jobodia_frontend/features/notifications/controller/notifications_controller.dart';
 
 class NotificationsScreen extends GetView<NotificationsController> {
@@ -12,7 +12,7 @@ class NotificationsScreen extends GetView<NotificationsController> {
   Widget build(BuildContext context) {
     final palette = context.palette;
 
-    return AdaptiveScaffold(
+    return Scaffold(
       body: Stack(
         children: [
           Positioned.fill(
@@ -230,40 +230,18 @@ class NotificationsScreen extends GetView<NotificationsController> {
             right: 20,
             child: Row(
               children: [
-                AdaptiveButton.icon(
-                  onPressed: () => Get.back<void>(),
-                  icon: PlatformInfo.isIOS
-                      ? Icons.arrow_back_ios_new_rounded
-                      : Icons.arrow_back_rounded,
-                  iconColor: palette.iconPrimary,
-                  style: AdaptiveButtonStyle.glass,
-                  size: AdaptiveButtonSize.large,
-                  minSize: const Size(44, 44),
-                  useSmoothRectangleBorder: false,
-                ),
+                QuietGlassBackButton(onPressed: () => Get.back<void>()),
                 const Spacer(),
-                AdaptiveButton(
+                QuietGlassIconButton(
                   onPressed: () {},
-                  label: 'Notifications',
-                  textColor: palette.textPrimary,
-                  style: AdaptiveButtonStyle.glass,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  size: AdaptiveButtonSize.large,
-                  minSize: const Size(150, 44),
-                  useSmoothRectangleBorder: false, // Fully rounded pill shape
+                  icon: Icons.notifications_outlined,
+                  foregroundColor: palette.iconPrimary,
                 ),
                 const Spacer(),
-                AdaptiveButton.icon(
+                QuietGlassIconButton(
                   onPressed: controller.markAllRead,
                   icon: Icons.done_all_rounded,
-                  iconColor: palette.iconPrimary,
-                  style: AdaptiveButtonStyle.glass,
-                  size: AdaptiveButtonSize.large,
-                  minSize: const Size(44, 44),
-                  useSmoothRectangleBorder: false,
+                  foregroundColor: palette.iconPrimary,
                 ),
               ],
             ),

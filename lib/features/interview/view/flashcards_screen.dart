@@ -1,6 +1,5 @@
 // ignore_for_file: deprecated_member_use, avoid_print, curly_braces_in_flow_control_structures, unused_import, unnecessary_underscores, unused_field, unused_local_variable, use_build_context_synchronously, duplicate_ignore
 import 'dart:async';
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -26,11 +25,12 @@ class FlashcardsScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                AdaptiveButton.icon(
+                IconButton(
                   onPressed: Get.back,
-                  icon: Icons.chevron_left_rounded,
-                  iconColor: palette.iconPrimary,
-                  style: AdaptiveButtonStyle.plain,
+                  icon: Icon(
+                    Icons.chevron_left_rounded,
+                    color: palette.iconPrimary,
+                  ),
                 ),
                 Expanded(
                   child: Text(
@@ -278,11 +278,12 @@ class _FlashcardDeckScreenState extends State<FlashcardDeckScreen> {
           children: [
             Row(
               children: [
-                AdaptiveButton.icon(
+                IconButton(
                   onPressed: Get.back,
-                  icon: Icons.chevron_left_rounded,
-                  iconColor: palette.iconPrimary,
-                  style: AdaptiveButtonStyle.plain,
+                  icon: Icon(
+                    Icons.chevron_left_rounded,
+                    color: palette.iconPrimary,
+                  ),
                 ),
                 Expanded(
                   child: Text(

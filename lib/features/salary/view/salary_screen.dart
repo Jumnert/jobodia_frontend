@@ -1,4 +1,3 @@
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -13,10 +12,13 @@ class SalaryScreen extends StatelessWidget {
     final palette = context.palette;
     final ctrl = Get.put(SalaryController());
 
-    return AdaptiveScaffold(
-      appBar: const AdaptiveAppBar(
-        title: 'Market Value',
-        useNativeToolbar: false,
+    return Scaffold(
+      backgroundColor: palette.scaffold,
+      appBar: AppBar(
+        backgroundColor: palette.surface,
+        elevation: 0,
+        centerTitle: true,
+        title: const Text('Market Value'),
       ),
       body: Obx(() {
         if (ctrl.isLoading.value) {

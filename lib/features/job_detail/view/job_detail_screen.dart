@@ -1,4 +1,3 @@
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
@@ -69,27 +68,27 @@ class JobDetailScreen extends GetView<JobDetailController> {
           ),
         );
       }
-      return AdaptiveScaffold(
+      return Scaffold(
         extendBodyBehindAppBar: true,
-        enableToolbarGradient: false,
-        appBar: AdaptiveAppBar(
-          useNativeToolbar: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
           leading: QuietGlassBackButton(
             onPressed: Get.back,
             foregroundColor: Colors.white,
           ),
           actions: [
-            AdaptiveAppBarAction(
+            IconButton(
               onPressed: controller.shareJob,
-              iosSymbol: 'square.and.arrow.up',
-              icon: Icons.ios_share_rounded,
+              icon: const Icon(Icons.ios_share_rounded),
             ),
-            AdaptiveAppBarAction(
+            IconButton(
               onPressed: controller.toggleSaved,
-              iosSymbol: controller.isSaved ? 'bookmark.fill' : 'bookmark',
-              icon: controller.isSaved
-                  ? Icons.bookmark_rounded
-                  : Icons.bookmark_border_rounded,
+              icon: Icon(
+                controller.isSaved
+                    ? Icons.bookmark_rounded
+                    : Icons.bookmark_border_rounded,
+              ),
             ),
           ],
         ),

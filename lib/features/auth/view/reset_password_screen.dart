@@ -1,4 +1,3 @@
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -98,11 +97,13 @@ class _ResetPasswordHeader extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  AdaptiveButton.icon(
+                  IconButton(
                     onPressed: onBack,
-                    icon: Icons.arrow_back_ios_new,
-                    iconColor: Colors.white,
-                    style: AdaptiveButtonStyle.bordered,
+                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.white.withValues(alpha: 0.15),
+                      shape: const CircleBorder(),
+                    ),
                   ),
                   const Spacer(),
                   const Text(

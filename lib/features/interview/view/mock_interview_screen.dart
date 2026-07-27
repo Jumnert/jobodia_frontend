@@ -1,4 +1,3 @@
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -23,11 +22,12 @@ class MockInterviewScreen extends GetView<MockInterviewController> {
           children: [
             Row(
               children: [
-                AdaptiveButton.icon(
+                IconButton(
                   onPressed: Get.back,
-                  icon: Icons.chevron_left_rounded,
-                  iconColor: palette.iconPrimary,
-                  style: AdaptiveButtonStyle.plain,
+                  icon: Icon(
+                    Icons.chevron_left_rounded,
+                    color: palette.iconPrimary,
+                  ),
                 ),
                 Expanded(
                   child: Text(

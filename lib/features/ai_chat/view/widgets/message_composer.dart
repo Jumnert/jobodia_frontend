@@ -3,7 +3,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/confirmation_dialog.dart';
 import 'package:jobodia_frontend/features/ai_chat/controller/ai_chat_controller.dart';
@@ -133,43 +132,66 @@ class _MessageComposerState extends State<MessageComposer> {
   }
 
   Widget _buildAttachmentMenu(Color foreground, AppPalette palette) {
-    return AdaptivePopupMenuButton.widget<String>(
-      tint: foreground,
-      buttonStyle: PopupButtonStyle.plain,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: palette.surfaceMuted.withValues(alpha: 0.76),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(Icons.add_rounded, color: foreground, size: 22),
+    return PopupMenuButton<String>(
+      color: palette.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
-      items: const [
-        AdaptivePopupMenuItem(
-          label: 'Upload Resume',
-          icon: 'doc.text',
+      offset: const Offset(0, 48),
+      itemBuilder: (context) => [
+        PopupMenuItem<String>(
           value: 'resume',
+          child: Row(
+            children: [
+              Icon(Icons.description_outlined, color: palette.iconPrimary, size: 20),
+              const SizedBox(width: 12),
+              Text('Upload Resume', style: TextStyle(color: palette.textPrimary)),
+            ],
+          ),
         ),
-        AdaptivePopupMenuItem(label: 'Camera', icon: 'camera', value: 'camera'),
-        AdaptivePopupMenuItem(
-          label: 'Photo Library',
-          icon: 'photo.on.rectangle',
+        PopupMenuItem<String>(
+          value: 'camera',
+          child: Row(
+            children: [
+              Icon(Icons.camera_alt_outlined, color: palette.iconPrimary, size: 20),
+              const SizedBox(width: 12),
+              Text('Camera', style: TextStyle(color: palette.textPrimary)),
+            ],
+          ),
+        ),
+        PopupMenuItem<String>(
           value: 'gallery',
+          child: Row(
+            children: [
+              Icon(Icons.photo_library_outlined, color: palette.iconPrimary, size: 20),
+              const SizedBox(width: 12),
+              Text('Photo Library', style: TextStyle(color: palette.textPrimary)),
+            ],
+          ),
         ),
-        AdaptivePopupMenuItem(
-          label: 'Deep Research',
-          icon: 'doc.text.magnifyingglass',
+        PopupMenuItem<String>(
           value: 'research',
+          child: Row(
+            children: [
+              Icon(Icons.manage_search_outlined, color: palette.iconPrimary, size: 20),
+              const SizedBox(width: 12),
+              Text('Deep Research', style: TextStyle(color: palette.textPrimary)),
+            ],
+          ),
         ),
-        AdaptivePopupMenuItem(
-          label: 'Interview Guide',
-          icon: 'questionmark.circle',
+        PopupMenuItem<String>(
           value: 'interview',
+          child: Row(
+            children: [
+              Icon(Icons.help_outline_rounded, color: palette.iconPrimary, size: 20),
+              const SizedBox(width: 12),
+              Text('Interview Guide', style: TextStyle(color: palette.textPrimary)),
+            ],
+          ),
         ),
       ],
-      onSelected: (index, entry) {
-        switch (entry.value) {
+      onSelected: (value) {
+        switch (value) {
           case 'resume':
             _pickResume();
           case 'camera':
@@ -182,6 +204,15 @@ class _MessageComposerState extends State<MessageComposer> {
             _sendMessage('Give me an interview preparation guide.');
         }
       },
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: palette.surfaceMuted.withValues(alpha: 0.76),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(Icons.add_rounded, color: foreground, size: 22),
+      ),
     );
   }
 

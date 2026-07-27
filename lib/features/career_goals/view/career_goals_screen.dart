@@ -1,4 +1,3 @@
-import 'package:jobodia_frontend/core/widgets/platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -35,41 +34,40 @@ class _CareerGoalsScreenState extends State<CareerGoalsScreen>
     final palette = context.palette;
     final ctrl = Get.put(CareerGoalsController());
 
-    return AdaptiveScaffold(
-      appBar: AdaptiveAppBar(
-        useNativeToolbar: false,
-        appBar: AppBar(
-          backgroundColor: palette.surface,
-          elevation: 0,
-          centerTitle: true,
-          leading: AdaptiveButton.icon(
-            onPressed: Get.back,
-            icon: Icons.chevron_left_rounded,
-            iconColor: palette.iconPrimary,
-            style: AdaptiveButtonStyle.plain,
+    return Scaffold(
+      backgroundColor: palette.scaffold,
+      appBar: AppBar(
+        backgroundColor: palette.surface,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          onPressed: Get.back,
+          icon: Icon(
+            Icons.chevron_left_rounded,
+            color: palette.iconPrimary,
           ),
-          title: Text(
-            'Career Journey',
-            style: TextStyle(
-              color: palette.textPrimary,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
+        ),
+        title: Text(
+          'Career Journey',
+          style: TextStyle(
+            color: palette.textPrimary,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
           ),
-          bottom: TabBar(
-            controller: _tabCtrl,
-            indicatorColor: AppColors.brandTeal,
-            labelColor: AppColors.brandTeal,
-            unselectedLabelColor: palette.textSecondary,
-            labelStyle: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-            ),
-            tabs: const [
-              Tab(text: 'Goals'),
-              Tab(text: 'Timeline'),
-            ],
+        ),
+        bottom: TabBar(
+          controller: _tabCtrl,
+          indicatorColor: AppColors.brandTeal,
+          labelColor: AppColors.brandTeal,
+          unselectedLabelColor: palette.textSecondary,
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
           ),
+          tabs: const [
+            Tab(text: 'Goals'),
+            Tab(text: 'Timeline'),
+          ],
         ),
       ),
       body: TabBarView(
