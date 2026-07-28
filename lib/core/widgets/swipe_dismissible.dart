@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 /// A thin wrapper around [Dismissible] for swipe-to-delete list rows. Renders a
@@ -20,7 +21,7 @@ class SwipeDismissible extends StatelessWidget {
     required this.onDismiss,
     this.direction = DismissDirection.endToStart,
     this.backgroundColor,
-    this.icon = Icons.delete_outline,
+    this.icon = FLucideIcons.trash2,
   });
 
   /// Stable key identifying the row in its list.

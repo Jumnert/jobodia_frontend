@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -39,7 +40,7 @@ class ChatHistoryDrawer extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.search_rounded, color: palette.iconMuted),
+                    Icon(FLucideIcons.search, color: palette.iconMuted),
                     const SizedBox(width: 10),
                     Expanded(
                       child: TextField(
@@ -97,7 +98,7 @@ class ChatHistoryDrawer extends StatelessWidget {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Icon(
-                            Icons.delete_outline_rounded,
+                            FLucideIcons.trash2,
                             color: Colors.white,
                           ),
                         ),
@@ -141,7 +142,7 @@ class _NewChatTile extends StatelessWidget {
         child: Row(
           children: [
             const SizedBox(width: 4),
-            Icon(Icons.add_comment_outlined, color: palette.textSecondary),
+            Icon(FLucideIcons.messageCirclePlus, color: palette.textSecondary),
             const SizedBox(width: 12),
             Text(
               'New chat',

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/undo_snackbar.dart';
@@ -132,7 +133,7 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
                 child: ElevatedButton.icon(
                   onPressed: () =>
                       _showComparisonSheet(context, palette, homeController),
-                  icon: const Icon(Icons.compare_arrows_rounded, size: 20),
+                  icon: const Icon(FLucideIcons.gitCompare, size: 20),
                   label: Text(
                     'Compare (${_comparisonSet.length})',
                     style: const TextStyle(
@@ -233,7 +234,7 @@ class _ComparisonSheet extends StatelessWidget {
                 child: Row(
                   children: [
                     Icon(
-                      Icons.compare_arrows_rounded,
+                      FLucideIcons.gitCompare,
                       color: AppColors.primary,
                       size: 22,
                     ),
@@ -364,11 +365,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.bookmark_border_rounded,
-              size: 56,
-              color: palette.iconMuted,
-            ),
+            Icon(FLucideIcons.bookmark, size: 56, color: palette.iconMuted),
             const SizedBox(height: 14),
             Text(
               'No saved jobs yet',

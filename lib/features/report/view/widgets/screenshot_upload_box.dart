@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 /// Interactive screenshot upload tile for the Report screen.
@@ -55,7 +56,7 @@ class ScreenshotUploadBox extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
-                          Icons.close_rounded,
+                          FLucideIcons.x,
                           size: 14,
                           color: Colors.white,
                         ),
@@ -68,7 +69,7 @@ class ScreenshotUploadBox extends StatelessWidget {
                 painter: _DashedBorderPainter(palette.border),
                 child: Center(
                   child: Icon(
-                    Icons.add_rounded,
+                    FLucideIcons.plus,
                     color: palette.textSecondary,
                     size: 30,
                   ),

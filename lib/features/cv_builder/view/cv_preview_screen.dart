@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/confirmation_dialog.dart';
@@ -116,7 +117,7 @@ class _PreviewActionsState extends State<_PreviewActions> {
                   borderRadius: BorderRadius.circular(15),
                 ),
               ),
-              child: const Icon(Icons.edit_outlined),
+              child: const Icon(FLucideIcons.pencil),
             ),
           ),
           const SizedBox(width: 10),
@@ -140,7 +141,7 @@ class _PreviewActionsState extends State<_PreviewActions> {
                         color: palette.textPrimary,
                       ),
                     )
-                  : const Icon(Icons.photo_library_outlined, size: 20),
+                  : const Icon(FLucideIcons.images, size: 20),
               label: const Text(
                 'Save to Photos',
                 style: TextStyle(fontWeight: FontWeight.w800),
@@ -168,7 +169,7 @@ class _PreviewActionsState extends State<_PreviewActions> {
                         color: Colors.white,
                       ),
                     )
-                  : const Icon(Icons.ios_share_rounded, size: 20),
+                  : const Icon(FLucideIcons.arrowUpRight, size: 20),
               label: const Text(
                 'Share PDF',
                 style: TextStyle(fontWeight: FontWeight.w800),
@@ -301,11 +302,7 @@ class _EmptyPreview extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.description_outlined,
-              size: 56,
-              color: palette.iconMuted,
-            ),
+            Icon(FLucideIcons.fileText, size: 56, color: palette.iconMuted),
             const SizedBox(height: 16),
             Text(
               'No CV generated yet',

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:jobodia_frontend/features/notifications/model/notification_item.dart';
@@ -81,7 +81,7 @@ class NotificationsController extends GetxController {
   List<NotificationItem> _mockNotifications() => [
     NotificationItem(
       id: 'n1',
-      icon: Icons.work_outline_rounded,
+      icon: FLucideIcons.briefcase,
       title: 'New job match',
       body:
           'Product Designer - SaaS is now a strong match based on your skills.',
@@ -90,7 +90,7 @@ class NotificationsController extends GetxController {
     ),
     NotificationItem(
       id: 'n2',
-      icon: Icons.smart_toy_outlined,
+      icon: FLucideIcons.bot,
       title: 'AI CV update',
       body: 'Your CV draft is ready with stronger summary bullet points.',
       time: '18 min ago',
@@ -98,21 +98,21 @@ class NotificationsController extends GetxController {
     ),
     NotificationItem(
       id: 'n3',
-      icon: Icons.favorite_border_rounded,
+      icon: FLucideIcons.heart,
       title: 'Saved job reminder',
       body: 'The remote Flutter role you saved has 4 new updates.',
       time: '1 hour ago',
     ),
     NotificationItem(
       id: 'n4',
-      icon: Icons.school_outlined,
+      icon: FLucideIcons.graduationCap,
       title: 'Interview prep',
       body: 'You have 3 interview practice questions waiting in your plan.',
       time: 'Today',
     ),
     NotificationItem(
       id: 'n5',
-      icon: Icons.notifications_active_outlined,
+      icon: FLucideIcons.bell,
       title: 'Weekly summary',
       body: '7 new jobs matched your filters this week.',
       time: 'Yesterday',

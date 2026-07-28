@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 /// Shared password visibility toggle used by login, signup, and
@@ -23,7 +24,7 @@ class PasswordVisibilityButton extends StatelessWidget {
         switchInCurve: Curves.easeInOutCubic,
         switchOutCurve: Curves.easeInOutCubic,
         child: Icon(
-          isVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+          isVisible ? FLucideIcons.eye : FLucideIcons.eyeClosed,
           key: ValueKey(isVisible),
           color: AppColors.textSecondary,
         ),

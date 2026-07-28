@@ -9,6 +9,8 @@ import 'package:jobodia_frontend/features/about/view/screens/privacy_policy_scre
 import 'package:jobodia_frontend/features/applications/view/applications_screen.dart';
 import 'package:jobodia_frontend/features/company/view/company_profile_screen.dart';
 import 'package:jobodia_frontend/features/auth/view/login_screen.dart';
+import 'package:jobodia_frontend/features/role/view/role_selection_screen.dart';
+import 'package:jobodia_frontend/features/settings/view/dev_logs_screen.dart';
 import 'package:jobodia_frontend/features/auth/view/otp_verification_screen.dart';
 import 'package:jobodia_frontend/features/auth/view/reset_password_screen.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
@@ -235,6 +237,21 @@ abstract final class AppPages {
     GetPage(
       name: AppRoutes.settings,
       page: () => const SettingsScreen(),
+      transition: Transition.cupertino,
+      transitionDuration: _defaultDuration,
+      curve: _defaultCurve,
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.selectRole,
+      page: () => const RoleSelectionScreen(),
+      transition: Transition.fadeIn,
+      transitionDuration: _defaultDuration,
+      curve: _defaultCurve,
+    ),
+    GetPage(
+      name: AppRoutes.devLogs,
+      page: () => const DevLogsScreen(),
       transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,

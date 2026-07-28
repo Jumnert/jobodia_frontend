@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/interview/controller/mock_interview_controller.dart';
@@ -25,7 +26,7 @@ class MockInterviewScreen extends GetView<MockInterviewController> {
                 IconButton(
                   onPressed: Get.back,
                   icon: Icon(
-                    Icons.chevron_left_rounded,
+                    FLucideIcons.chevronLeft,
                     color: palette.iconPrimary,
                   ),
                 ),
@@ -93,7 +94,7 @@ class _TimerBar extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.timer_outlined, size: 16, color: progressColor),
+                Icon(FLucideIcons.timer, size: 16, color: progressColor),
                 const SizedBox(width: 6),
                 Text(
                   timeLabel,
@@ -109,8 +110,8 @@ class _TimerBar extends StatelessWidget {
                   onPressed: controller.pauseResume,
                   icon: Icon(
                     controller.isTimerPaused.value
-                        ? Icons.play_arrow_rounded
-                        : Icons.pause_rounded,
+                        ? FLucideIcons.play
+                        : FLucideIcons.pause,
                     size: 22,
                     color: palette.iconMuted,
                   ),
@@ -253,10 +254,7 @@ class _QuestionView extends StatelessWidget {
                     if (!revealed)
                       TextButton.icon(
                         onPressed: controller.revealAnswer,
-                        icon: const Icon(
-                          Icons.lightbulb_outline_rounded,
-                          size: 18,
-                        ),
+                        icon: const Icon(FLucideIcons.lightbulb, size: 18),
                         style: TextButton.styleFrom(
                           foregroundColor: const Color(0xFF7C3AED),
                         ),
@@ -424,7 +422,7 @@ class _SummaryView extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              Icons.check_circle_rounded,
+              FLucideIcons.circleCheckBig,
               color: Color(0xFF7C3AED),
               size: 46,
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
@@ -26,7 +27,7 @@ class ProfessionalInfoStep extends StatelessWidget {
         ProfileSectionCard(
           title: 'Professional profile',
           subtitle: 'This appears at the top of your CV.',
-          icon: Icons.person_search_outlined,
+          icon: FLucideIcons.userRoundSearch,
           children: [
             CompactInput(
               label: 'Professional title',
@@ -57,7 +58,7 @@ class ProfessionalInfoStep extends StatelessWidget {
         ProfileSectionCard(
           title: 'Core skills',
           subtitle: 'Add focused skills recruiters can search for.',
-          icon: Icons.bolt_outlined,
+          icon: FLucideIcons.bolt,
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -87,7 +88,7 @@ class ProfessionalInfoStep extends StatelessWidget {
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                    child: const Icon(Icons.add_rounded),
+                    child: const Icon(FLucideIcons.plus),
                   ),
                 ),
               ],
@@ -118,10 +119,7 @@ class ProfessionalInfoStep extends StatelessWidget {
                             (skill) => InputChip(
                               label: Text(skill),
                               onDeleted: () => controller.removeSkill(skill),
-                              deleteIcon: const Icon(
-                                Icons.close_rounded,
-                                size: 16,
-                              ),
+                              deleteIcon: const Icon(FLucideIcons.x, size: 16),
                               backgroundColor: AppColors.brandTeal.withValues(
                                 alpha: 0.10,
                               ),

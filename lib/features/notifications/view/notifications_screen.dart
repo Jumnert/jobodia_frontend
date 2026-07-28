@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/empty_state.dart';
@@ -20,7 +21,7 @@ class NotificationsScreen extends GetView<NotificationsController> {
               final notifications = controller.notifications;
               return notifications.isEmpty
                   ? const EmptyState(
-                      icon: Icons.notifications_outlined,
+                      icon: FLucideIcons.bell,
                       title: 'No notifications yet',
                     )
                   : RefreshIndicator(
@@ -78,9 +79,7 @@ class NotificationsScreen extends GetView<NotificationsController> {
                                   Text(
                                     'Go to historical notifications.',
                                     style: const TextStyle(
-                                      color: Color(
-                                        0xFF0EA5A4,
-                                      ), // Teal link color
+                                      color: AppColors.brandPrimary,
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -104,7 +103,7 @@ class NotificationsScreen extends GetView<NotificationsController> {
                                   borderRadius: BorderRadius.circular(18),
                                 ),
                                 child: const Icon(
-                                  Icons.delete_outline_rounded,
+                                  FLucideIcons.trash2,
                                   color: Colors.white,
                                 ),
                               ),
@@ -234,13 +233,13 @@ class NotificationsScreen extends GetView<NotificationsController> {
                 const Spacer(),
                 QuietGlassIconButton(
                   onPressed: () {},
-                  icon: Icons.notifications_outlined,
+                  icon: FLucideIcons.bell,
                   foregroundColor: palette.iconPrimary,
                 ),
                 const Spacer(),
                 QuietGlassIconButton(
                   onPressed: controller.markAllRead,
-                  icon: Icons.done_all_rounded,
+                  icon: FLucideIcons.checkCheck,
                   foregroundColor: palette.iconPrimary,
                 ),
               ],

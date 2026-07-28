@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/utils/safe_image_loader.dart';
 import 'package:jobodia_frontend/features/profile/model/profile_model.dart';
@@ -57,12 +58,15 @@ class _ExperienceTimelineItem extends StatelessWidget {
                 _ExperienceLogo(imageUrl: experience.logoImageUrl),
                 if (!isLast)
                   Expanded(
-                    child: Container(
-                      width: 4,
-                      margin: const EdgeInsets.symmetric(vertical: 6),
-                      decoration: BoxDecoration(
-                        color: palette.divider,
-                        borderRadius: BorderRadius.circular(4),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: FDivider(
+                        axis: Axis.vertical,
+                        style: FDividerStyle(
+                          color: palette.divider,
+                          padding: EdgeInsets.zero,
+                          width: 4,
+                        ),
                       ),
                     ),
                   ),
@@ -151,7 +155,7 @@ class _ExperienceLogo extends StatelessWidget {
         url: imageUrl!,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) =>
-            const Icon(Icons.business_rounded, size: 20),
+            const Icon(FLucideIcons.building2, size: 20),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/custom_button.dart';
@@ -108,7 +109,7 @@ class _CreateAlertSheetState extends State<CreateAlertSheet> {
                 controller: _nameCtrl,
                 label: 'Alert Name',
                 hintText: 'e.g. Remote Flutter Developer',
-                prefixIcon: Icons.title,
+                prefixIcon: FLucideIcons.type,
               ),
               const SizedBox(height: 16),
               Text(
@@ -126,7 +127,7 @@ class _CreateAlertSheetState extends State<CreateAlertSheet> {
                       controller: _keywordCtrl,
                       label: 'Add Keyword',
                       hintText: 'e.g. Flutter, Dart',
-                      prefixIcon: Icons.tag,
+                      prefixIcon: FLucideIcons.tag,
                       onSubmitted: (_) => _addKeyword(),
                     ),
                   ),
@@ -134,7 +135,7 @@ class _CreateAlertSheetState extends State<CreateAlertSheet> {
                   IconButton(
                     onPressed: _addKeyword,
                     icon: const Icon(
-                      Icons.add_circle,
+                      FLucideIcons.plusCircle,
                       color: AppColors.brandTeal,
                       size: 28,
                     ),
@@ -190,7 +191,7 @@ class _CreateAlertSheetState extends State<CreateAlertSheet> {
                     ),
                     dropdownColor: palette.surface,
                     icon: Icon(
-                      Icons.keyboard_arrow_down,
+                      FLucideIcons.chevronDown,
                       color: palette.iconMuted,
                     ),
                     items: [
@@ -240,7 +241,7 @@ class _CreateAlertSheetState extends State<CreateAlertSheet> {
                     ),
                     dropdownColor: palette.surface,
                     icon: Icon(
-                      Icons.keyboard_arrow_down,
+                      FLucideIcons.chevronDown,
                       color: palette.iconMuted,
                     ),
                     items: [

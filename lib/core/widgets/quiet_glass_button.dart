@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 /// A glass icon control without the medium native-button haptic.
@@ -71,7 +72,7 @@ class QuietGlassBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => QuietGlassIconButton(
-    icon: Icons.arrow_back_ios_new_rounded,
+    icon: FLucideIcons.arrowLeft,
     tooltip: 'Back',
     onPressed: onPressed,
     foregroundColor: foregroundColor,

@@ -2,14 +2,14 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
 import 'package:jobodia_frontend/features/home/model/job_feed_model.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/job_feed_card.dart';
-import 'package:jobodia_frontend/features/job_detail/controller/job_detail_controller.dart';
-import 'package:jobodia_frontend/features/job_detail/view/job_detail_screen.dart';
+import 'package:jobodia_frontend/features/job_detail/view/job_detail_sheet.dart';
 import 'package:jobodia_frontend/features/saved_jobs/controller/saved_jobs_controller.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -34,11 +34,7 @@ class SearchResultsList extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.search_off_rounded,
-              size: 64,
-              color: palette.textTertiary,
-            ),
+            Icon(FLucideIcons.searchX, size: 64, color: palette.textTertiary),
             const SizedBox(height: 16),
             Text(
               "No jobs found for '$query'",
@@ -146,13 +142,7 @@ class SearchJobCard extends StatelessWidget {
         child: InkWell(
           onTap: () {
             unawaited(HapticFeedback.lightImpact());
-            Get.to(
-              () => const JobDetailScreen(),
-              arguments: job,
-              binding: BindingsBuilder(
-                () => Get.lazyPut<JobDetailController>(JobDetailController.new),
-              ),
-            );
+            showJobDetailSheet(context, job);
           },
           child: Obx(
             () => JobFeedCard(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -85,7 +86,7 @@ class InterviewScreen extends StatelessWidget {
                       Row(
                         children: [
                           Icon(
-                            Icons.event_rounded,
+                            FLucideIcons.calendar,
                             size: 20,
                             color: AppColors.primary,
                           ),
@@ -218,7 +219,7 @@ class InterviewScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       Icon(
-                        Icons.event_busy_outlined,
+                        FLucideIcons.calendarX,
                         size: 40,
                         color: palette.iconMuted,
                       ),
@@ -247,7 +248,7 @@ class InterviewScreen extends StatelessWidget {
               );
             }),
             _ModuleCard(
-              icon: Icons.record_voice_over_rounded,
+              icon: FLucideIcons.mic,
               title: 'Mock Interview',
               subtitle: 'Step through a simulated technical interview.',
               onTap: () => Get.to(
@@ -293,7 +294,7 @@ class InterviewScreen extends StatelessWidget {
                             child: Row(
                               children: [
                                 Icon(
-                                  Icons.history_rounded,
+                                  FLucideIcons.history,
                                   size: 16,
                                   color: palette.iconMuted,
                                 ),
@@ -317,14 +318,14 @@ class InterviewScreen extends StatelessWidget {
               }),
             const SizedBox(height: 12),
             _ModuleCard(
-              icon: Icons.style_rounded,
+              icon: FLucideIcons.bookOpen,
               title: 'Flash Cards',
               subtitle: 'Study HTML, CSS, and JavaScript concepts.',
               onTap: () => Get.to<void>(() => const FlashcardsScreen()),
             ),
             const SizedBox(height: 12),
             _ModuleCard(
-              icon: Icons.forum_rounded,
+              icon: FLucideIcons.messageCircle,
               title: 'How to Chat to Recruiter?',
               subtitle: 'Ready-to-send professional message templates.',
               onTap: () => Get.toNamed<void>(AppRoutes.conversations),
@@ -398,11 +399,7 @@ class _ModuleCard extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: palette.iconMuted,
-              size: 22,
-            ),
+            Icon(FLucideIcons.chevronRight, color: palette.iconMuted, size: 22),
           ],
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -74,7 +75,7 @@ class _PricingScreenState extends State<PricingScreen> {
         period: 'forever',
         description: 'Start your job search with core tools and a clean CV.',
         cta: 'Get started',
-        icon: Icons.rocket_launch_outlined,
+        icon: FLucideIcons.rocket,
         mascotAsset: 'assets/images/pricing/free_mascot.png',
         delivery: 'Currently In Use',
         features: const [
@@ -91,7 +92,7 @@ class _PricingScreenState extends State<PricingScreen> {
         period: yearly ? 'year' : 'month',
         description: 'Upgrade your CV, cover letters, and interview prep.',
         cta: 'Upgrade now',
-        icon: Icons.workspace_premium_outlined,
+        icon: FLucideIcons.award,
         mascotAsset: 'assets/images/pricing/plus_mascot.png',
         delivery: 'Best value',
         features: const [
@@ -108,7 +109,7 @@ class _PricingScreenState extends State<PricingScreen> {
         period: yearly ? 'year' : 'month',
         description: 'Get a guided plan from profile setup to interviews.',
         cta: 'Choose Pro',
-        icon: Icons.school_outlined,
+        icon: FLucideIcons.school,
         mascotAsset: 'assets/images/pricing/pro_mascot.png',
         delivery: 'Full guidance',
         features: const [
@@ -189,9 +190,9 @@ class _FeatureTiles extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const features = [
-      _FeatureTileData(Icons.description_outlined, 'CV Builder'),
-      _FeatureTileData(Icons.smart_toy_outlined, 'AI Coach'),
-      _FeatureTileData(Icons.calendar_month_outlined, 'Roadmap'),
+      _FeatureTileData(FLucideIcons.fileText, 'CV Builder'),
+      _FeatureTileData(FLucideIcons.bot, 'AI Coach'),
+      _FeatureTileData(FLucideIcons.calendar, 'Roadmap'),
     ];
 
     return Row(
@@ -378,11 +379,7 @@ void _showContactSheet(BuildContext context) {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.mail_outline_rounded,
-            size: 40,
-            color: AppColors.brandTeal,
-          ),
+          Icon(FLucideIcons.mail, size: 40, color: AppColors.brandTeal),
           const SizedBox(height: 16),
           Text(
             'Contact Us',
@@ -407,11 +404,7 @@ void _showContactSheet(BuildContext context) {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.email_outlined,
-                  size: 20,
-                  color: AppColors.brandTeal,
-                ),
+                Icon(FLucideIcons.mail, size: 20, color: AppColors.brandTeal),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -443,7 +436,7 @@ void _showContactSheet(BuildContext context) {
                       margin: const EdgeInsets.all(16),
                     );
                   },
-                  icon: const Icon(Icons.copy_rounded, size: 16),
+                  icon: const Icon(FLucideIcons.copy, size: 16),
                   label: const Text('Copy email'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.brandTeal,
@@ -469,7 +462,7 @@ void _showContactSheet(BuildContext context) {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.share_outlined, size: 16),
+                  icon: const Icon(FLucideIcons.share2, size: 16),
                   label: const Text('Share inquiry'),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.brandTeal,

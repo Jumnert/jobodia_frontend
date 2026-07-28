@@ -1,6 +1,7 @@
 import 'package:jobodia_frontend/features/cv_builder/model/cv_form_classes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
@@ -103,7 +104,7 @@ class HeadshotUploadTile extends StatelessWidget {
               child: controller.hasHeadshot
                   ? null
                   : Icon(
-                      Icons.add_a_photo_outlined,
+                      FLucideIcons.camera,
                       color: palette.iconMuted,
                       size: 28,
                     ),
@@ -429,7 +430,7 @@ class RepeatableEntryCard extends StatelessWidget {
                 IconButton(
                   onPressed: onRemove,
                   visualDensity: VisualDensity.compact,
-                  icon: const Icon(Icons.close_rounded, size: 20),
+                  icon: const Icon(FLucideIcons.x, size: 20),
                 ),
             ],
           ),
@@ -470,7 +471,7 @@ class AddEntryButton extends StatelessWidget {
               ),
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
-            icon: const Icon(Icons.add_rounded),
+            icon: const Icon(FLucideIcons.plus),
             label: Text(label),
           ),
         ),

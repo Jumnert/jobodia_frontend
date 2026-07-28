@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -39,7 +40,7 @@ class JobDetailScreen extends GetView<JobDetailController> {
                     child: Column(
                       children: [
                         Icon(
-                          Icons.work_off_outlined,
+                          FLucideIcons.briefcase,
                           size: 48,
                           color: palette.iconMuted,
                         ),
@@ -80,14 +81,14 @@ class JobDetailScreen extends GetView<JobDetailController> {
           actions: [
             IconButton(
               onPressed: controller.shareJob,
-              icon: const Icon(Icons.ios_share_rounded),
+              icon: const Icon(FLucideIcons.share2),
             ),
             IconButton(
               onPressed: controller.toggleSaved,
               icon: Icon(
                 controller.isSaved
-                    ? Icons.bookmark_rounded
-                    : Icons.bookmark_border_rounded,
+                    ? FLucideIcons.bookmark
+                    : FLucideIcons.bookmark,
               ),
             ),
           ],
@@ -194,7 +195,7 @@ class _SalaryRangeBar extends StatelessWidget {
                   child: Container(
                     height: 6,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0EA5A4),
+                      color: AppColors.brandPrimary,
                       borderRadius: BorderRadius.circular(3),
                     ),
                   ),
@@ -226,7 +227,7 @@ class _MatchBadgeTile extends StatelessWidget {
 
   final JobDetailController controller;
 
-  static const _kTeal = Color(0xFF0EA5A4);
+  static const _matchAccent = AppColors.brandPrimary;
 
   @override
   Widget build(BuildContext context) {
@@ -250,28 +251,28 @@ class _MatchBadgeTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: _kTeal.withValues(alpha: 0.10),
+          color: _matchAccent.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: _kTeal.withValues(alpha: 0.40)),
+          border: Border.all(color: _matchAccent.withValues(alpha: 0.40)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.auto_awesome_rounded, size: 14, color: _kTeal),
+            const Icon(FLucideIcons.sparkles, size: 14, color: _matchAccent),
             const SizedBox(width: 6),
             Text(
               '$pct% match',
               style: const TextStyle(
-                color: _kTeal,
+                color: _matchAccent,
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(width: 6),
             Icon(
-              Icons.info_outline_rounded,
+              FLucideIcons.info,
               size: 14,
-              color: _kTeal.withValues(alpha: 0.70),
+              color: _matchAccent.withValues(alpha: 0.70),
             ),
           ],
         ),
@@ -328,11 +329,7 @@ class _NotesCardState extends State<_NotesCard> {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.edit_note_rounded,
-                size: 20,
-                color: palette.textPrimary,
-              ),
+              Icon(FLucideIcons.filePen, size: 20, color: palette.textPrimary),
               const SizedBox(width: 8),
               Text(
                 'My Notes',
@@ -504,7 +501,7 @@ class _JobDetailsSliver extends StatelessWidget {
                     Row(
                       children: [
                         Icon(
-                          Icons.compare_arrows_rounded,
+                          FLucideIcons.arrowLeftRight,
                           color: AppColors.primary,
                           size: 20,
                         ),
@@ -582,7 +579,7 @@ class _JobDetailsSliver extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Icon(
-                              Icons.trending_up_rounded,
+                              FLucideIcons.trendingUp,
                               color: AppColors.success,
                               size: 14,
                             ),
@@ -650,7 +647,7 @@ class _JobDetailsSliver extends StatelessWidget {
                       width: double.infinity,
                       child: OutlinedButton.icon(
                         onPressed: () => Get.toNamed(AppRoutes.cvBuilder),
-                        icon: const Icon(Icons.description_outlined, size: 18),
+                        icon: const Icon(FLucideIcons.fileText, size: 18),
                         label: const Text('Improve CV'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.primary,

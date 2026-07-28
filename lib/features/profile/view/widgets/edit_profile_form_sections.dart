@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/custom_button.dart';
 import '../edit_profile_screen.dart'; // To access EditField, SectionLabel, PortfolioControllers, PortfolioCard
@@ -26,21 +27,21 @@ class BasicInfoSection extends StatelessWidget {
           label: 'Name',
           controller: nameCtrl,
           hint: 'Your full name',
-          icon: Icons.person_outline_rounded,
+          icon: FLucideIcons.userRound,
         ),
         const SizedBox(height: 14),
         EditField(
           label: 'Role',
           controller: roleCtrl,
           hint: 'e.g. Frontend Developer',
-          icon: Icons.work_outline_rounded,
+          icon: FLucideIcons.briefcase,
         ),
         const SizedBox(height: 14),
         EditField(
           label: 'About',
           controller: aboutCtrl,
           hint: 'Write a short bio...',
-          icon: Icons.notes_rounded,
+          icon: FLucideIcons.scrollText,
           minLines: 4,
           maxLines: 8,
           maxLength: 1000,
@@ -85,7 +86,7 @@ class LinksSection extends StatelessWidget {
             shape: const StadiumBorder(),
             minimumSize: const Size.fromHeight(44),
           ),
-          icon: const Icon(Icons.add_rounded, size: 18),
+          icon: const Icon(FLucideIcons.plus, size: 18),
           label: const Text('Add Link'),
         ),
       ],

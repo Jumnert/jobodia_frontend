@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
-import 'package:jobodia_frontend/core/widgets/custom_button.dart';
 import 'package:jobodia_frontend/core/widgets/gradient_header_painter.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
-import 'package:jobodia_frontend/features/auth/view/widgets/otp_input_field.dart';
 
 /// OTP verification screen shown after Register succeeds.
 class OtpVerificationScreen extends GetView<AuthController> {
@@ -89,12 +88,12 @@ class _OtpHeader extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconButton(
-                    onPressed: controller.goBackToLogin,
-                    icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.white.withValues(alpha: 0.15),
-                      shape: const CircleBorder(),
+                  FButton.icon(
+                    variant: FButtonVariant.ghost,
+                    onPress: controller.goBackToLogin,
+                    child: const Icon(
+                      FLucideIcons.arrowLeft,
+                      color: Colors.white,
                     ),
                   ),
                   const Spacer(),
@@ -145,7 +144,23 @@ class _OtpContent extends GetView<AuthController> {
             style: const TextStyle(color: AppColors.textSecondary),
           ),
           const SizedBox(height: 22),
-          const OtpInputField(),
+          Center(
+            child: FOtpField(
+              control: FOtpFieldControl.managed(
+                onChange: (value) {
+                  controller.otpController.text = value.text;
+                  if (value.text.length == 6) {
+                    FocusManager.instance.primaryFocus?.unfocus();
+                  }
+                },
+              ),
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.done,
+              onSubmit: (_) {
+                if (!controller.isLoading.value) controller.verifyOtp();
+              },
+            ),
+          ),
           const SizedBox(height: 8),
           _AnimatedErrorMessage(controller.errorMessage.value),
           Align(
@@ -164,10 +179,12 @@ class _OtpContent extends GetView<AuthController> {
             ),
           ),
           const SizedBox(height: 4),
-          CustomButton(
-            label: 'Confirm',
-            isLoading: controller.isLoading.value,
-            onPressed: controller.isLoading.value ? null : controller.verifyOtp,
+          FButton(
+            onPress: controller.isLoading.value ? null : controller.verifyOtp,
+            prefix: controller.isLoading.value
+                ? const FCircularProgress()
+                : null,
+            child: Text(controller.isLoading.value ? 'Please wait' : 'Confirm'),
           ),
           const SizedBox(height: 22),
           Center(

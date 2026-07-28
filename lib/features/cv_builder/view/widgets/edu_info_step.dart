@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
 import 'package:jobodia_frontend/features/cv_builder/view/widgets/cv_builder_helpers.dart';
@@ -17,7 +18,7 @@ class EduInfoStep extends StatelessWidget {
         title: 'Education',
         subtitle:
             'Add up to 3 schools or universities with degree, dates, and useful notes.',
-        icon: Icons.school_outlined,
+        icon: FLucideIcons.graduationCap,
         children: [
           ...controller.educations.map(
             (entry) => EducationEntry(

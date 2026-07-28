@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 class StarRating extends StatelessWidget {
@@ -23,11 +24,11 @@ class StarRating extends StatelessWidget {
         final starValue = index + 1;
         IconData iconData;
         if (rating >= starValue) {
-          iconData = Icons.star_rounded;
+          iconData = FLucideIcons.star;
         } else if (rating >= starValue - 0.5) {
-          iconData = Icons.star_half_rounded;
+          iconData = FLucideIcons.starHalf;
         } else {
-          iconData = Icons.star_outline_rounded;
+          iconData = FLucideIcons.star;
         }
 
         final star = Icon(iconData, color: context.palette.warning, size: size);

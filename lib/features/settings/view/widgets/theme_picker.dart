@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/theme/app_theme.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -108,7 +109,7 @@ class _ThemeCard extends StatelessWidget {
                       ),
                     ),
                     child: Icon(
-                      isSelected ? Icons.check_rounded : Icons.circle_outlined,
+                      isSelected ? FLucideIcons.check : FLucideIcons.circle,
                       color: Colors.white,
                       size: 18,
                     ),
@@ -167,9 +168,9 @@ class _ThemeCard extends StatelessWidget {
 
   List<Color> get _swatches => switch (preset) {
     AppThemePreset.defaultTheme => const [
-      Color(0xFF27B8BB),
-      Color(0xFF237BE8),
-      Color(0xFFF5F6F8),
+      AppColors.brandPrimary,
+      AppColors.chart2,
+      Color(0xFFFFFFFF),
     ],
     AppThemePreset.golden => const [
       Color(0xFFC38A16),
@@ -208,9 +209,9 @@ class _ThemeArtwork extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = switch (preset) {
       AppThemePreset.defaultTheme => const [
-        Color(0xFF0B6F74),
-        Color(0xFF27B8BB),
-        Color(0xFF82E5DF),
+        AppColors.chart5,
+        AppColors.brandPrimary,
+        AppColors.chart1,
       ],
       AppThemePreset.golden => const [
         Color(0xFF6D4610),
@@ -253,8 +254,8 @@ class _ThemeArtwork extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Icon(
             preset == AppThemePreset.golden
-                ? Icons.auto_awesome_rounded
-                : Icons.blur_on_rounded,
+                ? FLucideIcons.sparkles
+                : FLucideIcons.palette,
             color: Colors.white.withValues(alpha: 0.7),
             size: 34,
           ),

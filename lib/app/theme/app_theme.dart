@@ -46,17 +46,18 @@ abstract final class AppTheme {
     Brightness brightness = Brightness.light,
   }) {
     final palette = _paletteFor(preset, brightness);
-    final colorScheme =
-        ColorScheme.fromSeed(
-          seedColor: preset.accent,
-          brightness: brightness,
-        ).copyWith(
-          primary: preset.accent,
-          surface: palette.surface,
-          onSurface: palette.textPrimary,
-          outline: palette.border,
-          error: palette.error,
-        );
+    final colorScheme = preset == AppThemePreset.defaultTheme
+        ? _defaultColorScheme(brightness)
+        : ColorScheme.fromSeed(
+            seedColor: preset.accent,
+            brightness: brightness,
+          ).copyWith(
+            primary: preset.accent,
+            surface: palette.surface,
+            onSurface: palette.textPrimary,
+            outline: palette.border,
+            error: palette.error,
+          );
     return ThemeData(
       useMaterial3: true,
       scaffoldBackgroundColor: palette.scaffold,
@@ -76,12 +77,19 @@ abstract final class AppTheme {
         fillColor: palette.surfaceMuted,
         hintStyle: TextStyle(color: palette.textTertiary),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: palette.border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: preset.accent, width: 1.5),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(
+            color: preset == AppThemePreset.defaultTheme
+                ? (brightness == Brightness.dark
+                      ? const Color(0xFF737373)
+                      : const Color(0xFFA1A1A1))
+                : preset.accent,
+            width: 1.5,
+          ),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
@@ -104,6 +112,9 @@ abstract final class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: preset.accent,
           foregroundColor: colorScheme.onPrimary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -117,6 +128,57 @@ abstract final class AppTheme {
         labelStyle: TextStyle(color: palette.textPrimary),
       ),
       extensions: <ThemeExtension<dynamic>>[palette],
+    );
+  }
+
+  static ColorScheme _defaultColorScheme(Brightness brightness) {
+    final isDark = brightness == Brightness.dark;
+    final background = isDark
+        ? const Color(0xFF0A0A0A)
+        : const Color(0xFFFFFFFF);
+    final foreground = isDark
+        ? const Color(0xFFFAFAFA)
+        : const Color(0xFF0A0A0A);
+    final card = isDark ? const Color(0xFF171717) : const Color(0xFFFFFFFF);
+    final secondary = isDark
+        ? const Color(0xFF27272A)
+        : const Color(0xFFF4F4F5);
+    final muted = isDark ? const Color(0xFF262626) : const Color(0xFFF5F5F5);
+    final accent = isDark ? const Color(0xFF404040) : const Color(0xFFF5F5F5);
+    final border = isDark ? const Color(0x1AFFFFFF) : const Color(0xFFE5E5E5);
+
+    return ColorScheme.fromSeed(
+      seedColor: AppColors.brandPrimary,
+      brightness: brightness,
+    ).copyWith(
+      primary: AppColors.brandPrimary,
+      onPrimary: AppColors.primaryForeground,
+      primaryContainer: AppColors.brandPrimary,
+      onPrimaryContainer: const Color(0xFF0A0A0A),
+      secondary: secondary,
+      onSecondary: isDark ? const Color(0xFFFAFAFA) : const Color(0xFF18181B),
+      secondaryContainer: muted,
+      onSecondaryContainer: foreground,
+      tertiary: AppColors.chart2,
+      onTertiary: Colors.white,
+      error: isDark ? const Color(0xFFFF6467) : const Color(0xFFDF2225),
+      onError: Colors.white,
+      surface: card,
+      onSurface: foreground,
+      surfaceContainerLowest: background,
+      surfaceContainerLow: card,
+      surfaceContainer: muted,
+      surfaceContainerHigh: accent,
+      surfaceContainerHighest: secondary,
+      outline: border,
+      outlineVariant: border,
+      inverseSurface: isDark
+          ? const Color(0xFFFAFAFA)
+          : const Color(0xFF171717),
+      onInverseSurface: isDark
+          ? const Color(0xFF171717)
+          : const Color(0xFFFAFAFA),
+      surfaceTint: Colors.transparent,
     );
   }
 

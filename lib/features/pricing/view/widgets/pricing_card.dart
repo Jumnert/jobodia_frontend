@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 /// The per-plan benefits card shown on the pricing screen. Lists the selected
@@ -38,7 +39,7 @@ class PricingCard extends StatelessWidget {
           Row(
             children: [
               Icon(
-                Icons.arrow_outward_rounded,
+                FLucideIcons.arrowUpRight,
                 color: palette.iconPrimary,
                 size: 15,
               ),

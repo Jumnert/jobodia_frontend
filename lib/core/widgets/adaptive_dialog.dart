@@ -61,12 +61,7 @@ class DialogAction {
 }
 
 /// The style of a dialog action.
-enum DialogActionStyle {
-  defaultStyle,
-  primary,
-  cancel,
-  destructive,
-}
+enum DialogActionStyle { defaultStyle, primary, cancel, destructive }
 
 /// Input configuration for an input dialog.
 class AdaptiveDialogInput {
@@ -124,10 +119,7 @@ class _AdaptiveDialogContent extends StatelessWidget {
       content: message != null
           ? Text(
               message!,
-              style: TextStyle(
-                color: fg.withValues(alpha: 0.7),
-                fontSize: 14,
-              ),
+              style: TextStyle(color: fg.withValues(alpha: 0.7), fontSize: 14),
             )
           : null,
       actions: actions.map((action) {

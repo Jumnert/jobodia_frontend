@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 
 /// Section title label used throughout settings.
 class SectionTitle extends StatelessWidget {
@@ -128,7 +129,7 @@ class SettingsTile extends StatelessWidget {
             ?trailing,
             if (showChevron)
               Icon(
-                Icons.chevron_right_rounded,
+                FLucideIcons.chevronRight,
                 color: mutedColor.withValues(alpha: 0.6),
                 size: 20,
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/referrals/controller/referral_controller.dart';
@@ -41,7 +42,7 @@ class ReferralScreen extends StatelessWidget {
               child: Column(
                 children: [
                   const Icon(
-                    Icons.volunteer_activism_rounded,
+                    FLucideIcons.heartHandshake,
                     color: Colors.white,
                     size: 48,
                   ),
@@ -112,7 +113,7 @@ class ReferralScreen extends StatelessWidget {
                       IconButton(
                         onPressed: ctrl.copyReferralCode,
                         icon: const Icon(
-                          Icons.copy_rounded,
+                          FLucideIcons.copy,
                           color: AppColors.brandTeal,
                         ),
                         tooltip: 'Copy Code',
@@ -132,7 +133,7 @@ class ReferralScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      icon: const Icon(Icons.share_rounded),
+                      icon: const Icon(FLucideIcons.share2),
                       label: const Text(
                         'Share Link',
                         style: TextStyle(
@@ -204,17 +205,17 @@ class _ReferralTile extends StatelessWidget {
     switch (referral.status) {
       case ReferralStatus.hired:
         statusColor = AppColors.success;
-        statusIcon = Icons.check_circle_rounded;
+        statusIcon = FLucideIcons.circleCheckBig;
         statusText = 'Hired (+\$${referral.rewardEarned.toStringAsFixed(0)})';
         break;
       case ReferralStatus.registered:
         statusColor = AppColors.info;
-        statusIcon = Icons.how_to_reg_rounded;
+        statusIcon = FLucideIcons.userCheck;
         statusText = 'Registered';
         break;
       case ReferralStatus.invited:
         statusColor = palette.textSecondary;
-        statusIcon = Icons.mail_outline_rounded;
+        statusIcon = FLucideIcons.mail;
         statusText = 'Invited';
         break;
     }

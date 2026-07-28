@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 
 /// A wrapper around [Image.network] that only loads images from allowlisted
 /// domains. Prevents content injection if URLs become user-controlled.
@@ -41,7 +42,7 @@ class SafeImageLoader extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!isAllowedUrl(url)) {
       return errorBuilder?.call(context, 'Domain not allowed', null) ??
-          const Icon(Icons.broken_image, size: 48);
+          const Icon(FLucideIcons.imageOff, size: 48);
     }
     final dpr = MediaQuery.devicePixelRatioOf(context);
     return LayoutBuilder(
@@ -76,7 +77,7 @@ class SafeImageLoader extends StatelessWidget {
                 ),
           errorBuilder:
               errorBuilder ??
-              (_, _, _) => const Icon(Icons.broken_image, size: 48),
+              (_, _, _) => const Icon(FLucideIcons.imageOff, size: 48),
         );
       },
     );

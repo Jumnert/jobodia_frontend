@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -50,7 +51,7 @@ class ProfileScreen extends GetView<ProfileController> {
                           children: [
                             Obx(
                               () => _ProfileSectionCard(
-                                icon: Icons.person_outline_rounded,
+                                icon: FLucideIcons.userRound,
                                 child: ProfileAboutSection(
                                   about: controller.profile.about,
                                   isExpanded: controller.isAboutExpanded.value,
@@ -65,7 +66,7 @@ class ProfileScreen extends GetView<ProfileController> {
                                 return const SizedBox.shrink();
                               }
                               return _ProfileSectionCard(
-                                icon: Icons.auto_awesome_rounded,
+                                icon: FLucideIcons.sparkles,
                                 child: _SkillsSection(skills: skills),
                               );
                             }),
@@ -74,14 +75,14 @@ class ProfileScreen extends GetView<ProfileController> {
                               final links = controller.profile.portfolioLinks;
                               if (links.isEmpty) return const SizedBox.shrink();
                               return _ProfileSectionCard(
-                                icon: Icons.language_rounded,
+                                icon: FLucideIcons.globe2,
                                 child: _PortfolioSection(links: links),
                               );
                             }),
                             const SizedBox(height: 12),
                             Obx(
                               () => _ProfileSectionCard(
-                                icon: Icons.work_outline_rounded,
+                                icon: FLucideIcons.briefcase,
                                 child: ExperienceTimeline(
                                   experiences: controller.profile.experiences,
                                 ),
@@ -116,13 +117,13 @@ class ProfileScreen extends GetView<ProfileController> {
                   const Spacer(),
                   QuietGlassIconButton(
                     onPressed: () => Get.toNamed<void>(AppRoutes.settings),
-                    icon: Icons.settings_outlined,
+                    icon: FLucideIcons.settings,
                     foregroundColor: palette.iconPrimary,
                   ),
                   const SizedBox(width: 8),
                   QuietGlassIconButton(
                     onPressed: () => Get.toNamed<void>(AppRoutes.statistics),
-                    icon: Icons.bar_chart_rounded,
+                    icon: FLucideIcons.barChart,
                     foregroundColor: palette.iconPrimary,
                   ),
                 ],
@@ -176,7 +177,7 @@ class _ProfileHeader extends StatelessWidget {
               errorBuilder: (context, error, stackTrace) => Container(
                 color: palette.surfaceMuted,
                 child: Icon(
-                  Icons.person_rounded,
+                  FLucideIcons.userRound,
                   size: 52,
                   color: palette.iconMuted,
                 ),
@@ -276,7 +277,7 @@ class _ProfileHeader extends StatelessWidget {
                 visualDensity: VisualDensity.compact,
                 tooltip: 'Edit profile',
                 icon: Icon(
-                  Icons.edit_outlined,
+                  FLucideIcons.penLine,
                   size: 20,
                   color: palette.textSecondary,
                 ),
@@ -316,12 +317,12 @@ class _ProfileHeader extends StatelessWidget {
                     value: '${profile.experiences.length}',
                     label: 'Experience',
                   ),
-                  Container(width: 1, height: 30, color: palette.divider),
+                  SizedBox(height: 30, child: FDivider(axis: Axis.vertical)),
                   _ProfileMetric(
                     value: '${profile.skills.length}',
                     label: 'Skills',
                   ),
-                  Container(width: 1, height: 30, color: palette.divider),
+                  SizedBox(height: 30, child: FDivider(axis: Axis.vertical)),
                   _ProfileMetric(
                     value: '${profile.portfolioLinks.length}',
                     label: 'Projects',
@@ -380,19 +381,19 @@ class _ProfileSectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 17),
-      decoration: BoxDecoration(
-        color: palette.surface,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: palette.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.035),
-            blurRadius: 18,
-            offset: const Offset(0, 7),
+    final theme = FTheme.of(context);
+    return FCard(
+      style: FCardStyle(
+        decoration: ShapeDecoration(
+          shape: RoundedSuperellipseBorder(
+            side: BorderSide(color: palette.border),
+            borderRadius: BorderRadius.circular(22),
           ),
-        ],
+          color: palette.surface,
+        ),
+        titleTextStyle: theme.typography.body.md,
+        subtitleTextStyle: theme.typography.body.sm,
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 17),
       ),
       child: Stack(
         children: [
@@ -438,23 +439,29 @@ class _SkillsSection extends StatelessWidget {
           spacing: 8,
           runSpacing: 8,
           children: skills.map((skill) {
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.brandTeal.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: AppColors.brandTeal.withValues(alpha: 0.24),
+            return FBadge(
+              variant: FBadgeVariant.outline,
+              style: FBadgeStyle(
+                decoration: ShapeDecoration(
+                  shape: RoundedSuperellipseBorder(
+                    side: BorderSide(
+                      color: AppColors.brandTeal.withValues(alpha: 0.24),
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  color: AppColors.brandTeal.withValues(alpha: 0.10),
                 ),
-              ),
-              child: Text(
-                skill,
-                style: const TextStyle(
+                labelTextStyle: TextStyle(
                   color: AppColors.brandTeal,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
               ),
+              child: Text(skill),
             );
           }).toList(),
         ),
@@ -512,7 +519,7 @@ class _PortfolioSection extends StatelessWidget {
                 child: Row(
                   children: [
                     Icon(
-                      Icons.link_rounded,
+                      FLucideIcons.link,
                       color: AppColors.brandTeal,
                       size: 18,
                     ),
@@ -528,7 +535,7 @@ class _PortfolioSection extends StatelessWidget {
                       ),
                     ),
                     Icon(
-                      Icons.open_in_new_rounded,
+                      FLucideIcons.externalLink,
                       color: palette.textSecondary,
                       size: 16,
                     ),
@@ -557,13 +564,25 @@ class _CvLinkCard extends StatelessWidget {
     final palette = context.palette;
     final cv = generatedCv;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: palette.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: palette.textSecondary.withAlpha(40)),
+    return FCard(
+      style: FCardStyle(
+        decoration: ShapeDecoration(
+          shape: RoundedSuperellipseBorder(
+            side: BorderSide(color: palette.textSecondary.withAlpha(40)),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          color: palette.surface,
+        ),
+        titleTextStyle: TextStyle(
+          color: palette.textPrimary,
+          fontSize: 15,
+          fontWeight: FontWeight.w700,
+        ),
+        subtitleTextStyle: TextStyle(
+          color: palette.textSecondary,
+          fontSize: 13,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
       child: cv != null
           ? Row(
@@ -619,7 +638,7 @@ class _CvLinkCard extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(
-                    Icons.description_outlined,
+                    FLucideIcons.fileText,
                     color: palette.textSecondary,
                     size: 20,
                   ),

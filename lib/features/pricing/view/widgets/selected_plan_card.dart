@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -256,7 +257,7 @@ class SelectedPlanCard extends StatelessWidget {
               ),
               const Spacer(),
               const Icon(
-                Icons.arrow_outward_rounded,
+                FLucideIcons.arrowUpRight,
                 color: Colors.white,
                 size: 18,
               ),

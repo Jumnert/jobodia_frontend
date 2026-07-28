@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
-import 'package:jobodia_frontend/core/widgets/custom_button.dart';
-import 'package:jobodia_frontend/core/widgets/custom_text_field.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 
 /// Register form UI. Validation and actions live in AuthController.
@@ -17,71 +16,121 @@ class SignUpForm extends GetView<AuthController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        CustomTextField(
-          label: 'Username',
-          hintText: 'John Doe',
-          controller: controller.usernameController,
-          prefixIcon: Icons.person_outline_rounded,
+        FTextField(
+          control: FTextFieldControl.managed(
+            controller: controller.usernameController,
+          ),
+          label: const Text('Username'),
+          hint: 'John Doe',
           textInputAction: TextInputAction.next,
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9 -]')),
           ],
+          prefixBuilder: (context, style, variants) =>
+              FTextField.prefixIconBuilder(
+                context,
+                style,
+                variants,
+                const Icon(FLucideIcons.circleUser),
+              ),
         ),
         const SizedBox(height: 12),
-        CustomTextField(
-          label: 'Email',
-          hintText: 'example@gmail.com',
-          controller: controller.emailController,
-          prefixIcon: Icons.mail_outline_rounded,
+        FTextField(
+          control: FTextFieldControl.managed(
+            controller: controller.emailController,
+          ),
+          label: const Text('Email'),
+          hint: 'example@gmail.com',
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
+          prefixBuilder: (context, style, variants) =>
+              FTextField.prefixIconBuilder(
+                context,
+                style,
+                variants,
+                const Icon(FLucideIcons.mail),
+              ),
         ),
         const SizedBox(height: 12),
         Obx(
-          () => CustomTextField(
-            label: 'Password',
-            hintText: 'Min 8 chars, upper + lower + number',
-            controller: controller.passwordController,
-            prefixIcon: Icons.key_rounded,
+          () => FTextField(
+            control: FTextFieldControl.managed(
+              controller: controller.passwordController,
+            ),
+            label: const Text('Password'),
+            hint: 'Min 8 chars, upper + lower + number',
             obscureText: !controller.isPasswordVisible.value,
             textInputAction: TextInputAction.next,
             maxLength: 128,
-            suffixIcon: _PasswordVisibilityButton(
-              isVisible: controller.isPasswordVisible.value,
-              onPressed: controller.togglePasswordVisibility,
+            prefixBuilder: (context, style, variants) =>
+                FTextField.prefixIconBuilder(
+                  context,
+                  style,
+                  variants,
+                  const Icon(FLucideIcons.key),
+                ),
+            suffixBuilder: (context, style, variants) => Padding(
+              padding: const EdgeInsetsDirectional.only(end: 4),
+              child: FButton.icon(
+                variant: FButtonVariant.ghost,
+                onPress: controller.togglePasswordVisibility,
+                child: Icon(
+                  controller.isPasswordVisible.value
+                      ? FLucideIcons.eye
+                      : FLucideIcons.eyeClosed,
+                ),
+              ),
             ),
           ),
         ),
         const SizedBox(height: 12),
         Obx(
-          () => CustomTextField(
-            label: 'Confirm Password',
-            hintText: 'Confirm your password',
-            controller: controller.confirmPasswordController,
-            prefixIcon: Icons.key_rounded,
+          () => FTextField(
+            control: FTextFieldControl.managed(
+              controller: controller.confirmPasswordController,
+            ),
+            label: const Text('Confirm Password'),
+            hint: 'Confirm your password',
             obscureText: !controller.isConfirmPasswordVisible.value,
             textInputAction: TextInputAction.done,
-            onSubmitted: (_) {
+            onSubmit: (_) {
               if (!controller.isLoading.value) controller.signUp();
             },
-            suffixIcon: _PasswordVisibilityButton(
-              isVisible: controller.isConfirmPasswordVisible.value,
-              onPressed: controller.toggleConfirmPasswordVisibility,
+            prefixBuilder: (context, style, variants) =>
+                FTextField.prefixIconBuilder(
+                  context,
+                  style,
+                  variants,
+                  const Icon(FLucideIcons.key),
+                ),
+            suffixBuilder: (context, style, variants) => Padding(
+              padding: const EdgeInsetsDirectional.only(end: 4),
+              child: FButton.icon(
+                variant: FButtonVariant.ghost,
+                onPress: controller.toggleConfirmPasswordVisibility,
+                child: Icon(
+                  controller.isConfirmPasswordVisible.value
+                      ? FLucideIcons.eye
+                      : FLucideIcons.eyeClosed,
+                ),
+              ),
             ),
           ),
         ),
         const SizedBox(height: 16),
         Obx(() => _AnimatedErrorMessage(controller.errorMessage.value)),
         Obx(
-          () => CustomButton(
-            label: 'Sign up',
-            isLoading: controller.isLoading.value,
-            onPressed: controller.isLoading.value
+          () => FButton(
+            onPress: controller.isLoading.value
                 ? null
                 : () {
                     unawaited(HapticFeedback.lightImpact());
                     controller.signUp();
                   },
+            prefix: controller.isLoading.value
+                ? const FCircularProgress()
+                : null,
+            child: Text(controller.isLoading.value ? 'Please wait' : 'Sign up'),
           ),
         ),
         const SizedBox(height: 24),
@@ -110,34 +159,6 @@ class SignUpForm extends GetView<AuthController> {
   }
 }
 
-class _PasswordVisibilityButton extends StatelessWidget {
-  const _PasswordVisibilityButton({
-    required this.isVisible,
-    required this.onPressed,
-  });
-
-  final bool isVisible;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: isVisible ? 'Hide password' : 'Show password',
-      onPressed: onPressed,
-      icon: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 220),
-        switchInCurve: Curves.easeInOutCubic,
-        switchOutCurve: Curves.easeInOutCubic,
-        child: Icon(
-          isVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-          key: ValueKey(isVisible),
-          color: context.palette.textSecondary,
-        ),
-      ),
-    );
-  }
-}
-
 class _AnimatedErrorMessage extends StatelessWidget {
   const _AnimatedErrorMessage(this.message);
 
@@ -145,6 +166,7 @@ class _AnimatedErrorMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = FTheme.of(context);
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 280),
       switchInCurve: Curves.easeInOutCubic,
@@ -167,8 +189,8 @@ class _AnimatedErrorMessage extends StatelessWidget {
               child: Text(
                 message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: AppColors.error,
+                style: TextStyle(
+                  color: theme.colors.destructive,
                   fontWeight: FontWeight.w500,
                 ),
               ),

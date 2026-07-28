@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -115,7 +116,7 @@ class _MessageComposerState extends State<MessageComposer> {
                         padding: EdgeInsets.zero,
                         tooltip: 'Send message',
                         icon: Icon(
-                          Icons.arrow_upward_rounded,
+                          FLucideIcons.arrowUp,
                           size: 20,
                           color: canSend ? Colors.white : palette.iconMuted,
                         ),
@@ -134,18 +135,19 @@ class _MessageComposerState extends State<MessageComposer> {
   Widget _buildAttachmentMenu(Color foreground, AppPalette palette) {
     return PopupMenuButton<String>(
       color: palette.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       offset: const Offset(0, 48),
       itemBuilder: (context) => [
         PopupMenuItem<String>(
           value: 'resume',
           child: Row(
             children: [
-              Icon(Icons.description_outlined, color: palette.iconPrimary, size: 20),
+              Icon(FLucideIcons.fileText, color: palette.iconPrimary, size: 20),
               const SizedBox(width: 12),
-              Text('Upload Resume', style: TextStyle(color: palette.textPrimary)),
+              Text(
+                'Upload Resume',
+                style: TextStyle(color: palette.textPrimary),
+              ),
             ],
           ),
         ),
@@ -153,7 +155,7 @@ class _MessageComposerState extends State<MessageComposer> {
           value: 'camera',
           child: Row(
             children: [
-              Icon(Icons.camera_alt_outlined, color: palette.iconPrimary, size: 20),
+              Icon(FLucideIcons.camera, color: palette.iconPrimary, size: 20),
               const SizedBox(width: 12),
               Text('Camera', style: TextStyle(color: palette.textPrimary)),
             ],
@@ -163,9 +165,12 @@ class _MessageComposerState extends State<MessageComposer> {
           value: 'gallery',
           child: Row(
             children: [
-              Icon(Icons.photo_library_outlined, color: palette.iconPrimary, size: 20),
+              Icon(FLucideIcons.images, color: palette.iconPrimary, size: 20),
               const SizedBox(width: 12),
-              Text('Photo Library', style: TextStyle(color: palette.textPrimary)),
+              Text(
+                'Photo Library',
+                style: TextStyle(color: palette.textPrimary),
+              ),
             ],
           ),
         ),
@@ -173,9 +178,12 @@ class _MessageComposerState extends State<MessageComposer> {
           value: 'research',
           child: Row(
             children: [
-              Icon(Icons.manage_search_outlined, color: palette.iconPrimary, size: 20),
+              Icon(FLucideIcons.search, color: palette.iconPrimary, size: 20),
               const SizedBox(width: 12),
-              Text('Deep Research', style: TextStyle(color: palette.textPrimary)),
+              Text(
+                'Deep Research',
+                style: TextStyle(color: palette.textPrimary),
+              ),
             ],
           ),
         ),
@@ -183,9 +191,16 @@ class _MessageComposerState extends State<MessageComposer> {
           value: 'interview',
           child: Row(
             children: [
-              Icon(Icons.help_outline_rounded, color: palette.iconPrimary, size: 20),
+              Icon(
+                FLucideIcons.circleHelp,
+                color: palette.iconPrimary,
+                size: 20,
+              ),
               const SizedBox(width: 12),
-              Text('Interview Guide', style: TextStyle(color: palette.textPrimary)),
+              Text(
+                'Interview Guide',
+                style: TextStyle(color: palette.textPrimary),
+              ),
             ],
           ),
         ),
@@ -211,7 +226,7 @@ class _MessageComposerState extends State<MessageComposer> {
           color: palette.surfaceMuted.withValues(alpha: 0.76),
           shape: BoxShape.circle,
         ),
-        child: Icon(Icons.add_rounded, color: foreground, size: 22),
+        child: Icon(FLucideIcons.plus, color: foreground, size: 22),
       ),
     );
   }
@@ -371,7 +386,7 @@ class _ResumeOptionsSheetState extends State<_ResumeOptionsSheet> {
               decoration: InputDecoration(
                 labelText: 'Target role (optional)',
                 hintText: 'Flutter Developer',
-                prefixIcon: const Icon(Icons.work_outline_rounded),
+                prefixIcon: const Icon(FLucideIcons.briefcase),
                 filled: true,
                 fillColor: palette.surfaceMuted,
                 border: OutlineInputBorder(
@@ -417,7 +432,7 @@ class _ResumeOptionsSheetState extends State<_ResumeOptionsSheet> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                icon: const Icon(Icons.auto_awesome_rounded),
+                icon: const Icon(FLucideIcons.sparkles),
                 label: const Text(
                   'Continue to rating',
                   style: TextStyle(fontWeight: FontWeight.w800),

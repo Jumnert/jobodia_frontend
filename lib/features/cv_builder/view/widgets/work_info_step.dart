@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/widgets/custom_text_field.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
@@ -42,7 +43,7 @@ class WorkInfoStep extends StatelessWidget {
           label: 'Professional title',
           hintText: 'Product Designer',
           controller: controller.titleController,
-          prefixIcon: Icons.badge_outlined,
+          prefixIcon: FLucideIcons.idCard,
         ),
         const SizedBox(height: 16),
         Obx(
@@ -50,7 +51,7 @@ class WorkInfoStep extends StatelessWidget {
             title: 'Work experience',
             subtitle:
                 'Add up to 3 roles with company, dates, responsibilities, and measurable wins.',
-            icon: Icons.work_outline_rounded,
+            icon: FLucideIcons.briefcase,
             children: [
               ...controller.workExperiences.map(
                 (entry) => WorkExperienceEntry(
@@ -77,7 +78,7 @@ class WorkInfoStep extends StatelessWidget {
             title: 'Education',
             subtitle:
                 'Add up to 3 schools or universities with degree, dates, and useful notes.',
-            icon: Icons.school_outlined,
+            icon: FLucideIcons.graduationCap,
             children: [
               ...controller.educations.map(
                 (entry) => EducationEntry(
@@ -103,7 +104,7 @@ class WorkInfoStep extends StatelessWidget {
           title: 'Skills',
           subtitle:
               'Add one skill at a time. Keep them specific and searchable.',
-          icon: Icons.auto_awesome_outlined,
+          icon: FLucideIcons.sparkles,
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -128,7 +129,7 @@ class WorkInfoStep extends StatelessWidget {
                       padding: EdgeInsets.zero,
                       shape: const CircleBorder(),
                     ),
-                    child: const Icon(Icons.add_rounded),
+                    child: const Icon(FLucideIcons.plus),
                   ),
                 ),
               ],

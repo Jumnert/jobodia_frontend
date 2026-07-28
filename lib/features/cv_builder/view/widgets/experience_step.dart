@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
@@ -33,10 +34,7 @@ class ExperienceStep extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.tips_and_updates_outlined,
-                color: AppColors.info,
-              ),
+              const Icon(FLucideIcons.lightbulb, color: AppColors.info),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(

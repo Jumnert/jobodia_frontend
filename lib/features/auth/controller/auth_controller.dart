@@ -5,6 +5,7 @@ import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/utils/input_sanitizer.dart';
 import 'package:jobodia_frontend/features/auth/model/user_model.dart';
 import 'package:jobodia_frontend/features/auth/repository/auth_repository.dart';
+import 'package:jobodia_frontend/features/role/controller/role_controller.dart';
 
 /// GetX Controller used as the ViewModel for authentication screens.
 import 'package:jobodia_frontend/features/auth/controller/form_validation_mixin.dart';
@@ -106,7 +107,11 @@ class AuthController extends GetxController with FormValidationMixin {
         role: 'Candidate',
         avatarUrl: null,
       );
-      Get.offAllNamed(AppRoutes.home);
+      // First-time users pick a role (Job Seeker / Employer) before entering.
+      final hasRole = Get.isRegistered<RoleController>()
+          ? Get.find<RoleController>().hasRole
+          : false;
+      Get.offAllNamed(hasRole ? AppRoutes.home : AppRoutes.selectRole);
     } catch (e) {
       _showErrorSnackBar('Login failed', e.toString());
     } finally {

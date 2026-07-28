@@ -1,82 +1,48 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
+import 'package:jobodia_frontend/core/widgets/blurred_header.dart';
+import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
-import 'package:jobodia_frontend/core/widgets/feature_card_container.dart';
-import 'package:jobodia_frontend/core/widgets/feature_header.dart';
 
 /// Static privacy policy information.
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
 
-  static const _subtitle = 'How we handle your data';
-
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
-      child: Scaffold(
-        backgroundColor: AppColors.headerStart,
-        body: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                const headerHeight = 190.0;
-
-                return SingleChildScrollView(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight,
-                    ),
-                    child: Column(
-                      children: [
-                        const FeatureHeader(
-                          title: 'Privacy & Policy',
-                          subtitle: _subtitle,
-                          height: headerHeight,
-                        ),
-                        FeatureCardContainer(
-                          minHeight: constraints.maxHeight - headerHeight,
-                          padding: EdgeInsets.fromLTRB(
-                            22,
-                            22,
-                            22,
-                            MediaQuery.paddingOf(context).bottom + 32,
-                          ),
-                          child: const _PrivacyPolicyContent(),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
+    return FScaffold(
+      header: BlurredHeader(
+        child: FHeader.nested(
+          title: const Text('Privacy & Policy'),
+          prefixes: [FHeaderAction.back(onPress: () => Get.back<void>())],
         ),
+      ),
+      child: ListView(
+        padding: EdgeInsets.fromLTRB(
+          16,
+          8,
+          16,
+          MediaQuery.paddingOf(context).bottom + 32,
+        ),
+        children: [FCard(child: _PrivacyPolicyContent())],
       ),
     );
   }
 }
 
 class _PrivacyPolicyContent extends StatelessWidget {
-  const _PrivacyPolicyContent();
-
   @override
   Widget build(BuildContext context) {
-    final bodyStyle = TextStyle(
-      color: context.palette.textSecondary,
-      fontSize: 14,
-      height: 1.45,
-    );
+    final theme = FTheme.of(context);
+    final palette = context.palette;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Privacy Policy',
-          style: TextStyle(
-            color: context.palette.textPrimary,
-            fontSize: 18,
+          style: theme.typography.body.lg.copyWith(
+            color: theme.colors.foreground,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -86,7 +52,10 @@ class _PrivacyPolicyContent extends StatelessWidget {
           '"Application") for mobile devices that was created by (hereby '
           'referred to as "Service Provider") as a Commercial service. This '
           'service is intended for use "AS IS".',
-          style: bodyStyle,
+          style: theme.typography.body.sm.copyWith(
+            color: palette.textSecondary,
+            height: 1.45,
+          ),
         ),
         const SizedBox(height: 18),
         _PolicyQuestion(
@@ -145,6 +114,9 @@ class _PolicyQuestion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = FTheme.of(context);
+    final palette = context.palette;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
       child: Column(
@@ -152,9 +124,8 @@ class _PolicyQuestion extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(
-              color: context.palette.textPrimary,
-              fontSize: 14,
+            style: theme.typography.body.sm.copyWith(
+              color: theme.colors.foreground,
               height: 1.35,
               fontWeight: FontWeight.w700,
             ),
@@ -162,9 +133,8 @@ class _PolicyQuestion extends StatelessWidget {
           const SizedBox(height: 5),
           Text(
             body,
-            style: TextStyle(
-              color: context.palette.textSecondary,
-              fontSize: 14,
+            style: theme.typography.body.sm.copyWith(
+              color: palette.textSecondary,
               height: 1.45,
             ),
           ),

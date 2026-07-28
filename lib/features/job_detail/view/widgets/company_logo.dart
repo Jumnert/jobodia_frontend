@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 class CompanyLogo extends StatelessWidget {
@@ -59,7 +60,7 @@ class CompanyLogo extends StatelessWidget {
               ),
             )
           : Icon(
-              Icons.all_inclusive_rounded,
+              FLucideIcons.infinity,
               color: Colors.blue.shade700,
               size: size * 0.58,
             ),

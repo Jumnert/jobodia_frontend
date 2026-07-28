@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
-import 'package:jobodia_frontend/features/auth/view/widgets/auth_tab_switcher.dart';
 import 'package:jobodia_frontend/features/auth/view/widgets/login_form.dart';
 import 'package:jobodia_frontend/features/auth/view/widgets/signup_form.dart';
 
@@ -83,43 +83,27 @@ class _AuthContent extends GetView<AuthController> {
   @override
   Widget build(BuildContext context) {
     return AutofillGroup(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const AuthTabSwitcher(),
-          const SizedBox(height: 22),
-          Obx(() {
-            final isLogin = controller.selectedAuthTab.value == 0;
-            return AnimatedSize(
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOutCubic,
-              alignment: Alignment.topCenter,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 180),
-                reverseDuration: const Duration(milliseconds: 140),
-                switchInCurve: Curves.easeOutCubic,
-                switchOutCurve: Curves.easeInCubic,
-                layoutBuilder: (currentChild, previousChildren) => Stack(
-                  alignment: Alignment.topCenter,
-                  children: [...previousChildren, ?currentChild],
-                ),
-                transitionBuilder: (child, animation) => FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: Offset(isLogin ? -0.025 : 0.025, 0),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: child,
-                  ),
-                ),
-                child: isLogin
-                    ? const LoginForm(key: ValueKey('login_form'))
-                    : const SignUpForm(key: ValueKey('signup_form')),
-              ),
-            );
-          }),
-        ],
+      child: Obx(
+        () => FTabs(
+          control: FTabControl.lifted(
+            index: controller.selectedAuthTab.value,
+            onChange: (index) {
+              HapticFeedback.selectionClick();
+              controller.changeAuthTab(index);
+            },
+          ),
+          style: const FTabsStyleDelta.delta(spacing: 22),
+          children: const [
+            FTabEntry(
+              label: Text('Log in'),
+              child: LoginForm(key: ValueKey('login_form')),
+            ),
+            FTabEntry(
+              label: Text('Sign up'),
+              child: SignUpForm(key: ValueKey('signup_form')),
+            ),
+          ],
+        ),
       ),
     );
   }

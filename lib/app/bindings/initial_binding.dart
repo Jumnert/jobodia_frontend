@@ -4,6 +4,7 @@ import 'package:jobodia_frontend/features/ai_chat/controller/ai_chat_controller.
 import 'package:jobodia_frontend/features/home/controller/home_controller.dart'
     as jobodia_home;
 import 'package:jobodia_frontend/features/home/controller/main_nav_controller.dart';
+import 'package:jobodia_frontend/features/role/controller/role_controller.dart';
 import 'package:jobodia_frontend/features/applications/controller/applications_controller.dart';
 import 'package:jobodia_frontend/features/company/controller/company_controller.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
@@ -28,6 +29,7 @@ class InitialBinding extends Bindings {
     Get.put(const AuthRepository(), permanent: true);
     Get.put(AuthController(Get.find<AuthRepository>()), permanent: true);
     Get.put(MainNavController(), permanent: true);
+    Get.put(RoleController(), permanent: true);
     Get.put(ThemeController(), permanent: true);
     Get.put(NotesController(), permanent: true);
     Get.put(SavedJobsController(), permanent: true);

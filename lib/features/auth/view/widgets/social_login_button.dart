@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 /// Reusable white pill social button using an image asset logo.
@@ -36,7 +37,7 @@ class SocialLoginButton extends StatelessWidget {
                 height: 22,
                 errorBuilder: (context, error, stackTrace) {
                   return Icon(
-                    Icons.image_not_supported_outlined,
+                    FLucideIcons.imageOff,
                     size: 21,
                     color: palette.textSecondary,
                   );

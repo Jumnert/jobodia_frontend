@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/utils/safe_image_loader.dart';
 
@@ -11,7 +12,7 @@ class ImageWithPlaceholder extends StatelessWidget {
     this.height,
     this.fit = BoxFit.cover,
     this.borderRadius,
-    this.errorIcon = Icons.broken_image_rounded,
+    this.errorIcon = FLucideIcons.imageOff,
   });
 
   final String url;

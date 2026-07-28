@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/core/utils/safe_image_loader.dart';
 
 class JobDetailHeader extends StatelessWidget {
@@ -24,7 +25,7 @@ class JobDetailHeader extends StatelessWidget {
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) => Container(
         color: const Color(0xFFD8E6EF),
-        child: const Icon(Icons.business_rounded, size: 64),
+        child: const Icon(FLucideIcons.building2, size: 64),
       ),
     );
 

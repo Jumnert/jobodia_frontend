@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/quiet_glass_button.dart';
@@ -110,7 +111,7 @@ class AiChatScreen extends GetView<AiChatController> {
                   ),
                   const Spacer(),
                   QuietGlassIconButton(
-                    icon: Icons.add_rounded,
+                    icon: FLucideIcons.plus,
                     tooltip: 'New chat',
                     lightHaptic: true,
                     onPressed: () {
@@ -121,7 +122,7 @@ class AiChatScreen extends GetView<AiChatController> {
                   const SizedBox(width: 8),
                   QuietGlassIconButton(
                     onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
-                    icon: Icons.history_rounded,
+                    icon: FLucideIcons.history,
                     tooltip: 'Chat history',
                     lightHaptic: true,
                   ),
@@ -174,7 +175,7 @@ class _ModelSelectorPill extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Icon(
-                Icons.keyboard_arrow_down_rounded,
+                FLucideIcons.chevronDown,
                 color: palette.iconMuted,
                 size: 18,
               ),
@@ -216,11 +217,11 @@ class _EmptyChatState extends StatelessWidget {
     final palette = context.palette;
     final topInset = MediaQuery.paddingOf(context).top;
     final defaultIcons = [
-      Icons.article_outlined,
-      Icons.work_outline_rounded,
-      Icons.psychology_alt_outlined,
-      Icons.map_outlined,
-      Icons.travel_explore_rounded,
+      FLucideIcons.fileText,
+      FLucideIcons.briefcase,
+      FLucideIcons.brain,
+      FLucideIcons.map,
+      FLucideIcons.globe,
     ];
 
     return Obx(() {
@@ -229,7 +230,7 @@ class _EmptyChatState extends StatelessWidget {
         items.add((
           i < defaultIcons.length
               ? defaultIcons[i]
-              : Icons.chat_bubble_outline_rounded,
+              : FLucideIcons.messageCircle,
           controller.suggestions[i],
         ));
       }

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
-import 'package:jobodia_frontend/core/widgets/custom_button.dart';
 import 'package:jobodia_frontend/core/widgets/gradient_header_painter.dart';
-import 'package:jobodia_frontend/core/widgets/custom_text_field.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 
 /// Displays the reset password form backed by AuthController.
@@ -97,12 +96,12 @@ class _ResetPasswordHeader extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconButton(
-                    onPressed: onBack,
-                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.white.withValues(alpha: 0.15),
-                      shape: const CircleBorder(),
+                  FButton.icon(
+                    variant: FButtonVariant.ghost,
+                    onPress: onBack,
+                    child: const Icon(
+                      FLucideIcons.arrowLeft,
+                      color: Colors.white,
                     ),
                   ),
                   const Spacer(),
@@ -144,37 +143,69 @@ class _ResetPasswordForm extends GetView<AuthController> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Obx(
-          () => CustomTextField(
-            label: 'New Password',
-            hintText: 'Min 8 chars, upper + lower + number',
-            controller: controller.newPasswordController,
-            prefixIcon: Icons.key_rounded,
+          () => FTextField(
+            control: FTextFieldControl.managed(
+              controller: controller.newPasswordController,
+            ),
+            label: const Text('New Password'),
+            hint: 'Min 8 chars, upper + lower + number',
             obscureText: !controller.isNewPasswordVisible.value,
             textInputAction: TextInputAction.next,
             maxLength: 128,
-            suffixIcon: _PasswordVisibilityButton(
-              isVisible: controller.isNewPasswordVisible.value,
-              onPressed: controller.toggleNewPasswordVisibility,
+            prefixBuilder: (context, style, variants) =>
+                FTextField.prefixIconBuilder(
+                  context,
+                  style,
+                  variants,
+                  const Icon(FLucideIcons.key),
+                ),
+            suffixBuilder: (context, style, variants) => Padding(
+              padding: const EdgeInsetsDirectional.only(end: 4),
+              child: FButton.icon(
+                variant: FButtonVariant.ghost,
+                onPress: controller.toggleNewPasswordVisibility,
+                child: Icon(
+                  controller.isNewPasswordVisible.value
+                      ? FLucideIcons.eye
+                      : FLucideIcons.eyeClosed,
+                ),
+              ),
             ),
           ),
         ),
         const SizedBox(height: 16),
         Obx(
-          () => CustomTextField(
-            label: 'Confirm Password',
-            hintText: 'Confirm new password',
-            controller: controller.resetConfirmPasswordController,
-            prefixIcon: Icons.key_rounded,
+          () => FTextField(
+            control: FTextFieldControl.managed(
+              controller: controller.resetConfirmPasswordController,
+            ),
+            label: const Text('Confirm Password'),
+            hint: 'Confirm new password',
             obscureText: !controller.isResetConfirmPasswordVisible.value,
             textInputAction: TextInputAction.done,
-            onSubmitted: (_) {
+            onSubmit: (_) {
               if (!controller.isResetPasswordLoading.value) {
                 controller.resetPassword();
               }
             },
-            suffixIcon: _PasswordVisibilityButton(
-              isVisible: controller.isResetConfirmPasswordVisible.value,
-              onPressed: controller.toggleResetConfirmPasswordVisibility,
+            prefixBuilder: (context, style, variants) =>
+                FTextField.prefixIconBuilder(
+                  context,
+                  style,
+                  variants,
+                  const Icon(FLucideIcons.key),
+                ),
+            suffixBuilder: (context, style, variants) => Padding(
+              padding: const EdgeInsetsDirectional.only(end: 4),
+              child: FButton.icon(
+                variant: FButtonVariant.ghost,
+                onPress: controller.toggleResetConfirmPasswordVisibility,
+                child: Icon(
+                  controller.isResetConfirmPasswordVisible.value
+                      ? FLucideIcons.eye
+                      : FLucideIcons.eyeClosed,
+                ),
+              ),
             ),
           ),
         ),
@@ -184,12 +215,18 @@ class _ResetPasswordForm extends GetView<AuthController> {
               _AnimatedErrorMessage(controller.resetPasswordErrorMessage.value),
         ),
         Obx(
-          () => CustomButton(
-            label: 'Reset Password',
-            isLoading: controller.isResetPasswordLoading.value,
-            onPressed: controller.isResetPasswordLoading.value
+          () => FButton(
+            onPress: controller.isResetPasswordLoading.value
                 ? null
                 : controller.resetPassword,
+            prefix: controller.isResetPasswordLoading.value
+                ? const FCircularProgress()
+                : null,
+            child: Text(
+              controller.isResetPasswordLoading.value
+                  ? 'Please wait'
+                  : 'Reset Password',
+            ),
           ),
         ),
       ],
@@ -232,34 +269,6 @@ class _AnimatedErrorMessage extends StatelessWidget {
                 ),
               ),
             ),
-    );
-  }
-}
-
-class _PasswordVisibilityButton extends StatelessWidget {
-  const _PasswordVisibilityButton({
-    required this.isVisible,
-    required this.onPressed,
-  });
-
-  final bool isVisible;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: isVisible ? 'Hide password' : 'Show password',
-      onPressed: onPressed,
-      icon: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 220),
-        switchInCurve: Curves.easeInOutCubic,
-        switchOutCurve: Curves.easeInOutCubic,
-        child: Icon(
-          isVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-          key: ValueKey(isVisible),
-          color: AppColors.textSecondary,
-        ),
-      ),
     );
   }
 }

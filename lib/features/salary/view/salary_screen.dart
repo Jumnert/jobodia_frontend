@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/salary/controller/salary_controller.dart';
@@ -130,7 +131,7 @@ class SalaryScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Icon(
-                      Icons.lightbulb_outline,
+                      FLucideIcons.lightbulb,
                       color: AppColors.brandTeal,
                     ),
                     const SizedBox(width: 12),

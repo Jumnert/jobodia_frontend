@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/preferences/controller/preferences_controller.dart';
@@ -58,7 +59,7 @@ class _WizardBody extends GetView<PreferencesController> {
                 child: IconButton(
                   onPressed: controller.goBack,
                   icon: Icon(
-                    Icons.arrow_back_rounded,
+                    FLucideIcons.arrowLeft,
                     color: palette.iconPrimary,
                   ),
                 ),
@@ -441,7 +442,7 @@ class _NextButton extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   const Icon(
-                    Icons.arrow_forward_rounded,
+                    FLucideIcons.arrowRight,
                     color: Colors.white,
                     size: 18,
                   ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 /// Error state with icon, message, and optional retry button.
@@ -25,7 +26,7 @@ class ErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, size: 56, color: palette.error),
+            Icon(FLucideIcons.circleAlert, size: 56, color: palette.error),
             const SizedBox(height: 16),
             Text(
               message,
@@ -48,7 +49,7 @@ class ErrorState extends StatelessWidget {
               const SizedBox(height: 20),
               ElevatedButton.icon(
                 onPressed: onRetry,
-                icon: const Icon(Icons.refresh, size: 18),
+                icon: const Icon(FLucideIcons.refreshCw, size: 18),
                 label: Text(retryLabel),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.brandTeal,

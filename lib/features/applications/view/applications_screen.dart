@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/applications/controller/applications_controller.dart';
@@ -45,11 +46,11 @@ class ApplicationsScreen extends StatelessWidget {
   };
 
   static const _statusIcons = <String, IconData>{
-    'applied': Icons.send_rounded,
-    'phone_screen': Icons.phone_rounded,
-    'interview': Icons.people_rounded,
-    'offer': Icons.celebration_rounded,
-    'rejected': Icons.cancel_rounded,
+    'applied': FLucideIcons.send,
+    'phone_screen': FLucideIcons.phone,
+    'interview': FLucideIcons.usersRound,
+    'offer': FLucideIcons.partyPopper,
+    'rejected': FLucideIcons.xCircle,
   };
 
   @override
@@ -65,7 +66,7 @@ class ApplicationsScreen extends StatelessWidget {
         title: const Text('Applications'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.analytics_outlined),
+            icon: const Icon(FLucideIcons.chartLine),
             onPressed: () => Get.toNamed(AppRoutes.applicationAnalytics),
           ),
         ],
@@ -217,7 +218,7 @@ class ApplicationsScreen extends StatelessWidget {
                                                   shape: BoxShape.circle,
                                                 ),
                                                 child: const Icon(
-                                                  Icons.more_horiz_rounded,
+                                                  FLucideIcons.ellipsis,
                                                   color: Colors.white,
                                                   size: 18,
                                                 ),
@@ -281,8 +282,8 @@ class ApplicationsScreen extends StatelessWidget {
                                                   child: Row(
                                                     children: [
                                                       Icon(
-                                                        Icons
-                                                            .calendar_month_rounded,
+                                                        FLucideIcons
+                                                            .calendarDays,
                                                         size: 18,
                                                         color:
                                                             AppColors.primary,
@@ -319,7 +320,7 @@ class ApplicationsScreen extends StatelessWidget {
                                       children: [
                                         Icon(
                                           _statusIcons[application.status] ??
-                                              Icons.check_circle_rounded,
+                                              FLucideIcons.circleCheck,
                                           size: 14,
                                           color: AppColors.primary,
                                         ),
@@ -334,7 +335,7 @@ class ApplicationsScreen extends StatelessWidget {
                                         ),
                                         const SizedBox(width: 10),
                                         Icon(
-                                          Icons.calendar_today_rounded,
+                                          FLucideIcons.calendar,
                                           size: 11,
                                           color: palette.textSecondary,
                                         ),
@@ -456,11 +457,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.work_outline_rounded,
-              size: 56,
-              color: palette.iconMuted,
-            ),
+            Icon(FLucideIcons.briefcase, size: 56, color: palette.iconMuted),
             const SizedBox(height: 14),
             Text(
               'No applications yet',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/custom_button.dart';
@@ -42,10 +43,7 @@ class _CareerGoalsScreenState extends State<CareerGoalsScreen>
         centerTitle: true,
         leading: IconButton(
           onPressed: Get.back,
-          icon: Icon(
-            Icons.chevron_left_rounded,
-            color: palette.iconPrimary,
-          ),
+          icon: Icon(FLucideIcons.chevronLeft, color: palette.iconPrimary),
         ),
         title: Text(
           'Career Journey',
@@ -84,7 +82,7 @@ class _CareerGoalsScreenState extends State<CareerGoalsScreen>
         return FloatingActionButton.extended(
           onPressed: () => _showAddGoalSheet(context, ctrl),
           backgroundColor: AppColors.brandTeal,
-          icon: const Icon(Icons.add_rounded, color: Colors.white),
+          icon: const Icon(FLucideIcons.plus, color: Colors.white),
           label: const Text(
             'Add Goal',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -160,7 +158,7 @@ class _CareerGoalsScreenState extends State<CareerGoalsScreen>
                 CustomTextField(
                   label: 'Goal Title',
                   hintText: 'e.g., Become a Tech Lead',
-                  prefixIcon: Icons.title,
+                  prefixIcon: FLucideIcons.type,
                   controller: titleCtrl,
                 ),
                 const SizedBox(height: 16),
@@ -170,7 +168,7 @@ class _CareerGoalsScreenState extends State<CareerGoalsScreen>
                       child: CustomTextField(
                         label: 'Current Status',
                         hintText: 'e.g., Senior Dev',
-                        prefixIcon: Icons.flag_rounded,
+                        prefixIcon: FLucideIcons.flag,
                         controller: currentCtrl,
                       ),
                     ),
@@ -179,7 +177,7 @@ class _CareerGoalsScreenState extends State<CareerGoalsScreen>
                       child: CustomTextField(
                         label: 'Target',
                         hintText: 'e.g., Tech Lead',
-                        prefixIcon: Icons.track_changes_rounded,
+                        prefixIcon: FLucideIcons.target,
                         controller: targetCtrl,
                       ),
                     ),
@@ -309,7 +307,7 @@ class _GoalsTab extends StatelessWidget {
                     if (!g.isCompleted)
                       IconButton(
                         icon: Icon(
-                          Icons.check_circle_outline_rounded,
+                          FLucideIcons.circleCheck,
                           color: palette.iconMuted,
                         ),
                         onPressed: () => ctrl.completeGoal(g.id),
@@ -355,7 +353,7 @@ class _GoalsTab extends StatelessWidget {
                       ],
                     ),
                     const Icon(
-                      Icons.arrow_right_alt_rounded,
+                      FLucideIcons.moveRight,
                       color: AppColors.brandTeal,
                     ),
                     Column(
@@ -513,7 +511,7 @@ class _TimelineTab extends StatelessWidget {
       case 'offer':
         return AppColors.success;
       case 'certification':
-        return const Color(0xFF8B5CF6); // purple
+        return AppColors.chart3;
       default:
         return AppColors.info;
     }

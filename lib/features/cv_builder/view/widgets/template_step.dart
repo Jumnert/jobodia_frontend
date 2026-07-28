@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
@@ -16,17 +17,17 @@ class TemplateStep extends StatelessWidget {
     _TemplateOption(
       name: 'Classic',
       description: 'Single column · ATS-first',
-      icon: Icons.notes_rounded,
+      icon: FLucideIcons.scrollText,
     ),
     _TemplateOption(
       name: 'Editorial',
       description: 'Two column · Polished',
-      icon: Icons.view_sidebar_outlined,
+      icon: FLucideIcons.panelLeft,
     ),
     _TemplateOption(
       name: 'Impact',
       description: 'Strong header · Modern',
-      icon: Icons.space_dashboard_outlined,
+      icon: FLucideIcons.layoutDashboard,
     ),
   ];
 
@@ -75,7 +76,7 @@ class TemplateStep extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.check_circle_rounded,
+                    FLucideIcons.circleCheck,
                     color: AppColors.success,
                     size: 14,
                   ),
@@ -355,7 +356,7 @@ class _ReadinessCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          check.$1 ? Icons.check_rounded : Icons.remove_rounded,
+                          check.$1 ? FLucideIcons.check : FLucideIcons.minus,
                           color: check.$1
                               ? AppColors.success
                               : palette.iconMuted,

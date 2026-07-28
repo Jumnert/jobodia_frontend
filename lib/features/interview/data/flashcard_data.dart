@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 
 /// A single study flashcard. [front] holds the concept/question, [back] holds
 /// the answer or a code snippet. [isCode] renders [back] in a monospace style.
@@ -31,17 +32,17 @@ class FlashcardCategory {
 final List<FlashcardCategory> flashcardCategories = [
   FlashcardCategory(
     name: 'HTML',
-    icon: Icons.html_rounded,
+    icon: FLucideIcons.code,
     accent: const Color(0xFFE44D26),
   ),
   FlashcardCategory(
     name: 'CSS',
-    icon: Icons.css_rounded,
+    icon: FLucideIcons.fileCode,
     accent: const Color(0xFF2965F1),
   ),
   FlashcardCategory(
     name: 'JavaScript',
-    icon: Icons.javascript_rounded,
+    icon: FLucideIcons.braces,
     accent: const Color(0xFFF0DB4F),
   ),
 ];

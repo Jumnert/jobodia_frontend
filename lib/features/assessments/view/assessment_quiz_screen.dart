@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/assessments/controller/assessment_controller.dart';
@@ -100,7 +101,7 @@ class AssessmentQuizScreen extends StatelessWidget {
                               ),
                               child: isSelected
                                   ? const Icon(
-                                      Icons.circle,
+                                      FLucideIcons.circle,
                                       color: Colors.white,
                                       size: 10,
                                     )

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/applications/controller/applications_controller.dart';
@@ -13,9 +14,7 @@ class ApplicationAnalyticsScreen extends StatelessWidget {
     final apps = Get.find<ApplicationsController>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Application Analytics'),
-      ),
+      appBar: AppBar(title: const Text('Application Analytics')),
       body: Obx(() {
         final applications = apps.applications;
         final total = applications.length;
@@ -26,7 +25,7 @@ class ApplicationAnalyticsScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.analytics_outlined,
+                  FLucideIcons.chartLine,
                   size: 64,
                   color: palette.textTertiary,
                 ),
@@ -87,21 +86,21 @@ class ApplicationAnalyticsScreen extends StatelessWidget {
                   _StatCard(
                     label: 'Total Applied',
                     value: '$total',
-                    icon: Icons.send_rounded,
+                    icon: FLucideIcons.send,
                     palette: palette,
                   ),
                   const SizedBox(width: 12),
                   _StatCard(
                     label: 'Active',
                     value: '$activeCount',
-                    icon: Icons.trending_up_rounded,
+                    icon: FLucideIcons.trendingUp,
                     palette: palette,
                   ),
                   const SizedBox(width: 12),
                   _StatCard(
                     label: 'Avg. Days',
                     value: '${avgDays.round()}',
-                    icon: Icons.schedule_rounded,
+                    icon: FLucideIcons.clock,
                     palette: palette,
                   ),
                 ],

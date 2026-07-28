@@ -56,6 +56,16 @@ class OnboardingController extends GetxController {
     );
   }
 
+  void goBack() {
+    if (currentPage.value == 0) return;
+
+    pageController.animateToPage(
+      currentPage.value - 1,
+      duration: const Duration(milliseconds: 360),
+      curve: Curves.easeInOutCubic,
+    );
+  }
+
   Future<void> completeOnboarding() async {
     if (_isPreviewMode) {
       Get.back<void>();

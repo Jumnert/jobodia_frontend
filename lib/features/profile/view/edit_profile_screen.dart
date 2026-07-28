@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/auto_scroll_on_focus.dart';
@@ -170,9 +171,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Edit Profile'),
-        ),
+        appBar: AppBar(title: const Text('Edit Profile')),
         body: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(
             20,
@@ -205,7 +204,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             child:
                                 (p.avatarImageUrl.isEmpty && !p.hasAvatarBytes)
                                 ? const Icon(
-                                    Icons.person,
+                                    FLucideIcons.user,
                                     size: 32,
                                     color: AppColors.textSecondary,
                                   )
@@ -226,7 +225,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 ),
                               ),
                               child: const Icon(
-                                Icons.camera_alt_rounded,
+                                FLucideIcons.camera,
                                 size: 13,
                                 color: Colors.white,
                               ),
@@ -271,7 +270,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    Icons.camera_alt_rounded,
+                                    FLucideIcons.camera,
                                     size: 14,
                                     color: Colors.white,
                                   ),
@@ -319,7 +318,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   shape: const StadiumBorder(),
                   minimumSize: const Size.fromHeight(44),
                 ),
-                icon: const Icon(Icons.add_rounded, size: 18),
+                icon: const Icon(FLucideIcons.plus, size: 18),
                 label: const Text('Add Experience'),
               ),
               const SizedBox(height: 24),
@@ -388,7 +387,7 @@ class _ExperienceCard extends StatelessWidget {
               ),
               const Spacer(),
               IconButton(
-                icon: const Icon(Icons.delete_outline_rounded, size: 20),
+                icon: const Icon(FLucideIcons.trash2, size: 20),
                 color: AppColors.error,
                 tooltip: 'Remove',
                 onPressed: onRemove,
@@ -402,28 +401,28 @@ class _ExperienceCard extends StatelessWidget {
             label: 'Company',
             controller: controllers.company,
             hint: 'Company name',
-            icon: Icons.business_outlined,
+            icon: FLucideIcons.building2,
           ),
           const SizedBox(height: 10),
           EditField(
             label: 'Title',
             controller: controllers.title,
             hint: 'Job title',
-            icon: Icons.badge_outlined,
+            icon: FLucideIcons.idCard,
           ),
           const SizedBox(height: 10),
           EditField(
             label: 'Duration',
             controller: controllers.duration,
             hint: 'e.g. 2 Years',
-            icon: Icons.schedule_outlined,
+            icon: FLucideIcons.clock,
           ),
           const SizedBox(height: 10),
           EditField(
             label: 'Description',
             controller: controllers.description,
             hint: 'What did you do?',
-            icon: Icons.description_outlined,
+            icon: FLucideIcons.fileText,
             minLines: 3,
             maxLines: 6,
           ),
@@ -621,7 +620,7 @@ class _SkillsEditor extends StatelessWidget {
                   filled: true,
                   fillColor: palette.surfaceMuted,
                   prefixIcon: Icon(
-                    Icons.psychology_outlined,
+                    FLucideIcons.brain,
                     color: palette.iconMuted,
                     size: 20,
                   ),
@@ -679,7 +678,7 @@ class _SkillsEditor extends StatelessWidget {
                   side: BorderSide.none,
                 ),
                 deleteIcon: Icon(
-                  Icons.close_rounded,
+                  FLucideIcons.x,
                   size: 16,
                   color: palette.textSecondary,
                 ),
@@ -737,7 +736,7 @@ class PortfolioCard extends StatelessWidget {
               ),
               const Spacer(),
               IconButton(
-                icon: const Icon(Icons.delete_outline_rounded, size: 20),
+                icon: const Icon(FLucideIcons.trash2, size: 20),
                 color: AppColors.error,
                 tooltip: 'Remove',
                 onPressed: onRemove,
@@ -751,14 +750,14 @@ class PortfolioCard extends StatelessWidget {
             label: 'Title',
             controller: controllers.title,
             hint: 'e.g. GitHub, Portfolio',
-            icon: Icons.label_outline_rounded,
+            icon: FLucideIcons.tag,
           ),
           const SizedBox(height: 10),
           EditField(
             label: 'URL',
             controller: controllers.url,
             hint: 'https://…',
-            icon: Icons.link_rounded,
+            icon: FLucideIcons.link,
           ),
         ],
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/confirmation_dialog.dart';
@@ -16,13 +17,11 @@ class JobAlertsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: palette.scaffold,
-      appBar: AppBar(
-        title: const Text('Job Alerts'),
-      ),
+      appBar: AppBar(title: const Text('Job Alerts')),
       body: Obx(() {
         if (ctrl.alerts.isEmpty) {
           return EmptyState(
-            icon: Icons.notifications_active_outlined,
+            icon: FLucideIcons.bellRing,
             title: 'No job alerts yet',
             subtitle: 'Get notified when new jobs match your criteria',
             actionLabel: 'Create alert',
@@ -57,7 +56,7 @@ class JobAlertsScreen extends StatelessWidget {
                       TextButton.icon(
                         onPressed: () => _showCreateSheet(context),
                         icon: const Icon(
-                          Icons.add_rounded,
+                          FLucideIcons.plus,
                           size: 20,
                           color: AppColors.brandTeal,
                         ),
@@ -111,18 +110,22 @@ class JobAlertsScreen extends StatelessWidget {
                       runSpacing: 8,
                       children: [
                         for (final kw in alert.keywords)
-                          _Chip(label: kw, icon: Icons.tag, palette: palette),
+                          _Chip(
+                            label: kw,
+                            icon: FLucideIcons.tag,
+                            palette: palette,
+                          ),
                         if (alert.location != null &&
                             alert.location!.isNotEmpty)
                           _Chip(
                             label: alert.location!,
-                            icon: Icons.location_on,
+                            icon: FLucideIcons.mapPin,
                             palette: palette,
                           ),
                         if (alert.level != null && alert.level!.isNotEmpty)
                           _Chip(
                             label: alert.level!,
-                            icon: Icons.work,
+                            icon: FLucideIcons.briefcase,
                             palette: palette,
                           ),
                       ],
@@ -146,7 +149,7 @@ class JobAlertsScreen extends StatelessWidget {
                             }
                           },
                           icon: Icon(
-                            Icons.delete_outline,
+                            FLucideIcons.trash2,
                             size: 20,
                             color: palette.error,
                           ),

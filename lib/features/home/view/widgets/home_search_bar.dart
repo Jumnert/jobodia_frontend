@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/debouncer.dart';
 
@@ -101,7 +102,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
             ),
             child: Row(
               children: [
-                Icon(Icons.search_rounded, color: palette.iconMuted),
+                Icon(FLucideIcons.search, color: palette.iconMuted),
                 const SizedBox(width: 10),
                 Expanded(
                   child: TextField(
@@ -125,7 +126,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     icon: Icon(
-                      Icons.close_rounded,
+                      FLucideIcons.x,
                       size: 18,
                       color: palette.iconMuted,
                     ),
@@ -183,7 +184,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
                               width: 46,
                               height: 46,
                               child: Icon(
-                                Icons.filter_alt_rounded,
+                                FLucideIcons.filter,
                                 color: palette.scaffold,
                               ),
                             ),

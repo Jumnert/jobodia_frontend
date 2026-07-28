@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/quiet_glass_button.dart';
@@ -36,10 +37,7 @@ class HomeTopBar extends StatelessWidget {
           ),
           child: Text(
             'Hi, $name',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
         ),
         const Spacer(),
@@ -51,7 +49,7 @@ class HomeTopBar extends StatelessWidget {
               button: true,
               child: IconButton(
                 onPressed: onNotifications,
-                icon: Icon(Icons.notifications_none_rounded, color: foreground),
+                icon: Icon(FLucideIcons.bell, color: foreground),
                 style: IconButton.styleFrom(
                   backgroundColor: palette.surfaceMuted.withValues(alpha: 0.76),
                   shape: const CircleBorder(),
@@ -89,7 +87,7 @@ class HomeTopBar extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         QuietGlassIconButton(
-          icon: Icons.chat_bubble_outline_rounded,
+          icon: FLucideIcons.messageCircle,
           tooltip: 'Chat with Jobodia AI',
           lightHaptic: true,
           onPressed: () => Get.find<MainNavController>().goToTab(2),

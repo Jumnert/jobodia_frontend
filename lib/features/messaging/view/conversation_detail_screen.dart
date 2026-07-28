@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/quiet_glass_button.dart';
@@ -115,7 +116,7 @@ class _ConversationDetailScreenState extends State<ConversationDetailScreen> {
                       ),
                       child: IconButton(
                         icon: const Icon(
-                          Icons.send_rounded,
+                          FLucideIcons.send,
                           color: Colors.white,
                           size: 20,
                         ),
@@ -154,7 +155,7 @@ class _ConversationDetailScreenState extends State<ConversationDetailScreen> {
                 ),
                 const Spacer(),
                 QuietGlassIconButton(
-                  icon: Icons.more_horiz_rounded,
+                  icon: FLucideIcons.ellipsis,
                   tooltip: 'Conversation options',
                   onPressed: () {},
                 ),

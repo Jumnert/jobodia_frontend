@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/market_trends/controller/market_trends_controller.dart';
@@ -20,10 +21,7 @@ class MarketTrendsScreen extends StatelessWidget {
         centerTitle: true,
         leading: IconButton(
           onPressed: Get.back,
-          icon: Icon(
-            Icons.chevron_left_rounded,
-            color: palette.iconPrimary,
-          ),
+          icon: Icon(FLucideIcons.chevronLeft, color: palette.iconPrimary),
         ),
         title: Column(
           children: [
@@ -333,9 +331,9 @@ class _SkillBadge extends StatelessWidget {
       fg = const Color(0xFF9CA3AF);
     }
 
-    IconData icon = Icons.trending_flat_rounded;
-    if (trend == 'rising') icon = Icons.trending_up_rounded;
-    if (trend == 'declining') icon = Icons.trending_down_rounded;
+    IconData icon = FLucideIcons.moveRight;
+    if (trend == 'rising') icon = FLucideIcons.trendingUp;
+    if (trend == 'declining') icon = FLucideIcons.trendingDown;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

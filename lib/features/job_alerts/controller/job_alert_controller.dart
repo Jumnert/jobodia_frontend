@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
@@ -150,7 +150,7 @@ class JobAlertController extends GetxController {
           id: _uuid.v4(),
           title: 'New jobs for "${alert.name}"',
           body: subtitle,
-          icon: Icons.work_outline_rounded,
+          icon: FLucideIcons.briefcase,
           time: 'Just now',
           isRead: false,
         ),

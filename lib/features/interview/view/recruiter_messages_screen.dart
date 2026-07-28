@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/interview/data/recruiter_messages.dart';
@@ -22,7 +23,7 @@ class RecruiterMessagesScreen extends StatelessWidget {
                 IconButton(
                   onPressed: Get.back,
                   icon: Icon(
-                    Icons.chevron_left_rounded,
+                    FLucideIcons.chevronLeft,
                     color: palette.iconPrimary,
                   ),
                 ),
@@ -47,7 +48,7 @@ class RecruiterMessagesScreen extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            Icons.chat_bubble_outline_rounded,
+                            FLucideIcons.messageCircle,
                             size: 56,
                             color: palette.iconMuted,
                           ),
@@ -173,7 +174,7 @@ class _MessageCard extends StatelessWidget {
                 onPressed: _copy,
                 tooltip: 'Copy to clipboard',
                 icon: const Icon(
-                  Icons.copy_rounded,
+                  FLucideIcons.copy,
                   color: Color(0xFF7C3AED),
                   size: 20,
                 ),

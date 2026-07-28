@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -180,7 +181,7 @@ class ConversationsScreen extends StatelessWidget {
                 ),
                 const Spacer(),
                 QuietGlassIconButton(
-                  icon: Icons.search_rounded,
+                  icon: FLucideIcons.search,
                   tooltip: 'Search messages',
                   onPressed: () {},
                 ),

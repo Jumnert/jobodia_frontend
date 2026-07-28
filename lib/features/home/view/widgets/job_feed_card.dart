@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/company_avatar.dart';
 import 'package:jobodia_frontend/features/home/model/job_feed_model.dart';
@@ -113,14 +114,17 @@ class JobFeedCard extends StatelessWidget {
                       runSpacing: 8,
                       children: [
                         _PastelPill(
-                          icon: Icons.location_on_outlined,
+                          icon: FLucideIcons.mapPin,
                           label: job.location,
                         ),
                         _PastelPill(
-                          icon: Icons.school_outlined,
+                          icon: FLucideIcons.graduationCap,
                           label: job.level,
                         ), // using level as exp placeholder
-                        _PastelPill(icon: Icons.access_time, label: 'Fulltime'),
+                        _PastelPill(
+                          icon: FLucideIcons.clock,
+                          label: 'Fulltime',
+                        ),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -161,7 +165,7 @@ class JobFeedCard extends StatelessWidget {
                     Row(
                       children: [
                         Icon(
-                          Icons.history,
+                          FLucideIcons.history,
                           size: 16,
                           color: palette.textSecondary,
                         ),
@@ -211,7 +215,7 @@ class JobFeedCard extends StatelessWidget {
                   style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                 ),
                 const SizedBox(width: 4),
-                const Icon(Icons.arrow_outward_rounded, size: 16),
+                const Icon(FLucideIcons.arrowUpRight, size: 16),
               ],
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/confirmation_dialog.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
@@ -48,7 +49,7 @@ class BasicInfoStep extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                icon: const Icon(Icons.text_snippet_outlined, size: 20),
+                icon: const Icon(FLucideIcons.scrollText, size: 20),
                 label: const Text(
                   'Import from text',
                   style: TextStyle(fontWeight: FontWeight.w700),
@@ -67,7 +68,7 @@ class BasicInfoStep extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                icon: const Icon(Icons.person_pin_outlined, size: 20),
+                icon: const Icon(FLucideIcons.userRoundPen, size: 20),
                 label: const Text(
                   'Fill from profile',
                   style: TextStyle(fontWeight: FontWeight.w700),
@@ -88,7 +89,7 @@ class BasicInfoStep extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            icon: const Icon(Icons.science_outlined, size: 19),
+            icon: const Icon(FLucideIcons.flaskConical, size: 19),
             label: const Text(
               'Use complete sample CV',
               style: TextStyle(fontWeight: FontWeight.w700),
@@ -209,7 +210,7 @@ class BasicInfoStep extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  icon: const Icon(Icons.auto_fix_high_rounded, size: 19),
+                  icon: const Icon(FLucideIcons.sparkles, size: 19),
                   label: const Text('Import my resume'),
                 ),
               ),

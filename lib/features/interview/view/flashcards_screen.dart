@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/interview/controller/flashcards_controller.dart';
@@ -28,7 +29,7 @@ class FlashcardsScreen extends StatelessWidget {
                 IconButton(
                   onPressed: Get.back,
                   icon: Icon(
-                    Icons.chevron_left_rounded,
+                    FLucideIcons.chevronLeft,
                     color: palette.iconPrimary,
                   ),
                 ),
@@ -98,7 +99,7 @@ class FlashcardsScreen extends StatelessWidget {
                             child: _CategoryTile(
                               category: FlashcardCategory(
                                 name: 'Bookmarks',
-                                icon: Icons.bookmark_rounded,
+                                icon: FLucideIcons.bookmark,
                                 accent: const Color(0xFF6C5CE7),
                                 cards: bookmarkedCards,
                               ),
@@ -107,7 +108,7 @@ class FlashcardsScreen extends StatelessWidget {
                                   () => FlashcardDeckScreen(
                                     category: FlashcardCategory(
                                       name: 'Bookmarks',
-                                      icon: Icons.bookmark_rounded,
+                                      icon: FLucideIcons.bookmark,
                                       accent: const Color(0xFF6C5CE7),
                                       cards: bookmarkedCards,
                                     ),
@@ -212,11 +213,7 @@ class _CategoryTile extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: palette.iconMuted,
-              size: 22,
-            ),
+            Icon(FLucideIcons.chevronRight, color: palette.iconMuted, size: 22),
           ],
         ),
       ),
@@ -281,7 +278,7 @@ class _FlashcardDeckScreenState extends State<FlashcardDeckScreen> {
                 IconButton(
                   onPressed: Get.back,
                   icon: Icon(
-                    Icons.chevron_left_rounded,
+                    FLucideIcons.chevronLeft,
                     color: palette.iconPrimary,
                   ),
                 ),
@@ -299,7 +296,10 @@ class _FlashcardDeckScreenState extends State<FlashcardDeckScreen> {
                 IconButton(
                   onPressed: _reset,
                   tooltip: 'Restart deck',
-                  icon: Icon(Icons.refresh_rounded, color: palette.iconPrimary),
+                  icon: Icon(
+                    FLucideIcons.refreshCw,
+                    color: palette.iconPrimary,
+                  ),
                 ),
               ],
             ),
@@ -412,8 +412,8 @@ class _DeckStack extends StatelessWidget {
                         },
                         child: Icon(
                           ctrl.isBookmarked(category, index)
-                              ? Icons.bookmark
-                              : Icons.bookmark_border,
+                              ? FLucideIcons.bookmarkCheck
+                              : FLucideIcons.bookmark,
                           color: Colors.white,
                           size: 28,
                         ),

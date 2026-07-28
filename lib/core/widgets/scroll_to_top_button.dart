@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 /// A floating action button that appears after scrolling past [threshold] px.
@@ -70,7 +71,7 @@ class _ScrollToTopButtonState extends State<ScrollToTopButton> {
                   curve: Curves.easeOutCubic,
                 );
               },
-              child: const Icon(Icons.keyboard_arrow_up, color: Colors.white),
+              child: const Icon(FLucideIcons.chevronUp, color: Colors.white),
             ),
           ),
         ),

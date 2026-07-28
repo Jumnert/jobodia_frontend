@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/custom_button.dart';
@@ -19,9 +20,7 @@ class CompanyReviewsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: palette.scaffold,
-      appBar: AppBar(
-        title: Text('$companyName Reviews'),
-      ),
+      appBar: AppBar(title: Text('$companyName Reviews')),
       body: Obx(() {
         final reviews = ctrl.reviewsForCompany(companyName);
         // Derive the average from the already-filtered list instead of calling
@@ -57,7 +56,7 @@ class CompanyReviewsScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showWriteReviewSheet(context, ctrl, companyName),
         backgroundColor: AppColors.brandTeal,
-        icon: const Icon(Icons.edit_rounded, color: Colors.white),
+        icon: const Icon(FLucideIcons.edit, color: Colors.white),
         label: const Text(
           'Write a Review',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -131,21 +130,21 @@ class CompanyReviewsScreen extends StatelessWidget {
                 CustomTextField(
                   label: 'Review Title',
                   hintText: 'e.g., Great place to work',
-                  prefixIcon: Icons.title,
+                  prefixIcon: FLucideIcons.type,
                   controller: titleCtrl,
                 ),
                 const SizedBox(height: 16),
                 CustomTextField(
                   label: 'Pros',
                   hintText: 'What did you like?',
-                  prefixIcon: Icons.thumb_up_rounded,
+                  prefixIcon: FLucideIcons.thumbsUp,
                   controller: prosCtrl,
                 ),
                 const SizedBox(height: 16),
                 CustomTextField(
                   label: 'Cons',
                   hintText: 'What could be improved?',
-                  prefixIcon: Icons.thumb_down_rounded,
+                  prefixIcon: FLucideIcons.thumbsDown,
                   controller: consCtrl,
                 ),
                 const SizedBox(height: 16),
@@ -166,7 +165,7 @@ class CompanyReviewsScreen extends StatelessWidget {
                 CustomTextField(
                   label: 'Your Job Title',
                   hintText: 'e.g., Software Engineer',
-                  prefixIcon: Icons.work_rounded,
+                  prefixIcon: FLucideIcons.briefcase,
                   controller: jobTitleCtrl,
                 ),
                 const SizedBox(height: 24),
@@ -326,7 +325,7 @@ class _ReviewCard extends StatelessWidget {
               text: review.pros,
               color: AppColors.success,
               palette: palette,
-              icon: Icons.add_circle_outline_rounded,
+              icon: FLucideIcons.plusCircle,
             ),
             const SizedBox(height: 8),
           ],
@@ -335,7 +334,7 @@ class _ReviewCard extends StatelessWidget {
               text: review.cons,
               color: AppColors.error,
               palette: palette,
-              icon: Icons.remove_circle_outline_rounded,
+              icon: FLucideIcons.minusCircle,
             ),
             const SizedBox(height: 8),
           ],
@@ -344,7 +343,7 @@ class _ReviewCard extends StatelessWidget {
               text: review.advice,
               color: AppColors.info,
               palette: palette,
-              icon: Icons.info_outline_rounded,
+              icon: FLucideIcons.info,
             ),
           ],
         ],

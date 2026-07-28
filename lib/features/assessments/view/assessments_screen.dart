@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/assessments/controller/assessment_controller.dart';
@@ -33,7 +34,7 @@ class AssessmentsScreen extends StatelessWidget {
               child: Column(
                 children: [
                   const Icon(
-                    Icons.verified_rounded,
+                    FLucideIcons.badgeCheck,
                     color: Colors.white,
                     size: 48,
                   ),
@@ -114,7 +115,9 @@ class _AssessmentTile extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              assessment.passed ? Icons.verified_rounded : Icons.quiz_rounded,
+              assessment.passed
+                  ? FLucideIcons.badgeCheck
+                  : FLucideIcons.circleHelp,
               color: assessment.passed ? AppColors.success : palette.iconMuted,
             ),
           ),

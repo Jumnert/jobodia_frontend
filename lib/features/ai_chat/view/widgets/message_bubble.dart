@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
@@ -214,8 +215,8 @@ class _MessageBubbleState extends State<MessageBubble>
                       _ResponseAction(
                         tooltip: 'Good response',
                         icon: _feedback == 1
-                            ? Icons.thumb_up_rounded
-                            : Icons.thumb_up_outlined,
+                            ? FLucideIcons.thumbsUp
+                            : FLucideIcons.thumbsUp,
                         selected: _feedback == 1,
                         onPressed: () {
                           unawaited(HapticFeedback.selectionClick());
@@ -225,8 +226,8 @@ class _MessageBubbleState extends State<MessageBubble>
                       _ResponseAction(
                         tooltip: 'Bad response',
                         icon: _feedback == -1
-                            ? Icons.thumb_down_rounded
-                            : Icons.thumb_down_outlined,
+                            ? FLucideIcons.thumbsDown
+                            : FLucideIcons.thumbsDown,
                         selected: _feedback == -1,
                         onPressed: () {
                           unawaited(HapticFeedback.selectionClick());
@@ -235,12 +236,12 @@ class _MessageBubbleState extends State<MessageBubble>
                       ),
                       _ResponseAction(
                         tooltip: 'Regenerate response',
-                        icon: Icons.refresh_rounded,
+                        icon: FLucideIcons.refreshCw,
                         onPressed: widget.onRegenerate,
                       ),
                       _ResponseAction(
                         tooltip: 'Copy response',
-                        icon: Icons.content_copy_rounded,
+                        icon: FLucideIcons.copy,
                         onPressed: () {
                           unawaited(HapticFeedback.selectionClick());
                           unawaited(
@@ -319,7 +320,7 @@ class _ResumeAttachmentCard extends StatelessWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Icon(Icons.description_outlined, color: foreground, size: 23),
+                Icon(FLucideIcons.fileText, color: foreground, size: 23),
                 Positioned(
                   left: 5,
                   right: 5,
@@ -364,11 +365,7 @@ class _ResumeAttachmentCard extends StatelessWidget {
                 const SizedBox(height: 5),
                 Row(
                   children: [
-                    Icon(
-                      Icons.auto_awesome_rounded,
-                      size: 11,
-                      color: foreground,
-                    ),
+                    Icon(FLucideIcons.sparkles, size: 11, color: foreground),
                     const SizedBox(width: 4),
                     Text(
                       'Ready for AI review',
@@ -475,7 +472,7 @@ class _ResumeAnalysisCard extends StatelessWidget {
         Divider(color: palette.divider, height: 1),
         const SizedBox(height: 16),
         _AnalysisSectionTitle(
-          icon: Icons.analytics_outlined,
+          icon: FLucideIcons.chartLine,
           label: 'Score breakdown',
           palette: palette,
         ),
@@ -487,7 +484,7 @@ class _ResumeAnalysisCard extends StatelessWidget {
         if (analysis.strengths.isNotEmpty) ...[
           const SizedBox(height: 8),
           _AnalysisSectionTitle(
-            icon: Icons.verified_outlined,
+            icon: FLucideIcons.badgeCheck,
             label: 'What works',
             palette: palette,
           ),
@@ -495,7 +492,7 @@ class _ResumeAnalysisCard extends StatelessWidget {
           ...analysis.strengths.map(
             (strength) => _AnalysisBullet(
               text: strength,
-              icon: Icons.check_rounded,
+              icon: FLucideIcons.check,
               color: AppColors.success,
             ),
           ),
@@ -503,7 +500,7 @@ class _ResumeAnalysisCard extends StatelessWidget {
         if (analysis.priorityFixes.isNotEmpty) ...[
           const SizedBox(height: 8),
           _AnalysisSectionTitle(
-            icon: Icons.build_outlined,
+            icon: FLucideIcons.wrench,
             label: 'Fix these first',
             palette: palette,
           ),
@@ -515,7 +512,7 @@ class _ResumeAnalysisCard extends StatelessWidget {
         if (analysis.rewrites.isNotEmpty) ...[
           const SizedBox(height: 8),
           _AnalysisSectionTitle(
-            icon: Icons.auto_fix_high_rounded,
+            icon: FLucideIcons.sparkles,
             label: 'Stronger wording',
             palette: palette,
           ),
@@ -525,7 +522,7 @@ class _ResumeAnalysisCard extends StatelessWidget {
         if (analysis.missingInformation.isNotEmpty) ...[
           const SizedBox(height: 8),
           _AnalysisSectionTitle(
-            icon: Icons.info_outline_rounded,
+            icon: FLucideIcons.info,
             label: 'Missing or unclear',
             palette: palette,
           ),
@@ -533,7 +530,7 @@ class _ResumeAnalysisCard extends StatelessWidget {
           ...analysis.missingInformation.map(
             (item) => _AnalysisBullet(
               text: item,
-              icon: Icons.priority_high_rounded,
+              icon: FLucideIcons.alertTriangle,
               color: AppColors.warning,
             ),
           ),
@@ -541,7 +538,7 @@ class _ResumeAnalysisCard extends StatelessWidget {
         if (analysis.targetRoleFit case final fit?) ...[
           const SizedBox(height: 8),
           _AnalysisSectionTitle(
-            icon: Icons.track_changes_rounded,
+            icon: FLucideIcons.target,
             label: 'Target-role fit',
             palette: palette,
           ),
@@ -562,7 +559,7 @@ class _ResumeAnalysisCard extends StatelessWidget {
             foregroundColor: palette.textPrimary,
             padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
           ),
-          icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+          icon: const Icon(FLucideIcons.arrowRight, size: 18),
           label: const Text(
             'Improve in CV Builder',
             style: TextStyle(fontWeight: FontWeight.w800),

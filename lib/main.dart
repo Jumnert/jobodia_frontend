@@ -104,7 +104,7 @@ class _UnknownRouteScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.explore_off, size: 64, color: Colors.grey),
+              const Icon(FLucideIcons.compass, size: 64, color: Colors.grey),
               const SizedBox(height: 16),
               Text(
                 'Page not found',

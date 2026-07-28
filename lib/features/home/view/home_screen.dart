@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/app/theme/app_theme.dart';
@@ -15,8 +16,7 @@ import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
 import 'package:jobodia_frontend/features/home/model/job_feed_model.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/home_top_bar.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/job_feed_card.dart';
-import 'package:jobodia_frontend/features/job_detail/controller/job_detail_controller.dart';
-import 'package:jobodia_frontend/features/job_detail/view/job_detail_screen.dart';
+import 'package:jobodia_frontend/features/job_detail/view/job_detail_sheet.dart';
 import 'package:jobodia_frontend/features/saved_jobs/controller/saved_jobs_controller.dart';
 import 'package:jobodia_frontend/features/settings/controller/theme_controller.dart';
 
@@ -206,7 +206,7 @@ class _EmptyJobListing extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.travel_explore_rounded,
+              FLucideIcons.compass,
               color: AppColors.brandTeal,
               size: 28,
             ),
@@ -242,7 +242,7 @@ class _EmptyJobListing extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
               ),
             ),
-            icon: const Icon(Icons.refresh_rounded, size: 18),
+            icon: const Icon(FLucideIcons.refreshCw, size: 18),
             label: const Text(
               'Show all jobs',
               style: TextStyle(fontWeight: FontWeight.w700),
@@ -310,7 +310,7 @@ class _ThemePickerDialog extends StatelessWidget {
                   IconButton(
                     tooltip: 'Close',
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close_rounded),
+                    icon: const Icon(FLucideIcons.x),
                   ),
                 ],
               ),
@@ -436,7 +436,7 @@ class _ThemePreviewCard extends StatelessWidget {
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
-                              Icons.check_rounded,
+                              FLucideIcons.check,
                               size: 12,
                               color: Colors.white,
                             ),
@@ -515,7 +515,7 @@ class _ThemeBackdrop extends StatelessWidget {
       ],
       (AppThemePreset.defaultTheme, true) => const [
         Color(0xFF111719),
-        Color(0xFF101214),
+        Color(0xFF0A0A0A),
       ],
       (AppThemePreset.golden, false) => const [
         Color(0xFFFFFDF5),
@@ -670,15 +670,7 @@ class _JobFeedContextMenu extends StatelessWidget {
               child: InkWell(
                 onTap: () {
                   unawaited(HapticFeedback.lightImpact());
-                  Get.to(
-                    () => const JobDetailScreen(),
-                    arguments: job,
-                    binding: BindingsBuilder(
-                      () => Get.lazyPut<JobDetailController>(
-                        JobDetailController.new,
-                      ),
-                    ),
-                  );
+                  showJobDetailSheet(context, job);
                 },
                 child: Obx(
                   () => JobFeedCard(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -58,7 +59,7 @@ class MoreCompanyJobs extends StatelessWidget {
               if (companyName != null) ...[
                 const SizedBox(width: 6),
                 Icon(
-                  Icons.arrow_forward_ios_rounded,
+                  FLucideIcons.chevronRight,
                   size: 14,
                   color: palette.textSecondary,
                 ),

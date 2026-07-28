@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
-import 'package:jobodia_frontend/core/widgets/custom_button.dart';
-import 'package:jobodia_frontend/core/widgets/custom_text_field.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 
 /// Login form UI. Validation and actions live in AuthController.
@@ -18,29 +17,53 @@ class LoginForm extends GetView<AuthController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        CustomTextField(
-          label: 'Email',
-          hintText: 'example@gmail.com',
-          controller: controller.emailController,
-          prefixIcon: Icons.mail_outline_rounded,
+        FTextField(
+          control: FTextFieldControl.managed(
+            controller: controller.emailController,
+          ),
+          label: const Text('Email'),
+          hint: 'example@gmail.com',
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
+          prefixBuilder: (context, style, variants) =>
+              FTextField.prefixIconBuilder(
+                context,
+                style,
+                variants,
+                const Icon(FLucideIcons.mail),
+              ),
         ),
         const SizedBox(height: 16),
         Obx(
-          () => CustomTextField(
-            label: 'Password',
-            hintText: 'Enter your password',
-            controller: controller.passwordController,
-            prefixIcon: Icons.key_rounded,
+          () => FTextField(
+            control: FTextFieldControl.managed(
+              controller: controller.passwordController,
+            ),
+            label: const Text('Password'),
+            hint: 'Enter your password',
             obscureText: !controller.isPasswordVisible.value,
             textInputAction: TextInputAction.done,
-            onSubmitted: (_) {
+            onSubmit: (_) {
               if (!controller.isLoading.value) controller.login();
             },
-            suffixIcon: _PasswordVisibilityButton(
-              isVisible: controller.isPasswordVisible.value,
-              onPressed: controller.togglePasswordVisibility,
+            prefixBuilder: (context, style, variants) =>
+                FTextField.prefixIconBuilder(
+                  context,
+                  style,
+                  variants,
+                  const Icon(FLucideIcons.key),
+                ),
+            suffixBuilder: (context, style, variants) => Padding(
+              padding: const EdgeInsetsDirectional.only(end: 4),
+              child: FButton.icon(
+                variant: FButtonVariant.ghost,
+                onPress: controller.togglePasswordVisibility,
+                child: Icon(
+                  controller.isPasswordVisible.value
+                      ? FLucideIcons.eye
+                      : FLucideIcons.eyeClosed,
+                ),
+              ),
             ),
           ),
         ),
@@ -52,7 +75,7 @@ class LoginForm extends GetView<AuthController> {
               Get.toNamed(AppRoutes.resetPassword);
             },
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.textSecondary,
+              foregroundColor: palette.textSecondary,
               padding: const EdgeInsets.only(left: 12),
             ),
             child: const Text('Forgot Password?'),
@@ -60,27 +83,26 @@ class LoginForm extends GetView<AuthController> {
         ),
         Obx(() => _AnimatedErrorMessage(controller.errorMessage.value)),
         Obx(
-          () => CustomButton(
-            label: 'Log in',
-            isLoading: controller.isLoading.value,
-            onPressed: controller.isLoading.value
+          () => FButton(
+            onPress: controller.isLoading.value
                 ? null
                 : () {
                     unawaited(HapticFeedback.lightImpact());
                     controller.login();
                   },
+            prefix: controller.isLoading.value
+                ? const FCircularProgress()
+                : null,
+            child: Text(controller.isLoading.value ? 'Please wait' : 'Log in'),
           ),
         ),
-        const SizedBox(height: 12),
-        TextButton(
-          onPressed: () {
-            unawaited(HapticFeedback.lightImpact());
-            controller.skipLogin();
-          },
-          style: TextButton.styleFrom(foregroundColor: palette.textSecondary),
+        const SizedBox(height: 8),
+        FButton(
+          variant: FButtonVariant.ghost,
+          onPress: controller.skipLogin,
           child: const Text('Skip login'),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Wrap(
           alignment: WrapAlignment.center,
           crossAxisAlignment: WrapCrossAlignment.center,
@@ -106,34 +128,6 @@ class LoginForm extends GetView<AuthController> {
   }
 }
 
-class _PasswordVisibilityButton extends StatelessWidget {
-  const _PasswordVisibilityButton({
-    required this.isVisible,
-    required this.onPressed,
-  });
-
-  final bool isVisible;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: isVisible ? 'Hide password' : 'Show password',
-      onPressed: onPressed,
-      icon: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 220),
-        switchInCurve: Curves.easeInOutCubic,
-        switchOutCurve: Curves.easeInOutCubic,
-        child: Icon(
-          isVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-          key: ValueKey(isVisible),
-          color: context.palette.textSecondary,
-        ),
-      ),
-    );
-  }
-}
-
 class _AnimatedErrorMessage extends StatelessWidget {
   const _AnimatedErrorMessage(this.message);
 
@@ -141,6 +135,7 @@ class _AnimatedErrorMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = FTheme.of(context);
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 280),
       switchInCurve: Curves.easeInOutCubic,
@@ -163,8 +158,8 @@ class _AnimatedErrorMessage extends StatelessWidget {
               child: Text(
                 message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: AppColors.error,
+                style: TextStyle(
+                  color: theme.colors.destructive,
                   fontWeight: FontWeight.w500,
                 ),
               ),

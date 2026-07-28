@@ -458,63 +458,42 @@ jobodia_frontend/
 
 ### Color Palette
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│                      COLOR SYSTEM                             │
-├──────────────────────────────────────────────────────────────┤
-│                                                              │
-│  BRAND COLORS                                                │
-│  ┌────────┐ ┌────────┐ ┌────────┐                           │
-│  │████████│ │████████│ │████████│                           │
-│  │Primary │ │ Purple │ │ Purple │                           │
-│  │#202428 │ │Accent  │ │ Dark   │                           │
-│  │        │ │#8B5CF6 │ │#7C3AED│                           │
-│  └────────┘ └────────┘ └────────┘                           │
-│                                                              │
-│  SEMANTIC COLORS                                             │
-│  ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐               │
-│  │████████│ │████████│ │████████│ │████████│               │
-│  │  Bg    │ │Surface │ │ Error  │ │  Hint  │               │
-│  │#F7F8F9 │ │ White  │ │#D93B3B│ │#B9BEC3│               │
-│  └────────┘ └────────┘ └────────┘ └────────┘               │
-│                                                              │
-│  JOB CARD GRADIENTS (cycle by index)                         │
-│  ┌────────────────┐  ┌────────────────┐                     │
-│  │▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│  │▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒│                     │
-│  │ Blue → Purple  │  │Teal → Emerald  │                     │
-│  │#2B5DF0→#7C3AED │  │#0EA5A4→#10B981 │                     │
-│  └────────────────┘  └────────────────┘                     │
-│  ┌────────────────┐  ┌────────────────┐                     │
-│  │░░░░░░░░░░░░░░░░│  │▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│                     │
-│  │Orange → Coral  │  │Indigo → Violet │                     │
-│  │#FF7E45→#FF5A6E │  │#6D5BF8→#B14CF0 │                     │
-│  └────────────────┘  └────────────────┘                     │
-│                                                              │
-│  LIGHT THEME PALETTE (AppPalette.light)                      │
-│  scaffold:    #F5F6F8    textPrimary:   #101214             │
-│  surface:     #FFFFFF    textSecondary: #6F7378             │
-│  surfaceMuted:#F3F5F7    textTertiary:  #9A9FA4             │
-│  border:      #E9E9E9    iconPrimary:   #101214             │
-│  divider:     #E7E9EC    iconMuted:     #8C8C8C             │
-│                                                              │
-│  DARK THEME PALETTE (AppPalette.dark)                        │
-│  scaffold:    #101214    textPrimary:   #FFFFFF             │
-│  surface:     #1A1D20    textSecondary: #B7BDC3             │
-│  surfaceMuted:#22262B    textTertiary:  #7E868D             │
-│  border:      #2A2E33    iconPrimary:   #FFFFFF             │
-│  divider:     #2A2E33    iconMuted:     #A5ABB1             │
-│                                                              │
-│  TOP PICK HERO CARD                                          │
-│  ┌──────────────────────────────────┐                       │
-│  │▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│                       │
-│  │▓  Teal Gradient #0EA5A4→#0C8A89 ▓│                       │
-│  │▓  "Top Pick for you" badge       ▓│                       │
-│  │▓  White text, translucent pills  ▓│                       │
-│  │▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│                       │
-│  └──────────────────────────────────┘                       │
-│                                                              │
-└──────────────────────────────────────────────────────────────┘
-```
+The default Jobodia theme is based on the supplied **shadcn OKLCH** token set. Flutter's `Color` type uses sRGB, so the OKLCH source values are converted to the following display-ready values. The source OKLCH values remain canonical; the hex values are the Flutter implementation mapping.
+
+| Role | Light OKLCH | Light Flutter | Dark OKLCH | Dark Flutter |
+|---|---:|---:|---:|---:|
+| Background | `oklch(1 0 0)` | `#FFFFFF` | `oklch(0.145 0 0)` | `#0A0A0A` |
+| Foreground | `oklch(0.145 0 0)` | `#0A0A0A` | `oklch(0.985 0 0)` | `#FAFAFA` |
+| Card / popover | `oklch(1 0 0)` | `#FFFFFF` | `oklch(0.205 0 0)` | `#171717` |
+| Primary | `oklch(76.8% 0.233 130.85)` | `#7CCF00` | same | `#7CCF00` |
+| Primary foreground | `oklch(0.98 0.016 73.684)` | `#FFF7ED` | same | `#FFF7ED` |
+| Secondary | `oklch(0.967 0.001 286.375)` | `#F4F4F5` | `oklch(0.274 0.006 286.033)` | `#27272A` |
+| Muted | `oklch(0.97 0 0)` | `#F5F5F5` | `oklch(0.269 0 0)` | `#262626` |
+| Muted foreground | `oklch(0.556 0 0)` | `#737373` | `oklch(0.708 0 0)` | `#A1A1A1` |
+| Accent | `oklch(0.97 0 0)` | `#F5F5F5` | `oklch(0.371 0 0)` | `#404040` |
+| Destructive | `oklch(0.58 0.22 27)` | `#DF2225` | `oklch(0.704 0.191 22.216)` | `#FF6467` |
+| Border | `oklch(0.922 0 0)` | `#E5E5E5` | `oklch(1 0 0 / 10%)` | `#FFFFFF1A` |
+| Input | `oklch(0.922 0 0)` | `#E5E5E5` | `oklch(1 0 0 / 15%)` | `#FFFFFF26` |
+| Focus ring | `oklch(0.708 0 0)` | `#A1A1A1` | `oklch(0.556 0 0)` | `#737373` |
+
+#### Chart scale
+
+| Token | OKLCH source | Flutter sRGB |
+|---|---:|---:|
+| Chart 1 | `oklch(0.837 0.128 66.29)` | `#FFB86A` |
+| Chart 2 | `oklch(0.705 0.213 47.604)` | `#FF6900` |
+| Chart 3 | `oklch(0.646 0.222 41.116)` | `#F54900` |
+| Chart 4 | `oklch(0.553 0.195 38.402)` | `#CA3500` |
+| Chart 5 | `oklch(0.47 0.157 37.304)` | `#9F2D00` |
+
+#### Flutter mapping
+
+- `lib/theme/colors.dart` maps the tokens to forui `FColors`, so `FButton`, `FTextField`, `FTile`, navigation, cards, and other forui components inherit the scheme.
+- `lib/app/theme/app_theme.dart` maps the same values to Material `ColorScheme` and uses the `ring` token for focused input outlines.
+- `lib/core/constants/app_colors.dart` exposes the shared primary/chart colors and light/dark `AppPalette` roles used by feature widgets.
+- `AppColors.brandTeal` remains as a compatibility alias for `brandPrimary` (`#7CCF00`) while older feature code is migrated gradually.
+- The base radius is `0.625rem` / **10 px**. This matches forui's `FBorderRadius.md`; Material inputs and buttons use the same 10 px radius.
+- Sidebar tokens from the web source map to the closest mobile roles: sidebar background → card/surface, sidebar foreground → foreground, and sidebar border → border.
 
 ### Theme Switching
 
@@ -525,7 +504,7 @@ jobodia_frontend/
 │  AppTheme   │    ThemeMode()      │  AppTheme    │
 │  .light     │                     │  .dark       │
 │             │    Persisted via    │              │
-│  #F7F8F9 bg │    GetStorage       │  #101214 bg  │
+│  #FFFFFF bg │    GetStorage       │  #0A0A0A bg  │
 └─────────────┘    'isDarkMode'     └─────────────┘
 ```
 

@@ -1,24 +1,24 @@
 part of 'theme.dart';
 
-/// Jobodia brand colors integrated with Forui theme.
+/// shadcn OKLCH colors converted to sRGB for Flutter/forui.
 final FColors lightColors = FColors(
   brightness: Brightness.light,
   systemOverlayStyle: SystemUiOverlayStyle.dark,
   barrier: const Color(0x33000000),
-  background: const Color(0xFFF5F6F8),
-  foreground: const Color(0xFF101214),
-  primary: const Color(0xFF0EA5A4), // Jobodia brand teal
-  primaryForeground: const Color(0xFFFFFFFF),
-  secondary: const Color(0xFFF3F5F7),
-  secondaryForeground: const Color(0xFF101214),
-  muted: const Color(0xFFF3F5F7),
-  mutedForeground: const Color(0xFF6F7378),
-  destructive: const Color(0xFFD93B3B),
+  background: const Color(0xFFFFFFFF),
+  foreground: const Color(0xFF0A0A0A),
+  primary: const Color(0xFF7CCF00),
+  primaryForeground: const Color(0xFFFFF7ED),
+  secondary: const Color(0xFFF4F4F5),
+  secondaryForeground: const Color(0xFF18181B),
+  muted: const Color(0xFFF5F5F5),
+  mutedForeground: const Color(0xFF737373),
+  destructive: const Color(0xFFDF2225),
   destructiveForeground: const Color(0xFFFFFFFF),
-  error: const Color(0xFFD93B3B),
+  error: const Color(0xFFDF2225),
   errorForeground: const Color(0xFFFFFFFF),
   card: const Color(0xFFFFFFFF),
-  border: const Color(0xFFE9E9E9),
+  border: const Color(0xFFE5E5E5),
   extensions: const [JobodiaColors()],
 );
 
@@ -26,20 +26,20 @@ final FColors darkColors = FColors(
   brightness: Brightness.dark,
   systemOverlayStyle: SystemUiOverlayStyle.light,
   barrier: const Color(0x7A000000),
-  background: const Color(0xFF101214),
-  foreground: const Color(0xFFFFFFFF),
-  primary: const Color(0xFF0EA5A4), // Jobodia brand teal
-  primaryForeground: const Color(0xFFFFFFFF),
-  secondary: const Color(0xFF22262B),
-  secondaryForeground: const Color(0xFFB7BDC3),
-  muted: const Color(0xFF22262B),
-  mutedForeground: const Color(0xFF7E868D),
+  background: const Color(0xFF0A0A0A),
+  foreground: const Color(0xFFFAFAFA),
+  primary: const Color(0xFF7CCF00),
+  primaryForeground: const Color(0xFFFFF7ED),
+  secondary: const Color(0xFF27272A),
+  secondaryForeground: const Color(0xFFFAFAFA),
+  muted: const Color(0xFF262626),
+  mutedForeground: const Color(0xFFA1A1A1),
   destructive: const Color(0xFFFF6467),
   destructiveForeground: const Color(0xFFFFFFFF),
   error: const Color(0xFFFF6467),
   errorForeground: const Color(0xFFFFFFFF),
-  card: const Color(0xFF1A1D20),
-  border: const Color(0xFF2A2E33),
+  card: const Color(0xFF171717),
+  border: const Color(0x1AFFFFFF),
   extensions: const [JobodiaColors()],
 );
 
@@ -51,10 +51,10 @@ extension FColorsExtensions on FColors {
 /// Jobodia-specific color tokens.
 class JobodiaColors extends ThemeExtension<JobodiaColors> {
   const JobodiaColors({
-    this.accent = const Color(0xFF0EA5A4),
-    this.accentDark = const Color(0xFF0C8A89),
-    this.purple = const Color(0xFF8B5CF6),
-    this.purpleDark = const Color(0xFF7C3AED),
+    this.accent = const Color(0xFF7CCF00),
+    this.accentDark = const Color(0xFF4F8500),
+    this.purple = const Color(0xFFF54900),
+    this.purpleDark = const Color(0xFFCA3500),
   });
 
   final Color accent;

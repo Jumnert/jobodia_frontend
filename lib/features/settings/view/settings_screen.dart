@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
+import 'package:jobodia_frontend/core/widgets/blurred_header.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/adaptive_dialog.dart';
-import 'package:jobodia_frontend/core/widgets/quiet_glass_button.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 import 'package:jobodia_frontend/features/settings/controller/feedback_controller.dart';
 import 'package:jobodia_frontend/features/settings/controller/theme_controller.dart';
-import 'package:jobodia_frontend/features/settings/view/widgets/settings_helpers.dart';
 import 'package:jobodia_frontend/features/settings/view/widgets/theme_picker.dart';
 import 'package:jobodia_frontend/features/feature_discovery/controller/feature_discovery_controller.dart';
 import 'package:jobodia_frontend/features/onboarding/controllers/onboarding_controller.dart';
 import 'package:jobodia_frontend/features/onboarding/views/onboarding_view.dart';
+import 'package:jobodia_frontend/features/role/view/role_selection_screen.dart';
 import 'package:jobodia_frontend/features/splash/view/splash_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -36,214 +37,176 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = FTheme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final palette = context.palette;
-    final backgroundColor = palette.scaffold;
-    final foregroundColor = palette.textPrimary;
-    final sectionColor = palette.textSecondary;
-    final groupColor = palette.surface;
-    final borderColor = palette.border;
 
-    return Scaffold(
-      body: Material(
-        color: backgroundColor,
-        child: Stack(
+    final content = ListView(
+      padding: EdgeInsets.fromLTRB(
+        16,
+        MediaQuery.paddingOf(context).top + 64,
+        16,
+        32,
+      ),
+      children: [
+        FTileGroup(
+          label: const Text('Other settings'),
           children: [
-            Positioned.fill(
-              child: ListView(
-                padding: EdgeInsets.fromLTRB(
-                  20,
-                  MediaQuery.paddingOf(context).top + 80,
-                  20,
-                  112,
-                ),
-                children: [
-                  SectionTitle('Other settings', color: sectionColor),
-                  const SizedBox(height: 8),
-                  SettingsGroup(
-                    color: groupColor,
-                    borderColor: borderColor,
-                    children: [
-                      SettingsTile(
-                        icon: Icons.person_rounded,
-                        title: 'Profile details',
-                        showChevron: true,
-                        foregroundColor: foregroundColor,
-                        mutedColor: sectionColor,
-                        onTap: () => Get.toNamed<void>(AppRoutes.profile),
-                      ),
-                      SettingsTile(
-                        icon: Icons.lock_rounded,
-                        title: 'App PIN',
-                        showChevron: true,
-                        foregroundColor: foregroundColor,
-                        mutedColor: sectionColor,
-                        onTap: () => _showPinDialog(context),
-                      ),
-                      SettingsTile(
-                        icon: Icons.face_rounded,
-                        title: 'Face ID',
-                        subtitle: 'Fast biometric unlock (preview)',
-                        foregroundColor: foregroundColor,
-                        mutedColor: sectionColor,
-                        trailing: Switch(
-                          value: _faceIdEnabled,
-                          onChanged: (value) => _setFaceId(context, value),
-                        ),
-                      ),
-                      SettingsTile(
-                        icon: Icons.workspace_premium_rounded,
-                        title: 'Plans & pricing',
-                        subtitle: 'Free, Plus and Pro',
-                        showChevron: true,
-                        foregroundColor: foregroundColor,
-                        mutedColor: sectionColor,
-                        onTap: () => Get.toNamed<void>(AppRoutes.pricing),
-                      ),
-                      SettingsTile(
-                        icon: Icons.explore_rounded,
-                        title: 'Discover Features',
-                        showChevron: true,
-                        foregroundColor: foregroundColor,
-                        mutedColor: sectionColor,
-                        onTap: () {
-                          if (Get.isRegistered<FeatureDiscoveryController>()) {
-                            Get.find<FeatureDiscoveryController>()
-                                .resetDiscovery();
-                            Get.snackbar(
-                              'Discovery Reset',
-                              'You will see feature tooltips again.',
-                            );
-                          }
-                        },
-                      ),
-                      SettingsTile(
-                        icon: Icons.dark_mode_rounded,
-                        title: 'Dark mode',
-                        foregroundColor: foregroundColor,
-                        mutedColor: sectionColor,
-                        trailing: Switch(
-                          value: isDark,
-                          onChanged: (val) {
-                            if (!Get.isRegistered<ThemeController>()) return;
-                            Get.find<ThemeController>().toggleTheme(val);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  SectionTitle('Visual theme', color: sectionColor),
-                  const SizedBox(height: 8),
-                  const ThemePicker(),
-                  const SizedBox(height: 18),
-                  SectionTitle('App profile icon', color: sectionColor),
-                  const SizedBox(height: 8),
-                  const _ProfileIconPicker(),
-                  const SizedBox(height: 24),
-                  SectionTitle('Testing', color: sectionColor),
-                  const SizedBox(height: 8),
-                  SettingsGroup(
-                    color: groupColor,
-                    borderColor: borderColor,
-                    children: [
-                      SettingsTile(
-                        icon: Icons.play_circle_outline_rounded,
-                        title: 'Onboarding preview',
-                        subtitle: 'Preview the first-run experience',
-                        showChevron: true,
-                        foregroundColor: foregroundColor,
-                        mutedColor: sectionColor,
-                        onTap: _openOnboardingPreview,
-                      ),
-                      SettingsTile(
-                        icon: Icons.rocket_launch_rounded,
-                        title: 'Splash screen preview',
-                        subtitle: 'Replay the app launch experience',
-                        showChevron: true,
-                        foregroundColor: foregroundColor,
-                        mutedColor: sectionColor,
-                        onTap: _openSplashPreview,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  SettingsGroup(
-                    color: groupColor,
-                    borderColor: borderColor,
-                    children: [
-                      SettingsTile(
-                        icon: Icons.info_rounded,
-                        title: 'About application',
-                        showChevron: true,
-                        foregroundColor: foregroundColor,
-                        mutedColor: sectionColor,
-                        onTap: () => Get.toNamed<void>(AppRoutes.aboutUs),
-                      ),
-                      SettingsTile(
-                        icon: Icons.help_rounded,
-                        title: 'Help/FAQ',
-                        showChevron: true,
-                        foregroundColor: foregroundColor,
-                        mutedColor: sectionColor,
-                        onTap: () => _showFaqSheet(context),
-                      ),
-                      SettingsTile(
-                        icon: Icons.feedback_rounded,
-                        title: 'Leave Feedback',
-                        showChevron: true,
-                        foregroundColor: foregroundColor,
-                        mutedColor: sectionColor,
-                        onTap: () => _showFeedbackSheet(context),
-                      ),
-                      SettingsTile(
-                        icon: Icons.cleaning_services_rounded,
-                        title: 'Clear Cache',
-                        showChevron: true,
-                        foregroundColor: foregroundColor,
-                        mutedColor: sectionColor,
-                        onTap: () => _clearCache(context),
-                      ),
-                      SettingsTile(
-                        icon: Icons
-                            .delete_rounded, // Wait, Deactivate account icon in screenshot looks like a trash bin. delete_rounded is perfect.
-                        title: 'Sign out',
-                        showChevron: true,
-                        isDestructive: true,
-                        foregroundColor: foregroundColor,
-                        mutedColor: sectionColor,
-                        onTap: () => _showLogoutDialog(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                ],
+            FTile(
+              prefix: const Icon(FLucideIcons.circleUser),
+              title: const Text('Profile details'),
+              suffix: const Icon(FLucideIcons.chevronRight),
+              onPress: () => Get.toNamed<void>(AppRoutes.profile),
+            ),
+            FTile(
+              prefix: const Icon(FLucideIcons.lock),
+              title: const Text('App PIN'),
+              suffix: const Icon(FLucideIcons.chevronRight),
+              onPress: () => _showPinDialog(context),
+            ),
+            FTile(
+              prefix: const Icon(FLucideIcons.scanFace),
+              title: const Text('Face ID'),
+              subtitle: const Text('Unlock with biometrics'),
+              suffix: FSwitch(
+                value: _faceIdEnabled,
+                onChange: (value) => _setFaceId(context, value),
               ),
             ),
-            Positioned(
-              top: MediaQuery.paddingOf(context).top + 14,
-              left: 20,
-              right: 20,
-              child: Row(
-                children: [
-                  QuietGlassBackButton(onPressed: () => Get.back<void>()),
-                  const Spacer(),
-                  QuietGlassIconButton(
-                    onPressed: () {},
-                    icon: Icons.settings_outlined,
-                    foregroundColor: foregroundColor,
-                  ),
-                  const Spacer(),
-                  QuietGlassIconButton(
-                    onPressed: () => Get.toNamed<void>(AppRoutes.report),
-                    icon: Icons.report_problem_rounded,
-                    foregroundColor: foregroundColor,
-                  ),
-                ],
+            FTile(
+              prefix: const Icon(FLucideIcons.workflow),
+              title: const Text('Plans & pricing'),
+              suffix: const Icon(FLucideIcons.chevronRight),
+              onPress: () => Get.toNamed<void>(AppRoutes.pricing),
+            ),
+            FTile(
+              prefix: const Icon(FLucideIcons.compass),
+              title: const Text('Discover Features'),
+              suffix: const Icon(FLucideIcons.chevronRight),
+              onPress: () {
+                if (Get.isRegistered<FeatureDiscoveryController>()) {
+                  Get.find<FeatureDiscoveryController>().resetDiscovery();
+                  Get.snackbar(
+                    'Discovery Reset',
+                    'You will see feature tooltips again.',
+                  );
+                }
+              },
+            ),
+            FTile(
+              prefix: const Icon(FLucideIcons.moon),
+              title: const Text('Dark mode'),
+              subtitle: const Text('Switch between light and dark'),
+              suffix: FSwitch(
+                value: isDark,
+                onChange: (val) {
+                  if (!Get.isRegistered<ThemeController>()) return;
+                  Get.find<ThemeController>().toggleTheme(val);
+                },
               ),
             ),
           ],
         ),
+        const SizedBox(height: 24),
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text('Visual theme', style: theme.typography.body.sm),
+        ),
+        const ThemePicker(),
+        const SizedBox(height: 18),
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text('App profile icon', style: theme.typography.body.sm),
+        ),
+        const _ProfileIconPicker(),
+        const SizedBox(height: 24),
+        FTileGroup(
+          label: const Text('Testing'),
+          children: [
+            FTile(
+              prefix: const Icon(FLucideIcons.circlePlay),
+              title: const Text('Onboarding preview'),
+              suffix: const Icon(FLucideIcons.chevronRight),
+              onPress: _openOnboardingPreview,
+            ),
+            FTile(
+              prefix: const Icon(FLucideIcons.rocket),
+              title: const Text('Splash screen preview'),
+              suffix: const Icon(FLucideIcons.chevronRight),
+              onPress: _openSplashPreview,
+            ),
+            FTile(
+              prefix: const Icon(FLucideIcons.userCog),
+              title: const Text('Select role'),
+              suffix: const Icon(FLucideIcons.chevronRight),
+              onPress: _openRolePreview,
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        FTileGroup(
+          children: [
+            FTile(
+              prefix: const Icon(FLucideIcons.info),
+              title: const Text('About application'),
+              suffix: const Icon(FLucideIcons.chevronRight),
+              onPress: () => Get.toNamed<void>(AppRoutes.aboutUs),
+            ),
+            FTile(
+              prefix: const Icon(FLucideIcons.circleHelp),
+              title: const Text('Help/FAQ'),
+              suffix: const Icon(FLucideIcons.chevronRight),
+              onPress: () => _showFaqSheet(context),
+            ),
+            FTile(
+              prefix: const Icon(FLucideIcons.messageSquare),
+              title: const Text('Leave Feedback'),
+              suffix: const Icon(FLucideIcons.chevronRight),
+              onPress: () => _showFeedbackSheet(context),
+            ),
+            FTile(
+              prefix: const Icon(FLucideIcons.scrollText),
+              title: const Text('Dev Logs'),
+              suffix: const Icon(FLucideIcons.chevronRight),
+              onPress: () => Get.toNamed<void>(AppRoutes.devLogs),
+            ),
+            FTile(
+              prefix: const Icon(FLucideIcons.sparkles),
+              title: const Text('Clear Cache'),
+              suffix: const Icon(FLucideIcons.chevronRight),
+              onPress: () => _clearCache(context),
+            ),
+            FTile(
+              variant: FItemVariant.destructive,
+              prefix: const Icon(FLucideIcons.logOut),
+              title: const Text('Sign out'),
+              suffix: const Icon(FLucideIcons.chevronRight),
+              onPress: () => _showLogoutDialog(context),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    // Build the header widget separately so we can measure its height.
+    final header = BlurredHeader(
+      child: FHeader.nested(
+        title: const Text('Settings'),
+        prefixes: [FHeaderAction.back(onPress: () => Get.back<void>())],
+        suffixes: [
+          FHeaderAction(
+            icon: const Icon(FLucideIcons.flag),
+            onPress: () => Get.toNamed<void>(AppRoutes.report),
+          ),
+        ],
+      ),
+    );
+
+    return FScaffold(
+      child: Stack(
+        children: [
+          Positioned.fill(child: content),
+          Positioned(top: 0, left: 0, right: 0, child: header),
+        ],
       ),
     );
   }
@@ -276,6 +239,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ],
     );
+  }
+
+  void _openRolePreview() {
+    Get.to<void>(() => const RoleSelectionScreen(preview: true));
   }
 
   void _openOnboardingPreview() {
@@ -520,13 +487,14 @@ class _ProfileIconPicker extends StatelessWidget {
     final palette = context.palette;
     return SizedBox(
       height: 72,
-      child: Obx(
-        () => ListView.separated(
+      child: Obx(() {
+        final selectedIndex = controller.profileIconIndex.value;
+        return ListView.separated(
           scrollDirection: Axis.horizontal,
           itemCount: _icons.length,
           separatorBuilder: (_, _) => const SizedBox(width: 10),
           itemBuilder: (context, index) {
-            final selected = controller.profileIconIndex.value == index;
+            final selected = selectedIndex == index;
             return GestureDetector(
               onTap: () => AdaptiveDialog.show(
                 context: context,
@@ -564,7 +532,7 @@ class _ProfileIconPicker extends StatelessWidget {
                     errorBuilder: (_, _, _) => ColoredBox(
                       color: palette.surfaceMuted,
                       child: Icon(
-                        Icons.person_rounded,
+                        FLucideIcons.userRound,
                         color: palette.iconMuted,
                       ),
                     ),
@@ -573,8 +541,8 @@ class _ProfileIconPicker extends StatelessWidget {
               ),
             );
           },
-        ),
-      ),
+        );
+      }),
     );
   }
 }
@@ -642,7 +610,7 @@ class _FeedbackSheetState extends State<_FeedbackSheet> {
               return IconButton(
                 onPressed: () => setState(() => _selectedRating = i + 1),
                 icon: Icon(
-                  filled ? Icons.star_rounded : Icons.star_border_rounded,
+                  filled ? FLucideIcons.star : FLucideIcons.star,
                   color: filled
                       ? const Color(0xFFFFC107)
                       : foregroundColor.withValues(alpha: 0.4),
@@ -652,60 +620,33 @@ class _FeedbackSheetState extends State<_FeedbackSheet> {
             }),
           ),
           const SizedBox(height: 12),
-          TextField(
-            controller: _commentCtrl,
+          FTextField.multiline(
+            control: FTextFieldControl.managed(controller: _commentCtrl),
+            hint: 'Tell us what you think...',
+            minLines: 4,
             maxLines: 4,
-            decoration: InputDecoration(
-              hintText: 'Tell us what you think...',
-              hintStyle: TextStyle(
-                color: foregroundColor.withValues(alpha: 0.4),
-              ),
-              filled: true,
-              fillColor: isDark
-                  ? const Color(0xFF22262B)
-                  : const Color(0xFFF3F5F7),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-            ),
-            style: TextStyle(color: foregroundColor),
           ),
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _selectedRating == 0
-                  ? null
-                  : () {
-                      if (!Get.isRegistered<FeedbackController>()) {
-                        Get.lazyPut<FeedbackController>(FeedbackController.new);
-                      }
-                      Get.find<FeedbackController>().submit(
-                        _selectedRating,
-                        _commentCtrl.text.trim(),
-                      );
-                      Navigator.of(context).pop();
-                      Get.snackbar(
-                        'Thank you!',
-                        'Thanks for your feedback!',
-                        snackPosition: SnackPosition.BOTTOM,
-                        margin: const EdgeInsets.all(16),
-                      );
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00856F),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              child: const Text(
-                'Submit',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-              ),
-            ),
+          FButton(
+            onPress: _selectedRating == 0
+                ? null
+                : () {
+                    if (!Get.isRegistered<FeedbackController>()) {
+                      Get.lazyPut<FeedbackController>(FeedbackController.new);
+                    }
+                    Get.find<FeedbackController>().submit(
+                      _selectedRating,
+                      _commentCtrl.text.trim(),
+                    );
+                    Navigator.of(context).pop();
+                    Get.snackbar(
+                      'Thank you!',
+                      'Thanks for your feedback!',
+                      snackPosition: SnackPosition.BOTTOM,
+                      margin: const EdgeInsets.all(16),
+                    );
+                  },
+            child: const Text('Submit'),
           ),
         ],
       ),

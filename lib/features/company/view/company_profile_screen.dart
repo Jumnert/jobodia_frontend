@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -158,7 +159,7 @@ class CompanyProfileScreen extends StatelessWidget {
                         ? OutlinedButton.icon(
                             onPressed: () =>
                                 companyCtrl.toggleFollow(company.name),
-                            icon: const Icon(Icons.check, size: 18),
+                            icon: const Icon(FLucideIcons.check, size: 18),
                             label: const Text('Following'),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.primary,
@@ -171,7 +172,7 @@ class CompanyProfileScreen extends StatelessWidget {
                         : ElevatedButton.icon(
                             onPressed: () =>
                                 companyCtrl.toggleFollow(company.name),
-                            icon: const Icon(Icons.add, size: 18),
+                            icon: const Icon(FLucideIcons.plus, size: 18),
                             label: const Text('Follow'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,

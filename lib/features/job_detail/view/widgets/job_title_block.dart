@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/job_detail/model/job_detail_model.dart';
 import 'package:jobodia_frontend/features/job_detail/view/widgets/company_logo.dart';
 import 'package:jobodia_frontend/features/job_detail/view/widgets/job_chip.dart';
@@ -66,7 +67,7 @@ class JobTitleBlock extends StatelessWidget {
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     decoration: TextDecoration.underline,
-                    decorationColor: Color(0xFF0EA5A4),
+                    decorationColor: AppColors.brandPrimary,
                   ),
                 ),
               ],

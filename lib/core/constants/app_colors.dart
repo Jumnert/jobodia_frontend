@@ -1,57 +1,67 @@
 import 'package:flutter/material.dart';
 
-/// App color palette. Change these values to match final Figma colors.
+/// Shared colors derived from the shadcn OKLCH theme documented in README.
 abstract final class AppColors {
-  /// Near-black text/heading color (not the brand teal — see [brandTeal]).
-  static const primary = Color(0xFF202428);
-  static const headerStart = Color(0xFF090A0B);
-  static const headerEnd = Color(0xFF292B2D);
-  static const accentPurple = Color(0xFF8B5CF6);
-  static const accentPurpleDark = Color(0xFF7C3AED);
-  static const background = Color(0xFFF7F8F9);
-  static const surface = Colors.white;
-  static const textPrimary = Color(0xFF202428);
-  static const textSecondary = Color(0xFF68717A);
-  static const hint = Color(0xFFB9BEC3);
-  static const error = Color(0xFFD93B3B);
+  static const primary = Color(0xFF0A0A0A);
+  static const primaryForeground = Color(0xFFFFF7ED);
+  static const headerStart = Color(0xFF0A0A0A);
+  static const headerEnd = Color(0xFF171717);
 
-  // ── Semantic tokens ──────────────────────────────────────────────
-  /// Aqua brand accent used across the default Jobodia theme.
-  static const brandTeal = Color(0xFF27B8BB);
+  // Legacy names retained for existing feature code; these now map to the
+  // supplied orange chart scale instead of the previous purple palette.
+  static const accentPurple = Color(0xFFF54900);
+  static const accentPurpleDark = Color(0xFFCA3500);
+  static const background = Color(0xFFFFFFFF);
+  static const surface = Color(0xFFFFFFFF);
+  static const textPrimary = Color(0xFF0A0A0A);
+  static const textSecondary = Color(0xFF737373);
+  static const hint = Color(0xFFA1A1A1);
+  static const error = Color(0xFFDF2225);
 
-  /// Success / positive state (green).
-  static const success = Color(0xFF22C55E);
+  // ── Brand and semantic tokens ───────────────────────────────────
+  /// Primary brand color converted from `oklch(76.8% 0.233 130.85)`.
+  static const brandPrimary = Color(0xFF7CCF00);
 
-  /// Warning / attention state (amber).
-  static const warning = Color(0xFFFFC857);
+  /// Backward-compatible alias used throughout existing feature widgets.
+  static const brandTeal = brandPrimary;
 
-  /// Informational state (blue).
+  static const chart1 = Color(0xFFFFB86A);
+  static const chart2 = Color(0xFFFF6900);
+  static const chart3 = Color(0xFFF54900);
+  static const chart4 = Color(0xFFCA3500);
+  static const chart5 = Color(0xFF9F2D00);
+
+  /// Success / positive state.
+  static const success = brandPrimary;
+
+  /// Warning / attention state.
+  static const warning = chart1;
+
+  /// Informational state kept blue for conventional semantic recognition.
   static const info = Color(0xFF3B82F6);
 
-  /// Opaque high-contrast blue used for outgoing chat bubbles.
-  static const chatOutgoingStart = Color(0xFF237BE8);
-  static const chatOutgoingEnd = Color(0xFF075BC7);
+  /// High-contrast outgoing chat gradient drawn from the chart scale.
+  static const chatOutgoingStart = chart4;
+  static const chatOutgoingEnd = chart5;
 
-  /// Aqua highlight and lower edge used by the onboarding call-to-action.
-  static const onboardingCtaLight = Color(0xFF62DAD7);
-  static const onboardingCtaDark = Color(0xFF138A92);
+  /// Legacy onboarding CTA tokens mapped to the new warm chart scale.
+  static const onboardingCtaLight = chart2;
+  static const onboardingCtaDark = chart4;
 
-  /// Gradient pairings for job feed cards. Cards cycle through these by index
-  /// so each card gets a distinct, high-contrast background for white text.
+  /// Gradient pairings derived from the supplied chart scale.
   static const cardGradients = <List<Color>>[
-    [Color(0xFF2B5DF0), Color(0xFF7C3AED)], // Deep Blue → Purple
-    [Color(0xFF0EA5A4), Color(0xFF10B981)], // Teal → Emerald
-    [Color(0xFFFF7E45), Color(0xFFFF5A6E)], // Sunset Orange → Coral
-    [Color(0xFF6D5BF8), Color(0xFFB14CF0)], // Indigo → Violet
+    [chart2, chart3],
+    [chart3, chart4],
+    [chart4, chart5],
+    [chart5, Color(0xFF171717)],
   ];
 }
 
 /// Semantic, theme-aware color roles. Pick values by brightness so screens and
 /// widgets can read one palette instead of hardcoding light-only colors.
 ///
-/// Brand colors (accents, gradients, the teal CTA, branded header) intentionally
-/// live in [AppColors] and stay fixed across themes — only neutral surfaces,
-/// text, borders, and icons shift here.
+/// Brand and chart colors live in [AppColors]. Neutral surfaces, text,
+/// borders, icons, and destructive colors shift with the active brightness.
 class AppPalette extends ThemeExtension<AppPalette> {
   const AppPalette({
     required this.scaffold,
@@ -114,37 +124,37 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color error;
 
   static const light = AppPalette(
-    scaffold: Color(0xFFF5F6F8),
-    surface: Colors.white,
-    surfaceMuted: Color(0xFFF3F5F7),
-    textPrimary: Color(0xFF101214),
-    textSecondary: Color(0xFF6F7378),
-    textTertiary: Color(0xFF9A9FA4),
-    border: Color(0xFFE9E9E9),
-    divider: Color(0xFFE7E9EC),
-    iconPrimary: Color(0xFF101214),
-    iconMuted: Color(0xFF8C8C8C),
-    success: Color(0xFF22C55E),
-    warning: Color(0xFFFFC857),
+    scaffold: Color(0xFFFFFFFF),
+    surface: Color(0xFFFFFFFF),
+    surfaceMuted: Color(0xFFF5F5F5),
+    textPrimary: Color(0xFF0A0A0A),
+    textSecondary: Color(0xFF737373),
+    textTertiary: Color(0xFFA1A1A1),
+    border: Color(0xFFE5E5E5),
+    divider: Color(0xFFE5E5E5),
+    iconPrimary: Color(0xFF0A0A0A),
+    iconMuted: Color(0xFF737373),
+    success: Color(0xFF7CCF00),
+    warning: Color(0xFFFFB86A),
     info: Color(0xFF3B82F6),
-    error: Color(0xFFD93B3B),
+    error: Color(0xFFDF2225),
   );
 
   static const dark = AppPalette(
-    scaffold: Color(0xFF101214),
-    surface: Color(0xFF1A1D20),
-    surfaceMuted: Color(0xFF22262B),
-    textPrimary: Colors.white,
-    textSecondary: Color(0xFFB7BDC3),
-    textTertiary: Color(0xFF7E868D),
-    border: Color(0xFF2A2E33),
-    divider: Color(0xFF2A2E33),
-    iconPrimary: Colors.white,
-    iconMuted: Color(0xFFA5ABB1),
-    success: Color(0xFF22C55E),
-    warning: Color(0xFFFFC857),
+    scaffold: Color(0xFF0A0A0A),
+    surface: Color(0xFF171717),
+    surfaceMuted: Color(0xFF262626),
+    textPrimary: Color(0xFFFAFAFA),
+    textSecondary: Color(0xFFA1A1A1),
+    textTertiary: Color(0xFF737373),
+    border: Color(0x1AFFFFFF),
+    divider: Color(0x1AFFFFFF),
+    iconPrimary: Color(0xFFFAFAFA),
+    iconMuted: Color(0xFFA1A1A1),
+    success: Color(0xFF7CCF00),
+    warning: Color(0xFFFFB86A),
     info: Color(0xFF3B82F6),
-    error: Color(0xFFEF4444),
+    error: Color(0xFFFF6467),
   );
 
   static const goldenLight = AppPalette(

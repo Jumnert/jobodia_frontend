@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/custom_button.dart';
@@ -19,34 +20,34 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
     _WalkthroughPageData(
       title: "Let's explore Jobodia",
       description: "Discover tools to supercharge your career journey.",
-      icon: Icons.explore_rounded,
+      icon: FLucideIcons.compass,
       color: AppColors.brandTeal,
     ),
     _WalkthroughPageData(
       title: "AI Career Assistant",
       description:
           "Get instant career advice, resume reviews, and interview tips from our AI.",
-      icon: Icons.smart_toy_rounded,
+      icon: FLucideIcons.bot,
       color: AppColors.primary,
     ),
     _WalkthroughPageData(
       title: "Build your CV",
       description:
           "Create a professional CV in minutes to stand out to recruiters.",
-      icon: Icons.description_rounded,
+      icon: FLucideIcons.fileText,
       color: AppColors.success,
     ),
     _WalkthroughPageData(
       title: "Interview Practice",
       description: "Ace your interviews with flashcards and mock questions.",
-      icon: Icons.style_rounded,
+      icon: FLucideIcons.bookOpen,
       color: AppColors.warning,
     ),
     _WalkthroughPageData(
       title: "Market Insights",
       description:
           "Know your market value and track the most in-demand skills.",
-      icon: Icons.insights_rounded,
+      icon: FLucideIcons.chartLine,
       color: AppColors.info,
     ),
   ];

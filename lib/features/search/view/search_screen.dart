@@ -12,7 +12,9 @@ import 'package:jobodia_frontend/features/search/view/widgets/search_results_lis
 /// of recent searches (tap to re-run) when the query is empty, or the
 /// matching job results as the user types.
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key});
+  const SearchScreen({super.key, this.embedded = false});
+
+  final bool embedded;
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -58,7 +60,11 @@ class _SearchScreenState extends State<SearchScreen> {
     _submit(query);
   }
 
-  Widget _clearIcon(BuildContext context, FTextFieldStyle style, VoidCallback clear) {
+  Widget _clearIcon(
+    BuildContext context,
+    FTextFieldStyle style,
+    VoidCallback clear,
+  ) {
     return FTextField.defaultClearIconBuilder(context, style, () {
       clear();
       _homeController.clearSearch();
@@ -75,15 +81,22 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 20, 12),
+              padding: EdgeInsets.fromLTRB(
+                widget.embedded ? 20 : 12,
+                8,
+                20,
+                12,
+              ),
               child: Row(
                 children: [
-                  FButton.icon(
-                    variant: FButtonVariant.ghost,
-                    onPress: () => Get.back<void>(),
-                    child: const Icon(FLucideIcons.arrowLeft),
-                  ),
-                  const SizedBox(width: 4),
+                  if (!widget.embedded) ...[
+                    FButton.icon(
+                      variant: FButtonVariant.ghost,
+                      onPress: () => Get.back<void>(),
+                      child: const Icon(FLucideIcons.arrowLeft),
+                    ),
+                    const SizedBox(width: 4),
+                  ],
                   Expanded(
                     child: FTextField(
                       control: FTextFieldControl.managed(
@@ -91,7 +104,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         onChange: (_) => setState(() {}),
                       ),
                       hint: 'Search jobs, companies...',
-                      autofocus: true,
+                      autofocus: !widget.embedded,
                       textInputAction: TextInputAction.search,
                       onSubmit: _submit,
                       prefixBuilder: (context, style, variants) =>
@@ -228,11 +241,7 @@ class _RecentSearchRow extends StatelessWidget {
                 ),
               ),
             ),
-            Icon(
-              FLucideIcons.arrowUpRight,
-              size: 18,
-              color: palette.iconMuted,
-            ),
+            Icon(FLucideIcons.arrowUpRight, size: 18, color: palette.iconMuted),
             const SizedBox(width: 4),
             InkWell(
               onTap: onRemove,

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/features/career_goals/model/career_models.dart';
 import 'package:uuid/uuid.dart';
@@ -41,7 +41,7 @@ class CareerGoalsController extends GetxController {
         title: 'Joined Jobodia',
         description: 'Created your professional profile.',
         achievedAt: DateTime.now().subtract(const Duration(days: 90)),
-        icon: Icons.person_add_alt_1_rounded,
+        icon: FLucideIcons.userPlus,
         category: 'application',
       ),
       CareerMilestoneModel(
@@ -49,7 +49,7 @@ class CareerGoalsController extends GetxController {
         title: 'Earned Flutter Basics Certification',
         description: 'Passed the skill assessment with 90%.',
         achievedAt: DateTime.now().subtract(const Duration(days: 60)),
-        icon: Icons.verified_rounded,
+        icon: FLucideIcons.badgeCheck,
         category: 'certification',
       ),
       CareerMilestoneModel(
@@ -57,7 +57,7 @@ class CareerGoalsController extends GetxController {
         title: 'First Interview Scheduled',
         description: 'Google reached out for a Mobile Engineer role.',
         achievedAt: DateTime.now().subtract(const Duration(days: 10)),
-        icon: Icons.chat_bubble_outline_rounded,
+        icon: FLucideIcons.messageCircle,
         category: 'interview',
       ),
     ]);
@@ -107,7 +107,7 @@ class CareerGoalsController extends GetxController {
           title: 'Goal Completed',
           description: g.title,
           achievedAt: DateTime.now(),
-          icon: Icons.emoji_events_rounded,
+          icon: FLucideIcons.trophy,
           category: 'skill',
         ),
       );

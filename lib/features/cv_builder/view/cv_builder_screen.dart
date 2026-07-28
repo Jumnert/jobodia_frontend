@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -162,7 +163,7 @@ class _StudioHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Icon(
-              Icons.description_outlined,
+              FLucideIcons.fileText,
               color: AppColors.brandTeal,
               size: 22,
             ),
@@ -343,7 +344,7 @@ class _StudioFooter extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: const Icon(Icons.arrow_back_rounded),
+                child: const Icon(FLucideIcons.arrowLeft),
               ),
             ),
             const SizedBox(width: 10),
@@ -372,7 +373,7 @@ class _StudioFooter extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(width: 8),
-                  const Icon(Icons.arrow_forward_rounded, size: 18),
+                  const Icon(FLucideIcons.arrowRight, size: 18),
                 ],
               ),
             ),

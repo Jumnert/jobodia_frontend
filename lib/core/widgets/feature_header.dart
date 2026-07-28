@@ -39,7 +39,7 @@ class FeatureHeader extends StatelessWidget {
                     height: 32,
                     child: FButton(
                       onPress: onBack ?? Get.back,
-                      child: Icon(Icons.arrow_back_rounded, color: Colors.white),
+                      child: Icon(FLucideIcons.arrowLeft, color: Colors.white),
                     ),
                   ),
                   const Spacer(),

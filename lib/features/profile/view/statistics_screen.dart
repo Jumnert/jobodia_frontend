@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
@@ -129,7 +130,7 @@ class _PageHeader extends StatelessWidget {
           children: [
             IconButton(
               onPressed: () => Get.back<void>(),
-              icon: const Icon(Icons.arrow_back_rounded),
+              icon: const Icon(FLucideIcons.arrowLeft),
               color: palette.iconPrimary,
               tooltip: 'Back',
             ),
@@ -226,7 +227,7 @@ class _OverviewCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.calendar_today_rounded,
+                      FLucideIcons.calendar,
                       color: AppColors.brandTeal,
                       size: 14,
                     ),
@@ -390,7 +391,7 @@ class _MetricsGrid extends StatelessWidget {
           children: [
             _MetricCard(
               width: width,
-              icon: Icons.bookmark_outline_rounded,
+              icon: FLucideIcons.bookmark,
               label: 'Saved jobs',
               value: '$saved',
               color: AppColors.accentPurple,
@@ -399,7 +400,7 @@ class _MetricsGrid extends StatelessWidget {
             ),
             _MetricCard(
               width: width,
-              icon: Icons.north_east_rounded,
+              icon: FLucideIcons.arrowUpRight,
               label: 'Applications',
               value: '$applied',
               color: AppColors.brandTeal,
@@ -408,7 +409,7 @@ class _MetricsGrid extends StatelessWidget {
             ),
             _MetricCard(
               width: width,
-              icon: Icons.apartment_rounded,
+              icon: FLucideIcons.building2,
               label: 'Following',
               value: '$following',
               color: AppColors.info,
@@ -417,7 +418,7 @@ class _MetricsGrid extends StatelessWidget {
             ),
             _MetricCard(
               width: width,
-              icon: Icons.notifications_none_rounded,
+              icon: FLucideIcons.bell,
               label: 'Active alerts',
               value: '$alerts',
               color: AppColors.warning,
@@ -480,7 +481,7 @@ class _MetricCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   Icon(
-                    Icons.arrow_outward_rounded,
+                    FLucideIcons.arrowUpRight,
                     color: palette.iconMuted,
                     size: 17,
                   ),
@@ -652,7 +653,7 @@ class _EmptyPipeline extends StatelessWidget {
               borderRadius: BorderRadius.circular(13),
             ),
             child: const Icon(
-              Icons.stacked_bar_chart_rounded,
+              FLucideIcons.chartBar,
               color: AppColors.brandTeal,
               size: 21,
             ),
@@ -712,7 +713,7 @@ class _CvCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(15),
               ),
               child: Icon(
-                cvReady ? Icons.task_alt_rounded : Icons.description_outlined,
+                cvReady ? FLucideIcons.circleCheckBig : FLucideIcons.fileText,
                 color: cvReady ? AppColors.success : AppColors.brandTeal,
                 size: 23,
               ),
@@ -743,7 +744,7 @@ class _CvCard extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: palette.iconMuted),
+            Icon(FLucideIcons.chevronRight, color: palette.iconMuted),
           ],
         ),
       ),

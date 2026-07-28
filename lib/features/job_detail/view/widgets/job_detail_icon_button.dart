@@ -23,7 +23,8 @@ class JobDetailIconButton extends StatelessWidget {
       onPressed: onPressed,
       icon: Icon(icon, color: Colors.white),
       style: IconButton.styleFrom(
-        backgroundColor: backgroundColor ?? Colors.black.withValues(alpha: 0.38),
+        backgroundColor:
+            backgroundColor ?? Colors.black.withValues(alpha: 0.38),
         shape: const CircleBorder(),
         minimumSize: const Size(44, 44),
       ),

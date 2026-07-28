@@ -51,6 +51,7 @@ dependencies:
   file_selector: ^1.1.0
   read_pdf_text: ^0.3.1
   archive: ^4.0.9
+  lottie: ^3.5.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -89,6 +90,7 @@ flutter:
     - assets/images/profile_icons/
     - assets/images/pricing/
     - assets/data/
+    - assets/animations/nav_icons/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

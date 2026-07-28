@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 class JobActionButtons extends StatelessWidget {
@@ -72,7 +73,7 @@ class JobActionButtons extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                Icons.check_circle_rounded,
+                                FLucideIcons.circleCheckBig,
                                 size: 18,
                                 color: palette.textSecondary,
                               ),
