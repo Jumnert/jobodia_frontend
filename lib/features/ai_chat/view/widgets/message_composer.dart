@@ -107,7 +107,7 @@ class _MessageComposerState extends State<MessageComposer> {
                       height: 40,
                       decoration: BoxDecoration(
                         color: canSend
-                            ? AppColors.onboardingCtaDark
+                            ? AppColors.brandTeal
                             : palette.surfaceMuted.withValues(alpha: 0.82),
                         shape: BoxShape.circle,
                       ),

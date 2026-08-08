@@ -171,18 +171,24 @@ class _ProfileHeader extends StatelessWidget {
             ],
           ),
           child: ClipOval(
-            child: SafeImageLoader(
-              url: profile.avatarImageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                color: palette.surfaceMuted,
-                child: Icon(
-                  FLucideIcons.userRound,
-                  size: 52,
-                  color: palette.iconMuted,
-                ),
-              ),
-            ),
+            child: profile.hasAvatarBytes
+                ? Image.memory(
+                    profile.avatarBytes!,
+                    fit: BoxFit.cover,
+                    filterQuality: FilterQuality.high,
+                  )
+                : SafeImageLoader(
+                    url: profile.avatarImageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      color: palette.surfaceMuted,
+                      child: Icon(
+                        FLucideIcons.userRound,
+                        size: 52,
+                        color: palette.iconMuted,
+                      ),
+                    ),
+                  ),
           ),
         ),
       );

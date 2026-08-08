@@ -7,56 +7,28 @@ import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/home/model/job_feed_model.dart';
 import 'package:jobodia_frontend/features/job_detail/controller/job_detail_controller.dart';
-import 'package:jobodia_frontend/features/job_detail/view/job_detail_screen.dart';
 
-/// Tracks the single active job sheet so a previous one is always disposed
-/// before a new one opens. Only one job preview is ever shown at a time.
-FPersistentSheetController? _activeJobSheet;
-
-/// Opens a draggable, scrollable job preview as a forui persistent sheet.
+/// Opens a draggable, scrollable job preview as a Forui modal sheet.
 ///
-/// When [context] sits under an [FScaffold]/[FSheets] ancestor (the main shell
-/// provides one) a preview sheet is shown. Otherwise — e.g. from a pushed
-/// route without that ancestor — it safely falls back to the full
-/// [JobDetailScreen]. The full screen is also reachable from the sheet's
-/// "Open full details" action.
+/// It intentionally blocks the screen behind it, so a tap on the scrim closes
+/// the preview just like the close button does.
 void showJobDetailSheet(BuildContext context, JobFeedModel job) {
   unawaited(HapticFeedback.lightImpact());
 
-  // Dispose any previously shown preview before creating a new one.
-  _activeJobSheet?.dispose();
-  _activeJobSheet = null;
-
   final jobController = JobDetailController(source: job);
 
-  try {
-    _activeJobSheet = showFPersistentSheet(
+  unawaited(
+    showFSheet<void>(
       context: context,
       side: FLayout.btt,
       // null lets the DraggableScrollableSheet own its sizing + drag behavior.
       mainAxisMaxRatio: null,
-      builder: (context, controller) => _JobDetailSheet(
+      barrierDismissible: true,
+      builder: (sheetContext) => _JobDetailSheet(
         controller: jobController,
         source: job,
-        onClose: controller.hide,
-        onOpenFull: () {
-          controller.hide();
-          _openFullDetail(job);
-        },
+        onClose: () => Navigator.of(sheetContext).pop(),
       ),
-    );
-  } on FlutterError {
-    // No FScaffold/FSheets ancestor (e.g. a pushed route): open full screen.
-    _openFullDetail(job);
-  }
-}
-
-void _openFullDetail(JobFeedModel job) {
-  Get.to<void>(
-    () => const JobDetailScreen(),
-    arguments: job,
-    binding: BindingsBuilder(
-      () => Get.lazyPut<JobDetailController>(JobDetailController.new),
     ),
   );
 }
@@ -66,13 +38,11 @@ class _JobDetailSheet extends StatelessWidget {
     required this.controller,
     required this.source,
     required this.onClose,
-    required this.onOpenFull,
   });
 
   final JobDetailController controller;
   final JobFeedModel source;
   final VoidCallback onClose;
-  final VoidCallback onOpenFull;
 
   @override
   Widget build(BuildContext context) {
@@ -80,11 +50,10 @@ class _JobDetailSheet extends StatelessWidget {
 
     return DraggableScrollableSheet(
       expand: false,
-      initialChildSize: 0.6,
-      minChildSize: 0.3,
+      initialChildSize: 0.88,
+      minChildSize: 0.78,
       maxChildSize: 0.95,
-      snap: true,
-      snapSizes: const [0.6, 0.95],
+      snap: false,
       builder: (context, scrollController) {
         return DecoratedBox(
           decoration: BoxDecoration(
@@ -106,16 +75,25 @@ class _JobDetailSheet extends StatelessWidget {
                   controller: scrollController,
                   padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
                   children: [
-                    _SheetHeader(source: source, onOpenFull: onOpenFull),
+                    _SheetHeader(source: source, onClose: onClose),
                     const SizedBox(height: 14),
-                    _SheetMetaRow(source: source),
-                    const SizedBox(height: 16),
+                    _SheetOverview(source: source),
+                    const SizedBox(height: 20),
                     if (source.tags.isNotEmpty) ...[
+                      Text(
+                        'Skills & requirements',
+                        style: TextStyle(
+                          color: palette.textPrimary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
                       _SheetTags(tags: source.tags),
                       const SizedBox(height: 18),
                     ],
                     Text(
-                      'About this role',
+                      'Role overview',
                       style: TextStyle(
                         color: palette.textPrimary,
                         fontSize: 16,
@@ -130,13 +108,6 @@ class _JobDetailSheet extends StatelessWidget {
                         fontSize: 14,
                         height: 1.5,
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    FButton(
-                      variant: FButtonVariant.outline,
-                      onPress: onOpenFull,
-                      suffix: const Icon(FLucideIcons.arrowUpRight, size: 18),
-                      child: const Text('Open full details'),
                     ),
                   ],
                 ),
@@ -176,98 +147,142 @@ class _DragHandle extends StatelessWidget {
 }
 
 class _SheetHeader extends StatelessWidget {
-  const _SheetHeader({required this.source, required this.onOpenFull});
+  const _SheetHeader({required this.source, required this.onClose});
 
   final JobFeedModel source;
-  final VoidCallback onOpenFull;
+  final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return Row(
+    final colors = FTheme.of(context).colors;
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                source.title,
-                style: TextStyle(
-                  color: palette.textPrimary,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  height: 1.2,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    source.title,
+                    style: TextStyle(
+                      color: palette.textPrimary,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${source.company} · ${source.companyTag}',
+                    style: TextStyle(
+                      color: palette.textSecondary,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            ClipOval(
+              child: Material(
+                color: colors.primary,
+                child: InkWell(
+                  onTap: onClose,
+                  child: SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: Icon(
+                      FLucideIcons.x,
+                      size: 18,
+                      color: colors.primaryForeground,
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                '${source.company} · ${source.location}',
-                style: TextStyle(color: palette.textSecondary, fontSize: 14),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-        if (source.matchPercent > 0)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.brandPrimary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(99),
-            ),
-            child: Text(
-              '${source.matchPercent}% match',
-              style: const TextStyle(
-                color: AppColors.brandPrimary,
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
+        if (source.matchPercent > 0) ...[
+          const SizedBox(height: 12),
+          FBadge(
+            variant: FBadgeVariant.primary,
+            child: Text('${source.matchPercent}% match'),
           ),
+        ],
       ],
     );
   }
 }
 
-class _SheetMetaRow extends StatelessWidget {
-  const _SheetMetaRow({required this.source});
+class _SheetOverview extends StatelessWidget {
+  const _SheetOverview({required this.source});
 
   final JobFeedModel source;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    final items = <(IconData, String)>[
-      (FLucideIcons.briefcase, source.level),
-      if (source.salary.isNotEmpty) (FLucideIcons.banknote, source.salary),
-      (FLucideIcons.clock, source.timeAgo),
+    final items = <(IconData, String, String)>[
+      (FLucideIcons.mapPin, 'Location', source.location),
+      (FLucideIcons.briefcaseBusiness, 'Experience', source.level),
+      if (source.salary.isNotEmpty)
+        (FLucideIcons.banknote, 'Salary', source.salary),
+      if (source.distance.isNotEmpty)
+        (FLucideIcons.navigation, 'Distance', source.distance),
+      (FLucideIcons.clock3, 'Posted', source.timeAgo),
+      (FLucideIcons.building2, 'Company', source.companyTag),
     ];
 
     return Wrap(
       spacing: 10,
-      runSpacing: 8,
+      runSpacing: 10,
       children: [
-        for (final (icon, label) in items)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-            decoration: BoxDecoration(
-              color: palette.surfaceMuted,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, size: 14, color: palette.iconMuted),
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: palette.textSecondary,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
+        for (final (icon, label, value) in items)
+          SizedBox(
+            width: (MediaQuery.sizeOf(context).width - 50) / 2,
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: palette.surfaceMuted,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(icon, size: 16, color: palette.iconMuted),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          label,
+                          style: TextStyle(
+                            color: palette.textTertiary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          value,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: palette.textPrimary,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
       ],

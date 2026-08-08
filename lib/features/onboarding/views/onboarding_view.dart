@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'package:get/get.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/onboarding/controllers/onboarding_controller.dart';
 import 'package:jobodia_frontend/features/onboarding/widgets/onboarding_visuals.dart';
 import 'package:jobodia_frontend/theme/theme.dart';
@@ -38,23 +39,36 @@ class OnboardingView extends GetView<OnboardingController> {
   @override
   Widget build(BuildContext context) {
     controller.configurePreview(previewMode);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
+      value: (isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
+          .copyWith(
         statusBarColor: Colors.transparent,
-        systemNavigationBarColor: _OnboardingColors.background,
-        systemNavigationBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: _OnboardingColors.background(context),
+        systemNavigationBarIconBrightness:
+            isDark ? Brightness.light : Brightness.dark,
       ),
-      child: FTheme(data: lightTheme, child: const _OnboardingScaffold()),
+      child: FTheme(
+        data: isDark ? darkTheme : lightTheme,
+        child: const _OnboardingScaffold(),
+      ),
     );
   }
 }
 
 abstract final class _OnboardingColors {
-  static const background = Color(0xFFFAFBFC);
-  static const ink = Color(0xFF23130D);
-  static const muted = Color(0xFF62666B);
-  static const inactiveProgress = Color(0xFFE5E6E8);
-  static const buttonShadow = Color(0x45E58F56);
+  static bool _isDark(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark;
+
+  static Color background(BuildContext context) =>
+      _isDark(context) ? const Color(0xFF0B0E0C) : const Color(0xFFFAFBFC);
+
+  static Color ink(BuildContext context) =>
+      _isDark(context) ? const Color(0xFFF4F8F3) : const Color(0xFF23130D);
+
+  static Color muted(BuildContext context) =>
+      _isDark(context) ? const Color(0xFFB9C3B6) : const Color(0xFF62666B);
+
 }
 
 class _OnboardingScaffold extends GetView<OnboardingController> {
@@ -63,22 +77,23 @@ class _OnboardingScaffold extends GetView<OnboardingController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _OnboardingColors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            const _OnboardingHeader(),
-            Expanded(
-              child: PageView.builder(
-                controller: controller.pageController,
-                onPageChanged: controller.onPageChanged,
-                itemCount: OnboardingView._pages.length,
-                itemBuilder: (context, index) =>
-                    _OnboardingPage(data: OnboardingView._pages[index]),
-              ),
+      backgroundColor: _OnboardingColors.background(context),
+      body: Column(
+        children: [
+          const SafeArea(bottom: false, child: _OnboardingHeader()),
+          Expanded(
+            child: PageView.builder(
+              controller: controller.pageController,
+              onPageChanged: controller.onPageChanged,
+              itemCount: OnboardingView._pages.length,
+              itemBuilder: (context, index) =>
+                  _OnboardingPage(data: OnboardingView._pages[index]),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(42, 12, 42, 20),
+          ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(42, 12, 42, 8),
               child: Obx(
                 () => _PrimaryAction(
                   isLastPage: controller.isLastPage,
@@ -86,8 +101,8 @@ class _OnboardingScaffold extends GetView<OnboardingController> {
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -100,55 +115,36 @@ class _OnboardingHeader extends GetView<OnboardingController> {
   Widget build(BuildContext context) {
     return Obx(() {
       final currentPage = controller.currentPage.value;
+      final progress = controller.autoProgress.value.clamp(0.0, 1.0);
 
       return Padding(
-        padding: const EdgeInsets.fromLTRB(18, 12, 18, 8),
-        child: Row(
-          children: [
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 220),
-              child: currentPage == 0
-                  ? const SizedBox(key: ValueKey('no-back'), width: 42)
-                  : SizedBox(
-                      key: const ValueKey('back'),
-                      width: 42,
-                      height: 42,
-                      child: FButton.icon(
-                        variant: FButtonVariant.secondary,
-                        onPress: controller.goBack,
-                        child: const Icon(FLucideIcons.chevronLeft, size: 20),
+        padding: const EdgeInsets.fromLTRB(28, 18, 28, 8),
+        child: Semantics(
+          label:
+              'Onboarding step ${currentPage + 1} of '
+              '${OnboardingController.totalPages}',
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(99),
+            child: SizedBox(
+              height: 5,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: ColoredBox(
+                      color: AppColors.brandTeal.withValues(
+                        alpha: context.isDark ? 0.28 : 0.16,
                       ),
                     ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Row(
-                children: List.generate(OnboardingController.totalPages, (
-                  index,
-                ) {
-                  final active = index <= currentPage;
-                  return Expanded(
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 320),
-                      curve: Curves.easeOutCubic,
-                      height: 4,
-                      margin: EdgeInsets.only(
-                        right: index == OnboardingController.totalPages - 1
-                            ? 0
-                            : 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: active
-                            ? _OnboardingColors.ink
-                            : _OnboardingColors.inactiveProgress,
-                        borderRadius: BorderRadius.circular(99),
-                      ),
-                    ),
-                  );
-                }),
+                  ),
+                  FractionallySizedBox(
+                    widthFactor: progress,
+                    alignment: Alignment.centerLeft,
+                    child: const ColoredBox(color: AppColors.brandTeal),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       );
     });
@@ -172,6 +168,7 @@ class _OnboardingPage extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 22),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
                 height: visualHeight,
@@ -185,7 +182,7 @@ class _OnboardingPage extends StatelessWidget {
                 data.title,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: _OnboardingColors.ink,
+                  color: _OnboardingColors.ink(context),
                   fontSize: compact ? 28 : 32,
                   height: 1.12,
                   fontWeight: FontWeight.w800,
@@ -198,8 +195,8 @@ class _OnboardingPage extends StatelessWidget {
                 child: Text(
                   data.subtitle,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: _OnboardingColors.muted,
+                  style: TextStyle(
+                    color: _OnboardingColors.muted(context),
                     fontSize: 14,
                     height: 1.48,
                     fontWeight: FontWeight.w500,
@@ -223,27 +220,98 @@ class _PrimaryAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = isLastPage ? 'Get Started' : 'Next';
+    final colorScheme = Theme.of(context).colorScheme;
+    final primary = colorScheme.primary;
+    final highlightColor = Color.lerp(primary, Colors.white, 0.18)!;
+    final pressedBaseColor = Color.lerp(primary, Colors.black, 0.28)!;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
+    return SizedBox(
+      width: double.infinity,
+      height: 58,
+      child: Material(
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(
-            color: _OnboardingColors.buttonShadow,
-            blurRadius: 14,
-            offset: Offset(0, 5),
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [highlightColor, primary, pressedBaseColor],
+              stops: const [0, 0.64, 1],
+            ),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.30)),
+            boxShadow: [
+              BoxShadow(
+                color: pressedBaseColor,
+                blurRadius: 0,
+                offset: const Offset(0, 3),
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.16),
+                blurRadius: 5,
+                offset: const Offset(0, 5),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: SizedBox(
-        width: double.infinity,
-        height: 54,
-        child: FButton(
-          onPress: onPress,
-          suffix: const Icon(FLucideIcons.arrowRight, size: 18),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 180),
-            child: Text(label, key: ValueKey(label)),
+          child: Stack(
+            children: [
+              Positioned(
+                top: 2,
+                left: 3,
+                right: 3,
+                height: 10,
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(14),
+                      ),
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.white.withValues(alpha: 0.18),
+                          Colors.white.withValues(alpha: 0),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  onPress();
+                },
+                borderRadius: BorderRadius.circular(18),
+                splashColor: Colors.white.withValues(alpha: 0.16),
+                highlightColor: Colors.black.withValues(alpha: 0.12),
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 180),
+                        child: Text(
+                          label,
+                          key: ValueKey(label),
+                          style: TextStyle(
+                            color: colorScheme.onPrimary,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        FLucideIcons.arrowRight,
+                        size: 18,
+                        color: colorScheme.onPrimary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -4,8 +4,9 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/widgets/blurred_header.dart';
-import 'package:jobodia_frontend/core/constants/app_colors.dart';
-import 'package:jobodia_frontend/core/widgets/adaptive_dialog.dart';
+import 'package:jobodia_frontend/core/widgets/performance_debug_overlay.dart';
+import 'package:jobodia_frontend/core/widgets/adaptive_dialog.dart'
+    hide FDialog;
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 import 'package:jobodia_frontend/features/settings/controller/feedback_controller.dart';
 import 'package:jobodia_frontend/features/settings/controller/theme_controller.dart';
@@ -28,6 +29,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   static const _faceIdKey = 'mockFaceIdEnabled';
   bool _faceIdEnabled = false;
+  OverlayEntry? _performanceOverlay;
 
   @override
   void initState() {
@@ -112,12 +114,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Text('Visual theme', style: theme.typography.body.sm),
         ),
         const ThemePicker(),
-        const SizedBox(height: 18),
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text('App profile icon', style: theme.typography.body.sm),
-        ),
-        const _ProfileIconPicker(),
         const SizedBox(height: 24),
         FTileGroup(
           label: const Text('Testing'),
@@ -139,6 +135,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: const Text('Select role'),
               suffix: const Icon(FLucideIcons.chevronRight),
               onPress: _openRolePreview,
+            ),
+            FTile(
+              prefix: const Icon(FLucideIcons.chartNoAxesCombined),
+              title: const Text('Performance overlay'),
+              subtitle: const Text('Frame time and CPU load graphs'),
+              suffix: const Icon(FLucideIcons.chevronRight),
+              onPress: () => _togglePerformanceOverlay(context),
             ),
           ],
         ),
@@ -217,32 +220,73 @@ class _SettingsScreenState extends State<SettingsScreen> {
       GetStorage().write(_faceIdKey, false);
       return;
     }
-    AdaptiveDialog.show(
+
+    showFDialog<void>(
       context: context,
-      title: 'Allow Face ID?',
-      message:
-          'This is a preview setting. Device authentication will be connected later.',
-      actions: [
-        DialogAction(
-          title: 'Not now',
-          style: DialogActionStyle.cancel,
-          onPressed: () {},
+      builder: (dialogContext, _, animation) => FDialog(
+        animation: animation,
+        clipBehavior: Clip.antiAlias,
+        semanticsLabel: 'Allow Face ID',
+        builder: (dialogContext, _) => Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Allow Face ID?',
+                style: FTheme.of(dialogContext).typography.display.lg,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'This is a preview setting. Device authentication will be connected later.',
+                style: FTheme.of(dialogContext).typography.body.sm,
+              ),
+              const SizedBox(height: 20),
+              FButton(
+                onPress: () {
+                  Navigator.of(dialogContext).pop();
+                  if (!mounted) return;
+                  setState(() => _faceIdEnabled = true);
+                  GetStorage().write(_faceIdKey, true);
+                },
+                child: const Text('Allow'),
+              ),
+              const SizedBox(height: 10),
+              FButton(
+                variant: FButtonVariant.secondary,
+                onPress: () => Navigator.of(dialogContext).pop(),
+                child: const Text('Not now'),
+              ),
+            ],
+          ),
         ),
-        DialogAction(
-          title: 'Allow',
-          style: DialogActionStyle.primary,
-          onPressed: () {
-            if (!mounted) return;
-            setState(() => _faceIdEnabled = true);
-            GetStorage().write(_faceIdKey, true);
-          },
-        ),
-      ],
+      ),
     );
   }
 
   void _openRolePreview() {
     Get.to<void>(() => const RoleSelectionScreen(preview: true));
+  }
+
+  void _togglePerformanceOverlay(BuildContext context) {
+    if (_performanceOverlay != null) {
+      _removePerformanceOverlay();
+      return;
+    }
+    _performanceOverlay = OverlayEntry(
+      builder: (overlayContext) => Positioned(
+        right: 16,
+        bottom: MediaQuery.paddingOf(overlayContext).bottom + 18,
+        child: PerformanceDebugOverlay(onClose: _removePerformanceOverlay),
+      ),
+    );
+    Overlay.of(context, rootOverlay: true).insert(_performanceOverlay!);
+  }
+
+  void _removePerformanceOverlay() {
+    _performanceOverlay?.remove();
+    _performanceOverlay = null;
   }
 
   void _openOnboardingPreview() {
@@ -276,23 +320,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showLogoutDialog(BuildContext context) {
-    AdaptiveDialog.show(
+    showFDialog<void>(
       context: context,
-      title: 'Log out',
-      message: 'Are you sure you want to log out?',
-      actions: [
-        DialogAction(
-          title: 'Cancel',
-          style: DialogActionStyle.cancel,
-          onPressed: () {},
+      builder: (dialogContext, _, animation) => FDialog(
+        animation: animation,
+        clipBehavior: Clip.antiAlias,
+        semanticsLabel: 'Log out confirmation',
+        builder: (dialogContext, _) => Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Log out?',
+                style: FTheme.of(dialogContext).typography.display.lg,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Are you sure you want to log out?',
+                style: FTheme.of(dialogContext).typography.body.sm,
+              ),
+              const SizedBox(height: 20),
+              FButton(
+                variant: FButtonVariant.destructive,
+                onPress: () {
+                  Navigator.of(dialogContext).pop();
+                  Get.find<AuthController>().logout();
+                },
+                child: const Text('Log out'),
+              ),
+              const SizedBox(height: 10),
+              FButton(
+                variant: FButtonVariant.secondary,
+                onPress: () => Navigator.of(dialogContext).pop(),
+                child: const Text('Cancel'),
+              ),
+            ],
+          ),
         ),
-        DialogAction(
-          title: 'Log out',
-          style: DialogActionStyle.destructive,
-          // The dialog pops itself before invoking this callback.
-          onPressed: () => Get.find<AuthController>().logout(),
-        ),
-      ],
+      ),
     );
   }
 
@@ -445,6 +512,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  @override
+  void dispose() {
+    _removePerformanceOverlay();
+    super.dispose();
+  }
+
   static const _faqItems = [
     (
       'How do I save a job?',
@@ -463,88 +536,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       'Long-press the job card and select "Report" from the context menu. Describe the issue and submit.',
     ),
   ];
-}
-
-class _ProfileIconPicker extends StatelessWidget {
-  const _ProfileIconPicker();
-
-  static const _icons = [
-    'assets/images/profile_icons/aqua_orbit.png',
-    'assets/images/profile_icons/briefcase.png',
-    'assets/images/profile_icons/rocket.png',
-    'assets/images/profile_icons/compass.png',
-    'assets/images/profile_icons/document.png',
-    'assets/images/profile_icons/idea.png',
-    'assets/images/profile_icons/summit.png',
-    'assets/images/profile_icons/ai_orb.png',
-    'assets/images/profile_icons/handshake.png',
-    'assets/images/profile_icons/gem.png',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = Get.find<ThemeController>();
-    final palette = context.palette;
-    return SizedBox(
-      height: 72,
-      child: Obx(() {
-        final selectedIndex = controller.profileIconIndex.value;
-        return ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: _icons.length,
-          separatorBuilder: (_, _) => const SizedBox(width: 10),
-          itemBuilder: (context, index) {
-            final selected = selectedIndex == index;
-            return GestureDetector(
-              onTap: () => AdaptiveDialog.show(
-                context: context,
-                title: 'Use this profile icon?',
-                message:
-                    'It will appear in the app header and on your profile.',
-                actions: [
-                  DialogAction(
-                    title: 'Cancel',
-                    style: DialogActionStyle.cancel,
-                    onPressed: () {},
-                  ),
-                  DialogAction(
-                    title: 'Use icon',
-                    style: DialogActionStyle.primary,
-                    onPressed: () => controller.selectProfileIcon(index),
-                  ),
-                ],
-              ),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                width: 64,
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: selected ? AppColors.brandTeal : palette.border,
-                    width: selected ? 3 : 1,
-                  ),
-                ),
-                child: ClipOval(
-                  child: Image.asset(
-                    _icons[index],
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => ColoredBox(
-                      color: palette.surfaceMuted,
-                      child: Icon(
-                        FLucideIcons.userRound,
-                        color: palette.iconMuted,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      }),
-    );
-  }
 }
 
 class _FeedbackSheet extends StatefulWidget {

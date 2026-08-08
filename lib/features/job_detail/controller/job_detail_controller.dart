@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:forui/forui.dart';
 import 'package:jobodia_frontend/features/applications/controller/applications_controller.dart';
 import 'package:jobodia_frontend/features/home/model/job_feed_model.dart';
 import 'package:jobodia_frontend/features/job_detail/model/job_detail_model.dart';
@@ -107,12 +108,19 @@ class JobDetailController extends GetxController {
     applyError.value = null;
     try {
       // Dialog returns null on Cancel, empty/non-empty string on Confirm.
-      final coverLetter = await Get.dialog<String?>(
-        ApplyConfirmationDialog(
+      final context = Get.context;
+      if (context == null) {
+        applyError.value = 'Unable to open the application form. Try again.';
+        return;
+      }
+      final coverLetter = await showFDialog<String?>(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext, _, animation) => ApplyConfirmationDialog(
           jobTitle: job?.title ?? '',
           companyName: job?.companyName ?? '',
+          animation: animation,
         ),
-        barrierDismissible: false,
       );
 
       if (coverLetter == null) {

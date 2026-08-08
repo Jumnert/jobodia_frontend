@@ -353,7 +353,7 @@ class AuthController extends GetxController with FormValidationMixin {
       role: 'Candidate',
       avatarUrl: null,
     );
-    Get.offAllNamed(AppRoutes.home);
+    Get.offAllNamed(AppRoutes.selectRole);
   }
 
   void _showErrorSnackBar(String title, String message) {

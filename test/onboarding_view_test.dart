@@ -65,7 +65,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Build A CV That\nGets You Noticed'), findsOneWidget);
-    expect(find.byIcon(FLucideIcons.chevronLeft), findsOneWidget);
+    expect(find.byIcon(FLucideIcons.chevronLeft), findsNothing);
     expect(tester.takeException(), isNull);
 
     Get.find<OnboardingController>().goBack();

@@ -81,20 +81,6 @@ class _JobDiscoveryVisual extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    center: Alignment(0, -0.05),
-                    radius: 0.86,
-                    colors: [
-                      Color(0xFFFFE5D1),
-                      Color(0xFFFFD5B8),
-                      Color(0xFFFFF8F3),
-                    ],
-                    stops: [0, 0.58, 1],
-                  ),
-                ),
-              ),
               const CustomPaint(painter: _OrbitPainter()),
               Positioned(
                 top: 35 * scale,
@@ -182,20 +168,6 @@ class _ResumeVisual extends StatelessWidget {
           fit: StackFit.expand,
           alignment: Alignment.center,
           children: [
-            const Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0xFFF4F7F8), Color(0xFFFBFCFC)],
-                  ),
-                  borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(38),
-                  ),
-                ),
-              ),
-            ),
             Positioned(
               top: 15 * scale,
               width: 238 * scale,

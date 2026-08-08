@@ -11,14 +11,6 @@ class MainNavController extends GetxController {
 
   final RxInt selectedTab = 0.obs;
 
-  /// Whether the floating nav bar is collapsed (shrunk to just the active
-  /// tab) — driven by scroll direction in the content area.
-  final RxBool collapsed = false.obs;
-
-  void setCollapsed(bool value) {
-    if (collapsed.value != value) collapsed.value = value;
-  }
-
   void goToTab(int index) {
     if (index < 0 || index >= tabCount) return;
     if (selectedTab.value == index) return;

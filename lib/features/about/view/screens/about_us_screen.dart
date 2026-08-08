@@ -20,11 +20,19 @@ class AboutUsScreen extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.fromLTRB(
           16,
-          8,
+          16,
           16,
           MediaQuery.paddingOf(context).bottom + 32,
         ),
-        children: [FCard(child: _AboutUsContent())],
+        children: [
+          FCard(
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: _AboutUsContent(),
+            ),
+          ),
+        ],
       ),
     );
   }

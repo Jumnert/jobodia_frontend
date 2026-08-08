@@ -11,6 +11,7 @@ abstract final class AppColors {
   // supplied orange chart scale instead of the previous purple palette.
   static const accentPurple = Color(0xFFF54900);
   static const accentPurpleDark = Color(0xFFCA3500);
+
   static const background = Color(0xFFFFFFFF);
   static const surface = Color(0xFFFFFFFF);
   static const textPrimary = Color(0xFF0A0A0A);

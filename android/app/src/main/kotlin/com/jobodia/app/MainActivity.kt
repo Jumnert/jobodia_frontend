@@ -1,4 +1,4 @@
-package com.example.jobodia_frontend
+package com.jobodia.app
 
 import io.flutter.embedding.android.FlutterActivity
 

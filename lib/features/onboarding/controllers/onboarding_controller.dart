@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -10,11 +12,16 @@ class OnboardingController extends GetxController {
   static const hasSeenOnboardingKey = 'hasSeenOnboarding';
   static const _pageIndexKey = 'onboardingPageIndex';
   static const totalPages = 3;
+  static const _autoAdvanceDuration = Duration(seconds: 3);
+  static const _autoAdvanceTick = Duration(milliseconds: 50);
 
   final GetStorage _storage;
   late final PageController pageController;
   final RxInt currentPage = 0.obs;
+  final RxDouble autoProgress = 0.0.obs;
   bool _isPreviewMode = false;
+  bool _isChangingPage = false;
+  Timer? _autoAdvanceTimer;
 
   bool get isLastPage => currentPage.value == totalPages - 1;
 
@@ -24,7 +31,9 @@ class OnboardingController extends GetxController {
     _isPreviewMode = value;
     if (!value) return;
 
+    _autoAdvanceTimer?.cancel();
     currentPage.value = 0;
+    autoProgress.value = 0;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (pageController.hasClients) pageController.jumpToPage(0);
     });
@@ -38,27 +47,70 @@ class OnboardingController extends GetxController {
     pageController = PageController(initialPage: currentPage.value);
   }
 
+  @override
+  void onReady() {
+    super.onReady();
+    _startAutoAdvance();
+  }
+
+  void _startAutoAdvance() {
+    _autoAdvanceTimer?.cancel();
+    if (_isPreviewMode) return;
+
+    _autoAdvanceTimer = Timer.periodic(_autoAdvanceTick, (_) {
+      if (_isChangingPage) return;
+
+      final nextProgress =
+          autoProgress.value +
+          _autoAdvanceTick.inMilliseconds / _autoAdvanceDuration.inMilliseconds;
+      if (nextProgress < 1) {
+        autoProgress.value = nextProgress;
+        return;
+      }
+
+      autoProgress.value = 1;
+      _isChangingPage = true;
+      Future<void>.delayed(const Duration(milliseconds: 160), () {
+        if (isClosed) return;
+        autoProgress.value = 0;
+        _animateToPage(isLastPage ? 0 : currentPage.value + 1);
+        _isChangingPage = false;
+      });
+    });
+  }
+
   void onPageChanged(int index) {
     currentPage.value = index;
     if (!_isPreviewMode) _storage.write(_pageIndexKey, index);
   }
 
   void goNext() {
+    autoProgress.value = 0;
     if (isLastPage) {
       completeOnboarding();
       return;
     }
 
+    _animateToNextPage();
+  }
+
+  void _animateToNextPage() {
+    _animateToPage(currentPage.value + 1);
+  }
+
+  void _animateToPage(int page) {
+    if (!pageController.hasClients) return;
     pageController.animateToPage(
-      currentPage.value + 1,
-      duration: const Duration(milliseconds: 430),
+      page,
+      duration: const Duration(milliseconds: 360),
       curve: Curves.easeInOutCubic,
     );
   }
 
+  /// Retained for programmatic navigation and onboarding preview controls.
+  /// The first-run UI intentionally does not render a Back button.
   void goBack() {
-    if (currentPage.value == 0) return;
-
+    if (!pageController.hasClients || currentPage.value == 0) return;
     pageController.animateToPage(
       currentPage.value - 1,
       duration: const Duration(milliseconds: 360),
@@ -78,6 +130,7 @@ class OnboardingController extends GetxController {
 
   @override
   void onClose() {
+    _autoAdvanceTimer?.cancel();
     pageController.dispose();
     super.onClose();
   }

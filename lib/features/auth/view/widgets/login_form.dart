@@ -99,7 +99,7 @@ class LoginForm extends GetView<AuthController> {
         const SizedBox(height: 8),
         FButton(
           variant: FButtonVariant.ghost,
-          onPress: controller.skipLogin,
+          onPress: () => _showOfflineDialog(context),
           child: const Text('Skip login'),
         ),
         const SizedBox(height: 16),
@@ -124,6 +124,63 @@ class LoginForm extends GetView<AuthController> {
           ],
         ),
       ],
+    );
+  }
+
+  void _showOfflineDialog(BuildContext context) {
+    showFDialog<void>(
+      context: context,
+      builder: (dialogContext, _, animation) => FDialog(
+        animation: animation,
+        clipBehavior: Clip.antiAlias,
+        style: FDialogStyleDelta.delta(
+          decoration: DecorationDelta.shapeDelta(
+            shape: RoundedSuperellipseBorder(
+              side: BorderSide(color: FTheme.of(context).colors.border),
+              borderRadius: BorderRadius.circular(30),
+            ),
+          ),
+        ),
+        semanticsLabel: 'UAT testing notice',
+        builder: (dialogContext, _) => Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    FLucideIcons.circleAlert,
+                    size: 22,
+                    color: AppColors.brandTeal,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'UAT testing notice',
+                    style: FTheme.of(dialogContext).typography.body.md.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'This is a user acceptance testing build. Some features may be incomplete, and known bugs or unexpected behavior may occur while we test and improve the app.',
+                style: FTheme.of(dialogContext).typography.body.md,
+              ),
+              const SizedBox(height: 24),
+              FButton(
+                onPress: () {
+                  Navigator.of(dialogContext).pop();
+                  controller.skipLogin();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

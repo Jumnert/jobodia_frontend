@@ -149,6 +149,65 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
+  Future<void> _showAvatarPhotoDialog() async {
+    final action = await showFDialog<_AvatarPhotoAction>(
+      context: context,
+      builder: (context, _, animation) => FDialog(
+        animation: animation,
+        clipBehavior: Clip.antiAlias,
+        semanticsLabel: 'Profile photo options',
+        builder: (context, _) => Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Profile photo',
+                style: FTheme.of(context).typography.display.lg,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Choose a photo. It will be cropped to a circle for your profile.',
+                style: FTheme.of(context).typography.body.sm,
+              ),
+              const SizedBox(height: 20),
+              FButton(
+                onPress: () =>
+                    Navigator.of(context).pop(_AvatarPhotoAction.choose),
+                child: const Text('Choose photo'),
+              ),
+              if (_ctrl.profile.hasAvatarBytes) ...[
+                const SizedBox(height: 10),
+                FButton(
+                  variant: FButtonVariant.destructive,
+                  onPress: () =>
+                      Navigator.of(context).pop(_AvatarPhotoAction.remove),
+                  child: const Text('Remove custom photo'),
+                ),
+              ],
+              const SizedBox(height: 10),
+              FButton(
+                variant: FButtonVariant.secondary,
+                onPress: () => Navigator.of(context).pop(),
+                child: const Text('Cancel'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    switch (action) {
+      case _AvatarPhotoAction.choose:
+        await _ctrl.pickAvatar();
+      case _AvatarPhotoAction.remove:
+        _ctrl.removeAvatar();
+      case null:
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -189,7 +248,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   children: [
                     // Avatar
                     GestureDetector(
-                      onTap: _ctrl.pickAvatar,
+                      onTap: _showAvatarPhotoDialog,
                       child: Stack(
                         children: [
                           CircleAvatar(
@@ -345,6 +404,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 }
+
+enum _AvatarPhotoAction { choose, remove }
 
 // ---------------------------------------------------------------------------
 // Experience card (one per entry in the list)

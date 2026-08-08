@@ -1,7 +1,5 @@
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:get/get.dart';
@@ -14,23 +12,31 @@ import 'package:jobodia_frontend/features/ai_chat/view/widgets/chat_history_draw
 import 'package:jobodia_frontend/features/ai_chat/view/widgets/message_bubble.dart';
 import 'package:jobodia_frontend/features/ai_chat/view/widgets/message_composer.dart';
 
-class AiChatScreen extends GetView<AiChatController> {
-  AiChatScreen({super.key});
+class AiChatScreen extends StatefulWidget {
+  const AiChatScreen({super.key});
 
+  @override
+  State<AiChatScreen> createState() => _AiChatScreenState();
+}
+
+class _AiChatScreenState extends State<AiChatScreen>
+    with AutomaticKeepAliveClientMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+
+  AiChatController get controller => Get.find<AiChatController>();
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final palette = context.palette;
     final isDark = context.isDark;
-    final bottomPadding = MediaQuery.paddingOf(context).bottom;
     final keyboardVisible = MediaQuery.viewInsetsOf(context).bottom > 0;
-    final isIOS = defaultTargetPlatform == TargetPlatform.iOS;
     final composerBottomPadding = keyboardVisible
         ? 10.0
-        : isIOS
-        ? 94.0
-        : 12.0 + bottomPadding;
+        : 8.0;
     final topInset = MediaQuery.paddingOf(context).top;
 
     return Scaffold(
@@ -66,46 +72,12 @@ class AiChatScreen extends GetView<AiChatController> {
               right: 16,
               child: Row(
                 children: [
-                  Obx(
-                    () => PopupMenuButton<JobodiaAiModel>(
-                      color: palette.surface,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      offset: const Offset(0, 48),
-                      itemBuilder: (context) => [
-                        PopupMenuItem<JobodiaAiModel>(
-                          value: JobodiaAiModel.flash,
-                          child: Row(
-                            children: [
-                              BotAvatar(size: 22, model: JobodiaAiModel.flash),
-                              const SizedBox(width: 12),
-                              Text(
-                                'Jobodia Flash · Everyday',
-                                style: TextStyle(color: palette.textPrimary),
-                              ),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem<JobodiaAiModel>(
-                          value: JobodiaAiModel.pro,
-                          child: Row(
-                            children: [
-                              BotAvatar(size: 22, model: JobodiaAiModel.pro),
-                              const SizedBox(width: 12),
-                              Text(
-                                'Jobodia Pro · Thinking',
-                                style: TextStyle(color: palette.textPrimary),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                      onSelected: (model) {
-                        controller.selectModel(model);
-                      },
-                      child: _ModelSelectorPill(
-                        model: controller.selectedModel.value,
+                  SizedBox(
+                    width: 152,
+                    child: Obx(
+                      () => _ModelMultiSelect(
+                        selectedModel: controller.selectedModel.value,
+                        onChanged: controller.selectModel,
                       ),
                     ),
                   ),
@@ -136,53 +108,54 @@ class AiChatScreen extends GetView<AiChatController> {
   }
 }
 
-class _ModelSelectorPill extends StatelessWidget {
-  const _ModelSelectorPill({required this.model});
+class _ModelMultiSelect extends StatelessWidget {
+  const _ModelMultiSelect({
+    required this.selectedModel,
+    required this.onChanged,
+  });
 
-  final JobodiaAiModel model;
+  final JobodiaAiModel selectedModel;
+  final ValueChanged<JobodiaAiModel> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(22),
-      child: BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-        child: Container(
-          height: 44,
-          padding: const EdgeInsets.fromLTRB(7, 0, 12, 0),
-          decoration: BoxDecoration(
-            color: palette.surface.withValues(
-              alpha: context.isDark ? .68 : .76,
-            ),
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: context.isDark ? .10 : .62),
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              BotAvatar(size: 30, model: model),
-              const SizedBox(width: 6),
-              Text(
-                model.label,
-                style: TextStyle(
-                  color: palette.textPrimary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                FLucideIcons.chevronDown,
-                color: palette.iconMuted,
-                size: 18,
-              ),
-            ],
-          ),
-        ),
+    return FSelectMenuTile<JobodiaAiModel>(
+      autoHide: true,
+      divider: FItemDivider.none,
+      selectControl: FMultiValueControl.managedRadio(
+        initial: selectedModel,
+        onChange: (models) {
+          if (models.isNotEmpty) onChanged(models.first);
+        },
       ),
+      title: Row(
+        children: [
+          BotAvatar(size: 22, model: selectedModel),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              selectedModel.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      suffix: const Icon(FLucideIcons.chevronsUpDown, size: 16),
+      menu: [
+        for (final model in JobodiaAiModel.values)
+          FSelectTile<JobodiaAiModel>(
+            value: model,
+            title: Row(
+              children: [
+                BotAvatar(size: 28, model: model),
+                const SizedBox(width: 10),
+                Expanded(child: Text(model.label)),
+              ],
+            ),
+            subtitle: Text(model.description),
+          ),
+      ],
     );
   }
 }
@@ -698,7 +671,7 @@ class _ProcessingBackdropState extends State<_ProcessingBackdrop>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 5200),
+    duration: const Duration(milliseconds: 3600),
   );
 
   @override
@@ -762,28 +735,32 @@ class _ProcessingGradientPainter extends CustomPainter {
       canvas,
       Offset(
         size.width * (.22 + math.sin(phase) * .08),
-        size.height * (.33 + math.cos(phase * .8) * .06),
+        size.height * (.33 + math.cos(phase) * .06),
       ),
-      size.width * .72,
-      AppColors.brandTeal.withValues(alpha: isDark ? .16 : .14),
+      size.width * .78,
+      AppColors.brandTeal.withValues(alpha: isDark ? .27 : .22),
     );
     _paintGlow(
       canvas,
       Offset(
-        size.width * (.82 + math.cos(phase * .72) * .08),
-        size.height * (.53 + math.sin(phase * .68) * .08),
+        size.width * (.82 + math.cos(phase + .9) * .08),
+        size.height * (.53 + math.sin(phase + .9) * .08),
       ),
-      size.width * .64,
-      AppColors.info.withValues(alpha: isDark ? .11 : .09),
+      size.width * .70,
+      Color.lerp(AppColors.brandTeal, Colors.white, .42)!.withValues(
+        alpha: isDark ? .2 : .16,
+      ),
     );
     _paintGlow(
       canvas,
       Offset(
-        size.width * (.48 + math.sin(phase * .55) * .10),
-        size.height * (.76 + math.cos(phase * .62) * .05),
+        size.width * (.48 + math.sin(phase * 2 + 1.7) * .10),
+        size.height * (.76 + math.cos(phase * 2 + 1.7) * .05),
       ),
-      size.width * .58,
-      AppColors.onboardingCtaLight.withValues(alpha: isDark ? .09 : .10),
+      size.width * .66,
+      Color.lerp(AppColors.brandTeal, Colors.black, .14)!.withValues(
+        alpha: isDark ? .2 : .15,
+      ),
     );
   }
 
