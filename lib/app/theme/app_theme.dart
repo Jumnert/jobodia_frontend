@@ -7,7 +7,7 @@ extension AppThemePresetX on AppThemePreset {
   String get storageValue => name;
 
   String get label => switch (this) {
-    AppThemePreset.defaultTheme => 'Default',
+    AppThemePreset.defaultTheme => 'Jobodia',
     AppThemePreset.golden => 'Golden',
     AppThemePreset.midnight => 'Midnight',
     AppThemePreset.rose => 'Rose',
@@ -16,7 +16,7 @@ extension AppThemePresetX on AppThemePreset {
   };
 
   String get description => switch (this) {
-    AppThemePreset.defaultTheme => 'Clean and calm',
+    AppThemePreset.defaultTheme => 'Fresh green',
     AppThemePreset.golden => 'Warm and polished',
     AppThemePreset.midnight => 'Deep blue and focused',
     AppThemePreset.rose => 'Soft, warm and expressive',
@@ -44,6 +44,7 @@ abstract final class AppTheme {
   static ThemeData forPreset(
     AppThemePreset preset, {
     Brightness brightness = Brightness.light,
+    String fontFamily = 'GoogleSansFlex',
   }) {
     final palette = _paletteFor(preset, brightness);
     final colorScheme = preset == AppThemePreset.defaultTheme
@@ -65,7 +66,7 @@ abstract final class AppTheme {
       dividerColor: palette.divider,
       primaryColor: preset.accent,
       colorScheme: colorScheme,
-      fontFamily: 'Arial',
+      fontFamily: fontFamily,
       iconTheme: IconThemeData(color: palette.iconPrimary),
       appBarTheme: AppBarTheme(
         backgroundColor: palette.scaffold,

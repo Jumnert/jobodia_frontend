@@ -7,6 +7,10 @@ class ConversationModel {
     required this.lastMessage,
     required this.lastMessageTime,
     this.unreadCount = 0,
+    this.isOrganization = false,
+    this.isMuted = false,
+    this.isArchived = false,
+    this.isBlocked = false,
   });
 
   final String id;
@@ -16,6 +20,10 @@ class ConversationModel {
   final String lastMessage;
   final DateTime lastMessageTime;
   int unreadCount;
+  final bool isOrganization;
+  bool isMuted;
+  bool isArchived;
+  bool isBlocked;
 }
 
 class MessageModel {

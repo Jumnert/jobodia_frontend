@@ -49,7 +49,7 @@ class FlashcardsScreen extends StatelessWidget {
             ),
             Expanded(
               child: RefreshIndicator(
-                color: AppColors.primary,
+                color: AppColors.brandPrimary,
                 backgroundColor: palette.surface,
                 onRefresh: () async {
                   await Future<void>.delayed(const Duration(milliseconds: 600));

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
+import 'package:jobodia_frontend/core/utils/localized_time_ago.dart';
 import 'package:jobodia_frontend/core/widgets/company_avatar.dart';
 import 'package:jobodia_frontend/features/home/model/job_feed_model.dart';
 import 'package:jobodia_frontend/features/home/view/widgets/job_card_shape.dart';
@@ -123,7 +125,7 @@ class JobFeedCard extends StatelessWidget {
                         ), // using level as exp placeholder
                         _PastelPill(
                           icon: FLucideIcons.clock,
-                          label: 'Fulltime',
+                          label: 'full_time'.tr,
                         ),
                       ],
                     ),
@@ -137,10 +139,10 @@ class JobFeedCard extends StatelessWidget {
                           height: 1.4,
                           fontWeight: FontWeight.w500,
                         ),
-                        children: const [
+                        children: [
                           TextSpan(
-                            text: ' ...Read More',
-                            style: TextStyle(
+                            text: ' ...${'read_more'.tr}',
+                            style: const TextStyle(
                               decoration: TextDecoration.underline,
                               fontWeight: FontWeight.w700,
                               color: Color(0xFF1F2937),
@@ -171,7 +173,9 @@ class JobFeedCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'Posted ${job.timeAgo}',
+                          'posted_time'.trParams({
+                            'time': localizedTimeAgo(job.timeAgo),
+                          }),
                           style: TextStyle(
                             fontSize: 13,
                             color: palette.textSecondary,
@@ -210,9 +214,12 @@ class JobFeedCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Text(
-                  'Apply',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                Text(
+                  'apply'.tr,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
                 ),
                 const SizedBox(width: 4),
                 const Icon(FLucideIcons.arrowUpRight, size: 16),

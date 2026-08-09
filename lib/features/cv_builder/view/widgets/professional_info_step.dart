@@ -72,24 +72,12 @@ class ProfessionalInfoStep extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                SizedBox(
-                  width: 48,
-                  height: 48,
-                  child: FilledButton(
-                    onPressed: () {
-                      HapticFeedback.selectionClick();
-                      controller.addSkill();
-                    },
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.brandTeal,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    child: const Icon(FLucideIcons.plus),
-                  ),
+                FButton.icon(
+                  onPress: () {
+                    HapticFeedback.selectionClick();
+                    controller.addSkill();
+                  },
+                  child: const Icon(FLucideIcons.plus),
                 ),
               ],
             ),
@@ -116,19 +104,11 @@ class ProfessionalInfoStep extends StatelessWidget {
                       runSpacing: 8,
                       children: controller.skills
                           .map(
-                            (skill) => InputChip(
-                              label: Text(skill),
-                              onDeleted: () => controller.removeSkill(skill),
-                              deleteIcon: const Icon(FLucideIcons.x, size: 16),
-                              backgroundColor: AppColors.brandTeal.withValues(
-                                alpha: 0.10,
-                              ),
-                              side: BorderSide(
-                                color: AppColors.brandTeal.withValues(
-                                  alpha: 0.2,
-                                ),
-                              ),
-                              shape: const StadiumBorder(),
+                            (skill) => FButton(
+                              variant: FButtonVariant.secondary,
+                              onPress: () => controller.removeSkill(skill),
+                              suffix: const Icon(FLucideIcons.x, size: 15),
+                              child: Text(skill),
                             ),
                           )
                           .toList(),

@@ -2,9 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
-
-const _template =
-    'Dear Hiring Manager,\n\nI am excited to apply for the position at your company. I believe my skills and experience make me a strong candidate.\n\nBest regards';
+import 'package:get/get.dart';
 
 class ApplyConfirmationDialog extends StatefulWidget {
   const ApplyConfirmationDialog({
@@ -27,7 +25,7 @@ class _ApplyConfirmationDialogState extends State<ApplyConfirmationDialog> {
   int _step = 0;
   bool _coverLetterExpanded = false;
   late final TextEditingController _coverLetterCtrl = TextEditingController(
-    text: _template,
+    text: 'cover_letter_template'.tr,
   );
 
   @override
@@ -60,14 +58,17 @@ class _ApplyConfirmationDialogState extends State<ApplyConfirmationDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Ready to apply?',
+          'ready_to_apply'.tr,
           style: theme.typography.display.lg.copyWith(
             fontWeight: FontWeight.w700,
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          'This will apply you to ${widget.jobTitle} at ${widget.companyName}. Please confirm before continuing.',
+          'apply_confirmation'.trParams({
+            'job': widget.jobTitle,
+            'company': widget.companyName,
+          }),
           style: theme.typography.body.sm,
         ),
         const SizedBox(height: 16),
@@ -79,14 +80,14 @@ class _ApplyConfirmationDialogState extends State<ApplyConfirmationDialog> {
               child: FButton(
                 variant: FButtonVariant.secondary,
                 onPress: () => Navigator.of(context).pop<String?>(null),
-                child: const Text('Cancel'),
+                child: Text('cancel'.tr),
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: FButton(
                 onPress: () => setState(() => _step = 1),
-                child: const Text('Continue'),
+                child: Text('continue'.tr),
               ),
             ),
           ],
@@ -104,16 +105,15 @@ class _ApplyConfirmationDialogState extends State<ApplyConfirmationDialog> {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
-            onTap: () => setState(
-              () => _coverLetterExpanded = !_coverLetterExpanded,
-            ),
+            onTap: () =>
+                setState(() => _coverLetterExpanded = !_coverLetterExpanded),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
-                      'Add a cover letter (optional)',
+                      'add_cover_letter'.tr,
                       style: theme.typography.body.sm.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -142,7 +142,7 @@ class _ApplyConfirmationDialogState extends State<ApplyConfirmationDialog> {
               color: theme.colors.foreground,
             ),
             decoration: InputDecoration(
-              hintText: 'Write your cover letter...',
+              hintText: 'cover_letter_hint'.tr,
               hintStyle: TextStyle(color: theme.colors.mutedForeground),
               filled: true,
               fillColor: theme.colors.muted,
@@ -169,16 +169,13 @@ class _ApplyConfirmationDialogState extends State<ApplyConfirmationDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Confirm application',
+          'confirm_application'.tr,
           style: theme.typography.display.lg.copyWith(
             fontWeight: FontWeight.w700,
           ),
         ),
         const SizedBox(height: 8),
-        Text(
-          'Your application will be submitted.',
-          style: theme.typography.body.sm,
-        ),
+        Text('application_submitted'.tr, style: theme.typography.body.sm),
         const SizedBox(height: 28),
         Row(
           children: [
@@ -186,7 +183,7 @@ class _ApplyConfirmationDialogState extends State<ApplyConfirmationDialog> {
               child: FButton(
                 variant: FButtonVariant.secondary,
                 onPress: () => setState(() => _step = 0),
-                child: const Text('Back'),
+                child: Text('back'.tr),
               ),
             ),
             const SizedBox(width: 16),
@@ -195,11 +192,9 @@ class _ApplyConfirmationDialogState extends State<ApplyConfirmationDialog> {
                 onPress: () {
                   unawaited(HapticFeedback.lightImpact());
                   final cl = _coverLetterCtrl.text.trim();
-                  Navigator.of(context).pop<String?>(
-                    cl.isEmpty ? '' : cl,
-                  );
+                  Navigator.of(context).pop<String?>(cl.isEmpty ? '' : cl);
                 },
-                child: const Text('Confirm'),
+                child: Text('confirm'.tr),
               ),
             ),
           ],

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
@@ -13,11 +14,24 @@ class PreferencesController extends GetxController {
   final GetStorage _storage;
 
   final RxInt currentStep = 0.obs;
+  final RxList<String> selectedInterests = <String>[].obs;
   final RxString desiredRole = ''.obs;
   final RxString experienceLevel = ''.obs;
   final RxString preferredLocation = ''.obs;
+  final desiredRoleController = TextEditingController();
 
   bool get hasCompletedPreferences => _storage.read<bool>(completedKey) == true;
+
+  static const interests = [
+    'Technology',
+    'Design',
+    'Business',
+    'Marketing',
+    'Finance',
+    'Education',
+    'Healthcare',
+    'Remote work',
+  ];
 
   static const roles = [
     'Designer',
@@ -37,21 +51,37 @@ class PreferencesController extends GetxController {
 
   static const locations = ['Remote', 'Singapore', 'Washington, DC', 'Any'];
 
-  void selectRole(String role) => desiredRole.value = role;
+  void selectRole(String role, {String? displayLabel}) {
+    desiredRole.value = role.trim();
+    final visibleLabel = displayLabel ?? role;
+    if (desiredRoleController.text != visibleLabel) {
+      desiredRoleController
+        ..text = visibleLabel
+        ..selection = TextSelection.collapsed(offset: visibleLabel.length);
+    }
+  }
+
   void selectLevel(String level) => experienceLevel.value = level;
   void selectLocation(String location) => preferredLocation.value = location;
+
+  void toggleInterest(String interest) {
+    selectedInterests.contains(interest)
+        ? selectedInterests.remove(interest)
+        : selectedInterests.add(interest);
+  }
 
   void goBack() {
     if (currentStep.value > 0) currentStep.value--;
   }
 
   void goNext() {
-    if (currentStep.value < 2) currentStep.value++;
+    if (currentStep.value < 3) currentStep.value++;
   }
 
   void complete() {
     currentStep.value = 0;
     _storage.write(_prefsKey, {
+      'interests': selectedInterests.toList(growable: false),
       'desiredRole': desiredRole.value,
       'experienceLevel': experienceLevel.value,
       'preferredLocation': preferredLocation.value,
@@ -68,5 +98,11 @@ class PreferencesController extends GetxController {
     }
 
     Get.offAllNamed(AppRoutes.home);
+  }
+
+  @override
+  void onClose() {
+    desiredRoleController.dispose();
+    super.onClose();
   }
 }

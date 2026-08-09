@@ -399,6 +399,17 @@ $resumeText
     });
   }
 
+  /// Restores the conversation to its natural entry position when the AI tab
+  /// is reopened, without clearing messages or the active session.
+  void resetConversationViewport() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!conversationScrollController.hasClients) return;
+      conversationScrollController.jumpTo(
+        conversationScrollController.position.maxScrollExtent,
+      );
+    });
+  }
+
   void _generateFollowUps(String reply) {
     if (_matchesAny(reply, ['cv', 'resume'])) {
       suggestions.assignAll([

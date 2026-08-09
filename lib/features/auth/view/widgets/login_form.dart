@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'package:get/get.dart';
+import 'package:jobodia_frontend/app/localization/language_controller.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
@@ -130,6 +131,8 @@ class LoginForm extends GetView<AuthController> {
   void _showOfflineDialog(BuildContext context) {
     showFDialog<void>(
       context: context,
+      barrierDismissible: false,
+      useSafeArea: true,
       builder: (dialogContext, _, animation) => FDialog(
         animation: animation,
         clipBehavior: Clip.antiAlias,
@@ -156,10 +159,11 @@ class LoginForm extends GetView<AuthController> {
                     color: AppColors.brandTeal,
                   ),
                   const SizedBox(width: 10),
-                  Text(
-                    'UAT testing notice',
-                    style: FTheme.of(dialogContext).typography.body.md.copyWith(
-                      fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Text(
+                      'UAT testing notice',
+                      style: FTheme.of(dialogContext).typography.body.md
+                          .copyWith(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],
@@ -173,11 +177,172 @@ class LoginForm extends GetView<AuthController> {
               FButton(
                 onPress: () {
                   Navigator.of(dialogContext).pop();
-                  controller.skipLogin();
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (context.mounted) _showLanguageDialog(context);
+                  });
                 },
                 child: const Text('OK'),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showLanguageDialog(BuildContext context) {
+    final languageController = Get.find<LanguageController>();
+
+    showFDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      useSafeArea: true,
+      builder: (dialogContext, _, animation) => FDialog(
+        animation: animation,
+        clipBehavior: Clip.antiAlias,
+        style: FDialogStyleDelta.delta(
+          decoration: DecorationDelta.shapeDelta(
+            shape: RoundedSuperellipseBorder(
+              side: BorderSide(color: FTheme.of(context).colors.border),
+              borderRadius: BorderRadius.circular(30),
+            ),
+          ),
+        ),
+        semanticsLabel: 'Choose your language',
+        builder: (dialogContext, _) => Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Choose your language',
+                textAlign: TextAlign.center,
+                style: FTheme.of(
+                  dialogContext,
+                ).typography.display.sm.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'ជ្រើសរើសភាសារបស់អ្នក',
+                textAlign: TextAlign.center,
+                style: FTheme.of(dialogContext).typography.body.md.copyWith(
+                  color: FTheme.of(dialogContext).colors.mutedForeground,
+                  fontFamily: 'KantumruyPro',
+                ),
+              ),
+              const SizedBox(height: 22),
+              Row(
+                children: [
+                  Expanded(
+                    child: _LanguageFlagButton(
+                      assetPath: 'assets/images/branding/usa_flag.png',
+                      label: 'English',
+                      semanticsLabel: 'Continue in English',
+                      onPress: () => _chooseLanguage(
+                        dialogContext,
+                        languageController,
+                        AppLanguage.english,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _LanguageFlagButton(
+                      assetPath: 'assets/images/branding/cambodia_flag.png',
+                      label: 'ខ្មែរ',
+                      semanticsLabel: 'បន្តជាភាសាខ្មែរ',
+                      fontFamily: 'KantumruyPro',
+                      onPress: () => _chooseLanguage(
+                        dialogContext,
+                        languageController,
+                        AppLanguage.khmer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _chooseLanguage(
+    BuildContext dialogContext,
+    LanguageController languageController,
+    AppLanguage language,
+  ) {
+    HapticFeedback.selectionClick();
+    languageController.selectLanguage(language);
+    Navigator.of(dialogContext).pop();
+    controller.skipLogin();
+  }
+}
+
+class _LanguageFlagButton extends StatelessWidget {
+  const _LanguageFlagButton({
+    required this.assetPath,
+    required this.label,
+    required this.semanticsLabel,
+    required this.onPress,
+    this.fontFamily,
+  });
+
+  final String assetPath;
+  final String label;
+  final String semanticsLabel;
+  final VoidCallback onPress;
+  final String? fontFamily;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = FTheme.of(context);
+
+    return Semantics(
+      button: true,
+      label: semanticsLabel,
+      child: SizedBox(
+        height: 154,
+        child: FButton.raw(
+          variant: FButtonVariant.secondary,
+          onPress: onPress,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: Image.asset(
+                      assetPath,
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.medium,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 32,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      style: theme.typography.body.lg.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontFamily: fontFamily,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

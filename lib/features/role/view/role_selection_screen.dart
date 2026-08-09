@@ -25,7 +25,7 @@ class RoleSelectionScreen extends StatelessWidget {
       header: preview
           ? BlurredHeader(
               child: FHeader.nested(
-                title: const Text('Your role'),
+                title: Text('your_role'.tr),
                 prefixes: [FHeaderAction.back(onPress: () => Get.back<void>())],
               ),
             )
@@ -35,94 +35,90 @@ class RoleSelectionScreen extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 460),
             child: LayoutBuilder(
-              builder: (context, constraints) => SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 24,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Icon(
-                          FLucideIcons.users,
-                          size: 48,
-                          color: theme.colors.primary,
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          'Select Your Role',
-                          textAlign: TextAlign.center,
-                          style: theme.typography.body.xl2.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: theme.colors.foreground,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          "Choose how you'd like to use Jobodia.",
-                          textAlign: TextAlign.center,
-                          style: theme.typography.body.sm.copyWith(
-                            color: theme.colors.mutedForeground,
-                          ),
-                        ),
-                        const SizedBox(height: 28),
-                        Obx(
-                          () => _RoleCard(
-                            icon: FLucideIcons.userSearch,
-                            role: UserRole.jobSeeker,
-                            selected:
-                                controller.role.value == UserRole.jobSeeker,
-                            onTap: () =>
-                                _choose(controller, UserRole.jobSeeker),
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        Obx(
-                          () => _RoleCard(
-                            icon: FLucideIcons.building2,
-                            role: UserRole.employer,
-                            selected:
-                                controller.role.value == UserRole.employer,
-                            onTap: () => _choose(controller, UserRole.employer),
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        Obx(
-                          () => FButton(
-                            onPress: controller.hasRole
-                                ? () => _continue(controller)
-                                : null,
-                            child: const Text('Next'),
-                          ),
-                        ),
-                        const SizedBox(height: 22),
-                        Text.rich(
-                          TextSpan(
-                            text: 'You can switch roles anytime in ',
-                            style: theme.typography.body.sm.copyWith(
-                              color: theme.colors.mutedForeground,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: 'settings.',
-                                style: theme.typography.body.sm.copyWith(
-                                  color: theme.colors.foreground,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
+              builder: (context, constraints) {
+                final compact = constraints.maxHeight < 700;
+
+                return Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    24,
+                    compact ? 4 : 10,
+                    24,
+                    compact ? 8 : 14,
                   ),
-                ),
-              ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Semantics(
+                        image: true,
+                        label: 'Role selection illustration',
+                        child: RepaintBoundary(
+                          child: Image.asset(
+                            'assets/images/onboarding/role_selection_hero.png',
+                            height: compact ? 154 : 184,
+                            fit: BoxFit.contain,
+                            cacheHeight: 552,
+                            filterQuality: FilterQuality.medium,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        'select_your_role'.tr,
+                        textAlign: TextAlign.center,
+                        style: theme.typography.body.xl2.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: theme.colors.foreground,
+                          height: 1.05,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'choose_role_subtitle'.tr,
+                        textAlign: TextAlign.center,
+                        style: theme.typography.body.sm.copyWith(
+                          color: theme.colors.mutedForeground,
+                          height: 1.15,
+                        ),
+                      ),
+                      const Spacer(),
+                      SizedBox(height: compact ? 10 : 16),
+                      Obx(
+                        () => _RoleCard(
+                          icon: FLucideIcons.userSearch,
+                          role: UserRole.jobSeeker,
+                          selected: controller.role.value == UserRole.jobSeeker,
+                          onTap: () => _choose(controller, UserRole.jobSeeker),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Obx(
+                        () => _RoleCard(
+                          icon: FLucideIcons.building2,
+                          role: UserRole.employer,
+                          selected: controller.role.value == UserRole.employer,
+                          onTap: () => _choose(controller, UserRole.employer),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Obx(
+                        () => FButton(
+                          onPress: controller.hasRole
+                              ? () => _continue(controller)
+                              : null,
+                          child: Text('next'.tr),
+                        ),
+                      ),
+                      SizedBox(height: compact ? 10 : 14),
+                      Text(
+                        'role_settings_hint'.tr,
+                        style: theme.typography.body.sm.copyWith(
+                          color: theme.colors.mutedForeground,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -141,7 +137,7 @@ class RoleSelectionScreen extends StatelessWidget {
   void _continue(RoleController controller) {
     if (!controller.hasRole) return;
     HapticFeedback.lightImpact();
-    Get.offAllNamed<void>(AppRoutes.home);
+    Get.offNamed<void>(AppRoutes.roleWelcome);
   }
 }
 
@@ -162,30 +158,28 @@ class _RoleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = FTheme.of(context);
     final colors = theme.colors;
+    final isKhmer = Localizations.localeOf(context).languageCode == 'km';
     final accent = AppColors.brandTeal;
     final deepAccent = Color.lerp(accent, Colors.black, 0.8)!;
     final midAccent = Color.lerp(accent, Colors.black, 0.42)!;
     final lightAccent = Color.lerp(accent, Colors.white, 0.18)!;
+    const transitionDuration = Duration(milliseconds: 280);
+    const transitionCurve = Curves.easeOutCubic;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
+        duration: transitionDuration,
+        curve: transitionCurve,
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: selected ? null : colors.card,
-          gradient: selected
-              ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    deepAccent,
-                    deepAccent,
-                    midAccent,
-                    lightAccent,
-                  ],
-                  stops: const [0, 0.42, 0.74, 1],
-                )
-              : null,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: selected
+                ? [deepAccent, deepAccent, midAccent, lightAccent]
+                : [colors.card, colors.card, colors.card, colors.card],
+            stops: const [0, 0.42, 0.74, 1],
+          ),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: selected
@@ -202,14 +196,17 @@ class _RoleCard extends StatelessWidget {
                     offset: const Offset(0, 12),
                   ),
                 ]
-              : null,
+              : const [],
         ),
         child: Stack(
           children: [
-            if (selected) ...[
-              Positioned(
-                top: -62,
-                right: -28,
+            Positioned(
+              top: -62,
+              right: -28,
+              child: AnimatedOpacity(
+                duration: transitionDuration,
+                curve: transitionCurve,
+                opacity: selected ? 1 : 0,
                 child: Container(
                   width: 210,
                   height: 210,
@@ -224,69 +221,103 @@ class _RoleCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Positioned.fill(
+            ),
+            Positioned.fill(
+              child: AnimatedOpacity(
+                duration: transitionDuration,
+                curve: transitionCurve,
+                opacity: selected ? 1 : 0,
                 child: IgnorePointer(
                   child: CustomPaint(
                     painter: const _RoleCardNoise(color: AppColors.brandTeal),
                   ),
                 ),
               ),
-            ],
+            ),
             Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 42,
-                    height: 42,
+                  AnimatedContainer(
+                    duration: transitionDuration,
+                    curve: transitionCurve,
+                    width: 40,
+                    height: 40,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: selected
                           ? Colors.white.withValues(alpha: 0.12)
                           : Colors.transparent,
-                      border: selected
-                          ? Border.all(
-                              color: Colors.white.withValues(alpha: 0.18),
-                            )
-                          : null,
+                      border: Border.all(
+                        color: selected
+                            ? Colors.white.withValues(alpha: 0.18)
+                            : Colors.transparent,
+                      ),
                     ),
-                    child: Icon(
-                      icon,
-                      size: 22,
-                      color: selected ? Colors.white : colors.foreground,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: Icon(
+                        icon,
+                        key: ValueKey(selected),
+                        size: 20,
+                        color: selected ? Colors.white : colors.foreground,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          role.headline,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        AnimatedDefaultTextStyle(
+                          duration: transitionDuration,
+                          curve: transitionCurve,
                           style: theme.typography.body.lg.copyWith(
                             fontWeight: FontWeight.w700,
                             color: selected ? Colors.white : colors.foreground,
+                            height: isKhmer ? 1 : 1.15,
                           ),
+                          child: Text(role.headlineKey.tr),
                         ),
-                      ),
-                      if (selected)
-                        Icon(
-                          FLucideIcons.circleCheck,
-                          size: 20,
-                          color: Colors.white,
+                        const SizedBox(height: 2),
+                        AnimatedDefaultTextStyle(
+                          duration: transitionDuration,
+                          curve: transitionCurve,
+                          style: theme.typography.body.xs.copyWith(
+                            color: selected
+                                ? Color.lerp(Colors.white, lightAccent, 0.38)!
+                                : colors.mutedForeground,
+                            height: isKhmer ? 1.12 : 1.18,
+                          ),
+                          child: Text(role.descriptionKey.tr),
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    role.description,
-                    style: theme.typography.body.sm.copyWith(
-                      color: selected
-                          ? Color.lerp(Colors.white, lightAccent, 0.38)!
-                          : colors.mutedForeground,
-                      height: 1.4,
+                      ],
                     ),
+                  ),
+                  const SizedBox(width: 10),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 220),
+                    switchInCurve: Curves.easeOutBack,
+                    switchOutCurve: Curves.easeInCubic,
+                    transitionBuilder: (child, animation) => ScaleTransition(
+                      scale: animation,
+                      child: FadeTransition(opacity: animation, child: child),
+                    ),
+                    child: selected
+                        ? const Icon(
+                            FLucideIcons.circleCheck,
+                            key: ValueKey('selected'),
+                            size: 20,
+                            color: Colors.white,
+                          )
+                        : const SizedBox(
+                            key: ValueKey('unselected'),
+                            width: 20,
+                            height: 20,
+                          ),
                   ),
                 ],
               ),

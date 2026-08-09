@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 // ── Design tokens ──────────────────────────────────────────────────────────
@@ -64,25 +65,23 @@ class MatchBreakdownSheet extends StatelessWidget {
 
     final dimensions = [
       _MatchDimension(
-        label: 'Skills match',
-        sublabel: '${tags.length} of 4+ required skills',
+        label: 'skills_match'.tr,
+        sublabel: 'required_skills_count'.trParams({'count': '${tags.length}'}),
         score: _skillsScore,
       ),
       _MatchDimension(
-        label: 'Location match',
-        sublabel: location == 'Remote'
-            ? 'Fully remote position'
-            : 'On-site / hybrid',
+        label: 'location_match'.tr,
+        sublabel: location == 'Remote' ? 'fully_remote'.tr : 'onsite_hybrid'.tr,
         score: _locationScore,
       ),
       _MatchDimension(
-        label: 'Experience level',
+        label: 'experience_level'.tr,
         sublabel: level,
         score: _experienceScore,
       ),
       _MatchDimension(
-        label: 'Salary range',
-        sublabel: 'Based on overall match',
+        label: 'salary_range'.tr,
+        sublabel: 'based_overall_match'.tr,
         score: _salaryScore,
       ),
     ];
@@ -117,7 +116,7 @@ class MatchBreakdownSheet extends StatelessWidget {
           Row(
             children: [
               Text(
-                'Why this match?',
+                'why_match'.tr,
                 style: TextStyle(
                   color: palette.textPrimary,
                   fontSize: _titleFontSize,
@@ -150,7 +149,7 @@ class MatchBreakdownSheet extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Based on your profile and job details.',
+            'match_basis'.tr,
             style: TextStyle(
               color: palette.textSecondary,
               fontSize: _descriptionFontSize,

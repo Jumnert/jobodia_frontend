@@ -56,7 +56,7 @@ class SearchResultsList extends StatelessWidget {
     }
 
     return RefreshIndicator(
-      color: AppColors.primary,
+      color: AppColors.brandPrimary,
       backgroundColor: palette.surface,
       onRefresh: () async {
         await Future<void>.delayed(const Duration(milliseconds: 600));

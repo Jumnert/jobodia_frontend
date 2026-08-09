@@ -217,4 +217,51 @@ void main() {
     expect(analysis.maximumScore, 100);
     expect(analysis.targetRole, 'Flutter Developer');
   });
+
+  test('requests a structured employer job-post draft', () async {
+    late http.Request capturedRequest;
+    final client = MockClient((request) async {
+      capturedRequest = request;
+      return http.Response(
+        jsonEncode({
+          'choices': [
+            {
+              'message': {
+                'content': jsonEncode({
+                  'company': 'Your company',
+                  'location': 'Location to be confirmed',
+                  'workArrangement': 'Hybrid',
+                  'employmentType': 'Full-time',
+                  'description': 'Build and maintain mobile products.',
+                  'requirements': 'Flutter experience\nStrong communication',
+                  'tags': 'Flutter, Dart, REST APIs',
+                }),
+              },
+            },
+          ],
+        }),
+        200,
+      );
+    });
+    final service = DeepSeekChatService(client: client, apiKey: 'test-key');
+
+    final draft = await service.generateJobPost(
+      title: 'Senior Flutter Developer',
+      salary: '\$2,000 – \$3,000',
+      startDate: '2026-08-15',
+      endDate: '2026-09-15',
+      experienceLevel: 'Senior',
+    );
+    final body = jsonDecode(capturedRequest.body) as Map<String, dynamic>;
+    final messages = body['messages'] as List<dynamic>;
+
+    expect(body['response_format'], {'type': 'json_object'});
+    expect(body['thinking'], {'type': 'disabled'});
+    expect(
+      (messages.last as Map<String, dynamic>)['content'],
+      contains('Senior Flutter Developer'),
+    );
+    expect(draft['workArrangement'], 'Hybrid');
+    expect(draft['tags'], contains('Flutter'));
+  });
 }

@@ -9,17 +9,31 @@ import 'package:jobodia_frontend/core/widgets/quiet_glass_button.dart';
 import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_controller.dart';
 import 'package:jobodia_frontend/features/cv_builder/model/cv_data.dart';
 import 'package:jobodia_frontend/features/profile/controller/profile_controller.dart';
+import 'package:jobodia_frontend/features/profile/model/profile_model.dart';
 import 'package:jobodia_frontend/features/profile/view/widgets/experience_timeline.dart';
 import 'package:jobodia_frontend/features/profile/view/widgets/profile_about_section.dart';
-import 'package:jobodia_frontend/features/profile/model/profile_model.dart';
 
-class ProfileScreen extends GetView<ProfileController> {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({this.embedded = false, super.key});
 
-  /// Whether this screen is embedded as a bottom-nav tab rather than pushed
-  /// as a standalone route. When embedded, the floating back button is
-  /// hidden since there is nothing to pop back to within the tab shell.
   final bool embedded;
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final ScrollController _scrollController = ScrollController(
+    keepScrollOffset: false,
+  );
+
+  ProfileController get controller => Get.find<ProfileController>();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,319 +41,255 @@ class ProfileScreen extends GetView<ProfileController> {
     final topInset = MediaQuery.paddingOf(context).top;
 
     return Scaffold(
-      body: Container(
-        color: palette.scaffold,
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 480),
-                  child: ListView(
-                    padding: EdgeInsets.zero,
-                    children: [
-                      // Full-bleed cover banner (runs behind the toolbar) with
-                      // the avatar overlapping its bottom edge.
-                      _ProfileHeader(
-                        controller: controller,
-                        topInset: topInset,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 40),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Obx(
-                              () => _ProfileSectionCard(
-                                icon: FLucideIcons.userRound,
-                                child: ProfileAboutSection(
-                                  about: controller.profile.about,
-                                  isExpanded: controller.isAboutExpanded.value,
-                                  onReadMore: controller.toggleAbout,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Obx(() {
-                              final skills = controller.profile.skills;
-                              if (skills.isEmpty) {
-                                return const SizedBox.shrink();
-                              }
-                              return _ProfileSectionCard(
-                                icon: FLucideIcons.sparkles,
-                                child: _SkillsSection(skills: skills),
-                              );
-                            }),
-                            const SizedBox(height: 12),
-                            Obx(() {
-                              final links = controller.profile.portfolioLinks;
-                              if (links.isEmpty) return const SizedBox.shrink();
-                              return _ProfileSectionCard(
-                                icon: FLucideIcons.globe2,
-                                child: _PortfolioSection(links: links),
-                              );
-                            }),
-                            const SizedBox(height: 12),
-                            Obx(
-                              () => _ProfileSectionCard(
-                                icon: FLucideIcons.briefcase,
-                                child: ExperienceTimeline(
-                                  experiences: controller.profile.experiences,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Obx(() {
-                              final cv = Get.find<CvBuilderController>()
-                                  .generatedCv
-                                  .value;
-                              return _CvLinkCard(generatedCv: cv);
-                            }),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+      backgroundColor: palette.scaffold,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Obx(
+              () => ListView(
+                controller: _scrollController,
+                padding: EdgeInsets.fromLTRB(
+                  12,
+                  topInset + 12,
+                  12,
+                  MediaQuery.paddingOf(context).bottom + 28,
                 ),
-              ),
-            ),
-            // ── Floating glass toolbar (over the cover) ──
-            Positioned(
-              top: topInset + 14,
-              left: 20,
-              right: 20,
-              child: Row(
                 children: [
-                  if (!embedded)
-                    QuietGlassBackButton(onPressed: () => Get.back<void>())
-                  else
-                    const SizedBox(width: 44, height: 44),
-                  const Spacer(),
-                  QuietGlassIconButton(
-                    onPressed: () => Get.toNamed<void>(AppRoutes.settings),
-                    icon: FLucideIcons.settings,
-                    foregroundColor: palette.iconPrimary,
-                  ),
-                  const SizedBox(width: 8),
-                  QuietGlassIconButton(
-                    onPressed: () => Get.toNamed<void>(AppRoutes.statistics),
-                    icon: FLucideIcons.barChart,
-                    foregroundColor: palette.iconPrimary,
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 520),
+                      child: Column(
+                        children: [
+                          _ProfilePresentation(
+                            profile: controller.profile,
+                            isAboutExpanded: controller.isAboutExpanded.value,
+                            onToggleAbout: controller.toggleAbout,
+                          ),
+                          _ProfileDetails(profile: controller.profile),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
+          ),
+          if (!widget.embedded)
+            Positioned(
+              top: topInset + 24,
+              left: 24,
+              child: QuietGlassBackButton(onPressed: () => Get.back<void>()),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfilePresentation extends StatelessWidget {
+  const _ProfilePresentation({
+    required this.profile,
+    required this.isAboutExpanded,
+    required this.onToggleAbout,
+  });
+
+  final ProfileModel profile;
+  final bool isAboutExpanded;
+  final VoidCallback onToggleAbout;
+
+  static const _coverHeight = 210.0;
+  static const _avatarSize = 112.0;
+  static const _coverTop = 18.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Column(
+          children: [
+            const SizedBox(height: _coverTop),
+            _ProfileCover(profile: profile, height: _coverHeight),
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(18, 76, 18, 22),
+              decoration: BoxDecoration(
+                color: palette.surface,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    profile.name,
+                    style: TextStyle(
+                      color: palette.textPrimary,
+                      fontSize: 27,
+                      fontWeight: FontWeight.w800,
+                      height: 1.05,
+                      letterSpacing: -0.7,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    profile.role,
+                    style: TextStyle(
+                      color: palette.textSecondary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  ProfileAboutSection(
+                    about: profile.about,
+                    isExpanded: isAboutExpanded,
+                    onReadMore: onToggleAbout,
+                  ),
+                  const SizedBox(height: 34),
+                  _ProfileMetrics(profile: profile),
+                ],
+              ),
+            ),
           ],
+        ),
+        Positioned(
+          top: _coverTop + _coverHeight - _avatarSize / 2,
+          left: 24,
+          child: _ProfileAvatar(profile: profile, size: _avatarSize),
+        ),
+        Positioned(
+          top: _coverTop + _coverHeight + 30,
+          right: 18,
+          child: SizedBox(
+            height: 38,
+            child: FButton(
+              variant: FButtonVariant.outline,
+              onPress: () => Get.toNamed<void>(AppRoutes.editProfile),
+              prefix: const Icon(FLucideIcons.penLine, size: 15),
+              child: const Text('Edit Profile'),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ProfileCover extends StatelessWidget {
+  const _ProfileCover({required this.profile, required this.height});
+
+  final ProfileModel profile;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = context.isDark;
+    final cover = profile.hasCoverBytes
+        ? Image.memory(
+            profile.coverBytes!,
+            fit: BoxFit.cover,
+            filterQuality: FilterQuality.high,
+          )
+        : Image.asset(
+            isDark
+                ? 'assets/images/profile/profile_cover_dark.png'
+                : 'assets/images/profile/profile_cover_light.png',
+            fit: BoxFit.cover,
+            alignment: Alignment.center,
+            cacheWidth: 1440,
+            filterQuality: FilterQuality.high,
+          );
+
+    return SizedBox(
+      width: double.infinity,
+      height: height,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 240),
+          child: KeyedSubtree(
+            key: ValueKey('${isDark}_${profile.hasCoverBytes}'),
+            child: cover,
+          ),
         ),
       ),
     );
   }
 }
 
-// ── Header: full-bleed cover + overlapping avatar + name + role + edit ────────
+class _ProfileAvatar extends StatelessWidget {
+  const _ProfileAvatar({required this.profile, required this.size});
 
-class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader({required this.controller, required this.topInset});
-
-  final ProfileController controller;
-  final double topInset;
+  final ProfileModel profile;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    // Cover runs from the very top (behind the status bar + toolbar).
-    final coverHeight = topInset + 176;
-    const avatarSize = 108.0;
+    final initial = profile.name.trim().isEmpty
+        ? 'U'
+        : profile.name.trim().characters.first.toUpperCase();
 
-    return Obx(() {
-      final profile = controller.profile;
-
-      final avatar = Hero(
-        tag: 'user-avatar',
-        child: Container(
-          width: avatarSize,
-          height: avatarSize,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: palette.surface, width: 4),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: ClipOval(
-            child: profile.hasAvatarBytes
-                ? Image.memory(
-                    profile.avatarBytes!,
-                    fit: BoxFit.cover,
-                    filterQuality: FilterQuality.high,
-                  )
-                : SafeImageLoader(
-                    url: profile.avatarImageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      color: palette.surfaceMuted,
-                      child: Icon(
-                        FLucideIcons.userRound,
-                        size: 52,
-                        color: palette.iconMuted,
-                      ),
-                    ),
-                  ),
-          ),
+    return Hero(
+      tag: 'user-avatar',
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: palette.surfaceMuted,
+          border: Border.all(color: palette.surface, width: 5),
         ),
-      );
+        clipBehavior: Clip.antiAlias,
+        child: profile.hasAvatarBytes
+            ? Image.memory(
+                profile.avatarBytes!,
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
+              )
+            : SafeImageLoader(
+                url: profile.avatarImageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => Center(
+                  child: Text(
+                    initial,
+                    style: TextStyle(
+                      color: palette.textPrimary,
+                      fontSize: 36,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+      ),
+    );
+  }
+}
 
-      return Column(
-        children: [
-          SizedBox(
-            // cover + the half of the avatar that hangs below it.
-            height: coverHeight + avatarSize / 2,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: coverHeight,
-                  child: DecoratedBox(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color(0xFF101820),
-                          Color(0xFF1C4D55),
-                          AppColors.brandTeal,
-                        ],
-                      ),
-                    ),
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          right: -36,
-                          top: -52,
-                          child: Container(
-                            width: 170,
-                            height: 170,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withValues(alpha: 0.08),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          left: -55,
-                          bottom: -70,
-                          child: Container(
-                            width: 190,
-                            height: 190,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.12),
-                                width: 32,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: coverHeight - avatarSize / 2,
-                  left: 0,
-                  right: 0,
-                  child: Center(child: avatar),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Flexible(
-                child: Text(
-                  profile.name,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: palette.textPrimary,
-                    fontSize: 25,
-                    fontWeight: FontWeight.w800,
-                    height: 1.05,
-                    letterSpacing: -0.6,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
-              IconButton(
-                onPressed: () => Get.toNamed<void>(AppRoutes.editProfile),
-                visualDensity: VisualDensity.compact,
-                tooltip: 'Edit profile',
-                icon: Icon(
-                  FLucideIcons.penLine,
-                  size: 20,
-                  color: palette.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            profile.role,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: palette.textSecondary,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 13),
-              decoration: BoxDecoration(
-                color: palette.surface,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: palette.border),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  _ProfileMetric(
-                    value: '${profile.experiences.length}',
-                    label: 'Experience',
-                  ),
-                  SizedBox(height: 30, child: FDivider(axis: Axis.vertical)),
-                  _ProfileMetric(
-                    value: '${profile.skills.length}',
-                    label: 'Skills',
-                  ),
-                  SizedBox(height: 30, child: FDivider(axis: Axis.vertical)),
-                  _ProfileMetric(
-                    value: '${profile.portfolioLinks.length}',
-                    label: 'Projects',
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      );
-    });
+class _ProfileMetrics extends StatelessWidget {
+  const _ProfileMetrics({required this.profile});
+
+  final ProfileModel profile;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _ProfileMetric(
+          value: '${profile.experiences.length}',
+          label: 'Experience',
+        ),
+        _ProfileMetric(value: '${profile.skills.length}', label: 'Skills'),
+        _ProfileMetric(
+          value: '${profile.portfolioLinks.length}',
+          label: 'Projects',
+        ),
+      ],
+    );
   }
 }
 
@@ -354,22 +304,25 @@ class _ProfileMetric extends StatelessWidget {
     final palette = context.palette;
     return Expanded(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             value,
             style: TextStyle(
               color: palette.textPrimary,
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
+              fontSize: 29,
+              fontWeight: FontWeight.w700,
+              height: 1,
+              letterSpacing: -0.5,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 7),
           Text(
             label,
             style: TextStyle(
               color: palette.textTertiary,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -378,48 +331,48 @@ class _ProfileMetric extends StatelessWidget {
   }
 }
 
-class _ProfileSectionCard extends StatelessWidget {
-  const _ProfileSectionCard({required this.icon, required this.child});
+class _ProfileDetails extends StatelessWidget {
+  const _ProfileDetails({required this.profile});
 
-  final IconData icon;
-  final Widget child;
+  final ProfileModel profile;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    final theme = FTheme.of(context);
-    return FCard(
-      style: FCardStyle(
-        decoration: ShapeDecoration(
-          shape: RoundedSuperellipseBorder(
-            side: BorderSide(color: palette.border),
-            borderRadius: BorderRadius.circular(22),
+    final sections = <Widget>[
+      if (profile.experiences.isNotEmpty)
+        ExperienceTimeline(experiences: profile.experiences),
+      if (profile.skills.isNotEmpty) _SkillsSection(skills: profile.skills),
+      if (profile.portfolioLinks.isNotEmpty)
+        _LinkedAccountsSection(links: profile.portfolioLinks),
+      if (Get.isRegistered<CvBuilderController>())
+        Obx(
+          () => _CvSection(
+            generatedCv: Get.find<CvBuilderController>().generatedCv.value,
           ),
-          color: palette.surface,
         ),
-        titleTextStyle: theme.typography.body.md,
-        subtitleTextStyle: theme.typography.body.sm,
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 17),
-      ),
-      child: Stack(
+    ];
+
+    if (sections.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(18, 28, 18, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Positioned(
-            right: 0,
-            top: 0,
-            child: Icon(
-              icon,
-              size: 19,
-              color: AppColors.brandTeal.withValues(alpha: 0.65),
-            ),
-          ),
-          Padding(padding: const EdgeInsets.only(right: 26), child: child),
+          for (var index = 0; index < sections.length; index++) ...[
+            sections[index],
+            if (index != sections.length - 1) ...[
+              const SizedBox(height: 24),
+              Divider(color: palette.divider, height: 1),
+              const SizedBox(height: 24),
+            ],
+          ],
         ],
       ),
     );
   }
 }
-
-// ── Skills section ────────────────────────────────────────────────────────────
 
 class _SkillsSection extends StatelessWidget {
   const _SkillsSection({required this.skills});
@@ -440,46 +393,46 @@ class _SkillsSection extends StatelessWidget {
             fontWeight: FontWeight.w800,
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: skills.map((skill) {
-            return FBadge(
-              variant: FBadgeVariant.outline,
-              style: FBadgeStyle(
-                decoration: ShapeDecoration(
-                  shape: RoundedSuperellipseBorder(
-                    side: BorderSide(
-                      color: AppColors.brandTeal.withValues(alpha: 0.24),
+          children: skills
+              .map(
+                (skill) => FBadge(
+                  variant: FBadgeVariant.outline,
+                  style: FBadgeStyle(
+                    decoration: ShapeDecoration(
+                      color: AppColors.brandTeal.withValues(alpha: 0.08),
+                      shape: RoundedSuperellipseBorder(
+                        side: BorderSide(
+                          color: AppColors.brandTeal.withValues(alpha: 0.22),
+                        ),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(20),
+                    labelTextStyle: const TextStyle(
+                      color: AppColors.brandTeal,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 13,
+                      vertical: 7,
+                    ),
                   ),
-                  color: AppColors.brandTeal.withValues(alpha: 0.10),
+                  child: Text(skill),
                 ),
-                labelTextStyle: TextStyle(
-                  color: AppColors.brandTeal,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
-                ),
-              ),
-              child: Text(skill),
-            );
-          }).toList(),
+              )
+              .toList(growable: false),
         ),
       ],
     );
   }
 }
 
-// ── Portfolio section ─────────────────────────────────────────────────────────
-
-class _PortfolioSection extends StatelessWidget {
-  const _PortfolioSection({required this.links});
+class _LinkedAccountsSection extends StatelessWidget {
+  const _LinkedAccountsSection({required this.links});
 
   final List<PortfolioLink> links;
 
@@ -490,76 +443,73 @@ class _PortfolioSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Portfolio',
+          'Linked accounts',
           style: TextStyle(
             color: palette.textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.w800,
           ),
         ),
-        const SizedBox(height: 10),
-        ...links.map((link) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: AnimatedScaleButton(
-              onTap: () {
-                Get.snackbar(
-                  'Coming soon',
-                  'This link will be available in a future update.',
-                  snackPosition: SnackPosition.BOTTOM,
-                  margin: const EdgeInsets.all(16),
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: palette.surfaceMuted.withAlpha(180),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: palette.textSecondary.withAlpha(30),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      FLucideIcons.link,
-                      color: AppColors.brandTeal,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        link.title,
-                        style: TextStyle(
-                          color: palette.textPrimary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+        const SizedBox(height: 8),
+        for (var index = 0; index < links.length; index++) ...[
+          AnimatedScaleButton(
+            onTap: () => Get.snackbar(
+              links[index].title,
+              links[index].url,
+              snackPosition: SnackPosition.BOTTOM,
+              margin: const EdgeInsets.all(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          links[index].title,
+                          style: TextStyle(
+                            color: palette.textPrimary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 3),
+                        Text(
+                          links[index].url,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: palette.textTertiary,
+                            fontSize: 12.5,
+                          ),
+                        ),
+                      ],
                     ),
-                    Icon(
-                      FLucideIcons.externalLink,
-                      color: palette.textSecondary,
-                      size: 16,
+                  ),
+                  Text(
+                    'Open',
+                    style: TextStyle(
+                      color: AppColors.brandTeal,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          );
-        }),
+          ),
+          if (index != links.length - 1)
+            Divider(color: palette.divider, height: 1),
+        ],
       ],
     );
   }
 }
 
-// ── CV preview link card ──────────────────────────────────────────────────────
-
-class _CvLinkCard extends StatelessWidget {
-  const _CvLinkCard({required this.generatedCv});
+class _CvSection extends StatelessWidget {
+  const _CvSection({required this.generatedCv});
 
   final CvData? generatedCv;
 
@@ -569,96 +519,47 @@ class _CvLinkCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final cv = generatedCv;
-
-    return FCard(
-      style: FCardStyle(
-        decoration: ShapeDecoration(
-          shape: RoundedSuperellipseBorder(
-            side: BorderSide(color: palette.textSecondary.withAlpha(40)),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          color: palette.surface,
-        ),
-        titleTextStyle: TextStyle(
-          color: palette.textPrimary,
-          fontSize: 15,
-          fontWeight: FontWeight.w700,
-        ),
-        subtitleTextStyle: TextStyle(
-          color: palette.textSecondary,
-          fontSize: 13,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    return AnimatedScaleButton(
+      onTap: () => Get.toNamed<void>(
+        cv == null ? AppRoutes.cvBuilder : AppRoutes.cvPreview,
       ),
-      child: cv != null
-          ? Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Your CV',
-                        style: TextStyle(
-                          color: palette.textPrimary,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        _templateNames[cv.templateIndex.clamp(
-                          0,
-                          _templateNames.length - 1,
-                        )],
-                        style: TextStyle(
-                          color: palette.textSecondary,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => Get.toNamed<void>(AppRoutes.cvPreview),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    backgroundColor: AppColors.primary.withAlpha(25),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
-                    ),
-                  ),
-                  child: const Text(
-                    'Preview →',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            )
-          : AnimatedScaleButton(
-              onTap: () => Get.toNamed<void>(AppRoutes.cvBuilder),
-              child: Row(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    FLucideIcons.fileText,
-                    color: palette.textSecondary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 10),
                   Text(
-                    'No CV yet — Build your CV →',
+                    'Resume',
                     style: TextStyle(
-                      color: palette.textSecondary,
-                      fontSize: 14,
+                      color: palette.textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
                     ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    cv == null
+                        ? 'No resume yet — create one now'
+                        : '${_templateNames[cv.templateIndex.clamp(0, _templateNames.length - 1)]} template',
+                    style: TextStyle(color: palette.textTertiary, fontSize: 13),
                   ),
                 ],
               ),
             ),
+            Text(
+              cv == null ? 'Create' : 'Preview',
+              style: const TextStyle(
+                color: AppColors.brandTeal,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

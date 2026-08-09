@@ -12,16 +12,29 @@ extension UserRoleX on UserRole {
     UserRole.employer => 'Employer',
   };
 
+  String get labelKey => switch (this) {
+    UserRole.jobSeeker => 'role_job_seeker_label',
+    UserRole.employer => 'role_employer_label',
+  };
+
   String get headline => switch (this) {
     UserRole.jobSeeker => "I'm here to find work",
     UserRole.employer => "I'm here to hire",
   };
 
+  String get headlineKey => switch (this) {
+    UserRole.jobSeeker => 'role_job_seeker_headline',
+    UserRole.employer => 'role_employer_headline',
+  };
+
   String get description => switch (this) {
-    UserRole.jobSeeker =>
-      'Discover roles that match your skills and track your applications.',
-    UserRole.employer =>
-      'Post openings, review candidates, and manage your hiring.',
+    UserRole.jobSeeker => 'Find matching jobs and track applications.',
+    UserRole.employer => 'Post jobs and manage candidates.',
+  };
+
+  String get descriptionKey => switch (this) {
+    UserRole.jobSeeker => 'role_job_seeker_description',
+    UserRole.employer => 'role_employer_description',
   };
 }
 

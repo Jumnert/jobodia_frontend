@@ -136,8 +136,8 @@ class _MessageBubbleState extends State<MessageBubble>
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    final userBubbleColor = context.isDark ? Colors.white : Colors.black;
-    final userTextColor = context.isDark ? Colors.black : Colors.white;
+    const userBubbleColor = AppColors.brandPrimary;
+    const userTextColor = AppColors.textPrimary;
     final maxWidth = MediaQuery.sizeOf(context).width * (_isUser ? 0.76 : 0.84);
     final messageStyle = TextStyle(
       color: _isUser ? userTextColor : palette.textPrimary,

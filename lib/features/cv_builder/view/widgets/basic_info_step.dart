@@ -36,21 +36,11 @@ class BasicInfoStep extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _showImportSheet(context),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.brandTeal,
-                  side: const BorderSide(
-                    color: AppColors.brandTeal,
-                    width: 1.5,
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                icon: const Icon(FLucideIcons.scrollText, size: 20),
-                label: const Text(
+              child: FButton(
+                variant: FButtonVariant.outline,
+                onPress: () => _showImportSheet(context),
+                prefix: const Icon(FLucideIcons.scrollText, size: 18),
+                child: const Text(
                   'Import from text',
                   style: TextStyle(fontWeight: FontWeight.w700),
                 ),
@@ -58,18 +48,11 @@ class BasicInfoStep extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _confirmFillFromProfile(context),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: palette.textPrimary,
-                  side: BorderSide(color: palette.border),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                icon: const Icon(FLucideIcons.userRoundPen, size: 20),
-                label: const Text(
+              child: FButton(
+                variant: FButtonVariant.outline,
+                onPress: () => _confirmFillFromProfile(context),
+                prefix: const Icon(FLucideIcons.userRoundPen, size: 18),
+                child: const Text(
                   'Fill from profile',
                   style: TextStyle(fontWeight: FontWeight.w700),
                 ),
@@ -80,17 +63,11 @@ class BasicInfoStep extends StatelessWidget {
         const SizedBox(height: 10),
         SizedBox(
           width: double.infinity,
-          child: TextButton.icon(
-            onPressed: () => _confirmSampleFill(context),
-            style: TextButton.styleFrom(
-              foregroundColor: palette.textSecondary,
-              padding: const EdgeInsets.symmetric(vertical: 11),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            icon: const Icon(FLucideIcons.flaskConical, size: 19),
-            label: const Text(
+          child: FButton(
+            variant: FButtonVariant.ghost,
+            onPress: () => _confirmSampleFill(context),
+            prefix: const Icon(FLucideIcons.flaskConical, size: 18),
+            child: const Text(
               'Use complete sample CV',
               style: TextStyle(fontWeight: FontWeight.w700),
             ),
@@ -132,92 +109,67 @@ class BasicInfoStep extends StatelessWidget {
 
   /// Opens a bottom sheet with a multiline field for pasting resume text.
   void _showImportSheet(BuildContext context) {
-    final palette = context.palette;
     final textController = TextEditingController();
 
-    showModalBottomSheet<void>(
+    showFSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: palette.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetContext) {
-        return Padding(
-          padding: EdgeInsets.fromLTRB(
-            20,
-            16,
-            20,
-            MediaQuery.of(sheetContext).viewInsets.bottom + 20,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Import from text',
-                style: TextStyle(
-                  color: palette.textPrimary,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
+      side: FLayout.btt,
+      mainAxisMaxRatio: 0.82,
+      useSafeArea: true,
+      barrierDismissible: true,
+      builder: (sheetContext) => ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        child: ColoredBox(
+          color: FTheme.of(sheetContext).colors.background,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              20,
+              20,
+              20,
+              MediaQuery.viewInsetsOf(sheetContext).bottom + 20,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Import from text',
+                  style: FTheme.of(
+                    sheetContext,
+                  ).typography.display.sm.copyWith(fontWeight: FontWeight.w800),
                 ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'Paste your resume text below and we will fill in what we can.',
-                style: TextStyle(
-                  color: palette.textSecondary,
-                  fontSize: 13,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: textController,
-                minLines: 6,
-                maxLines: 10,
-                style: TextStyle(color: palette.textPrimary),
-                decoration: InputDecoration(
-                  hintText:
-                      'Alex Johnson\nalex.j@example.com\n+1 234 567 890\n...',
-                  filled: true,
-                  fillColor: palette.surfaceMuted,
-                  hintStyle: TextStyle(
-                    color: palette.textTertiary,
-                    fontSize: 13,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
+                const SizedBox(height: 6),
+                Text(
+                  'Paste your resume text and we will fill in what we can.',
+                  style: FTheme.of(sheetContext).typography.body.sm.copyWith(
+                    color: FTheme.of(sheetContext).colors.mutedForeground,
+                    height: 1.4,
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {
+                const SizedBox(height: 18),
+                FTextField.multiline(
+                  control: FTextFieldControl.managed(
+                    controller: textController,
+                  ),
+                  hint: 'Alex Johnson\nalex.j@example.com\n+1 234 567 890\n...',
+                  minLines: 7,
+                  maxLines: 10,
+                ),
+                const SizedBox(height: 16),
+                FButton(
+                  onPress: () {
                     final text = textController.text;
                     Navigator.of(sheetContext).pop();
                     controller.importFromText(text);
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandTeal,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  icon: const Icon(FLucideIcons.sparkles, size: 19),
-                  label: const Text('Import my resume'),
+                  prefix: const Icon(FLucideIcons.sparkles, size: 18),
+                  child: const Text('Import my resume'),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        );
-      },
+        ),
+      ),
     ).whenComplete(textController.dispose);
   }
 

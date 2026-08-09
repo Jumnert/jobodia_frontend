@@ -1,5 +1,3 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:get/get.dart';
@@ -33,100 +31,44 @@ class _MessageComposerState extends State<MessageComposer> {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    final isDark = context.isDark;
-    final fg = isDark ? Colors.white : palette.iconPrimary;
+    final foreground = context.isDark ? Colors.white : palette.iconPrimary;
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.08),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
+    return FTextField.multiline(
+      control: FTextFieldControl.managed(
+        controller: controller.messageController,
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: BackdropFilter(
-          filter: ui.ImageFilter.blur(sigmaX: 22, sigmaY: 22),
-          child: Container(
-            constraints: const BoxConstraints(minHeight: 58),
-            padding: const EdgeInsets.fromLTRB(8, 7, 8, 7),
-            decoration: BoxDecoration(
-              color: palette.surface.withValues(alpha: isDark ? 0.72 : 0.78),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: isDark ? 0.12 : 0.72),
+      focusNode: _focusNode,
+      hint: 'Message Jobodia',
+      minLines: 1,
+      maxLines: 4,
+      maxLength: 8000,
+      keyboardType: TextInputType.multiline,
+      textInputAction: TextInputAction.newline,
+      prefixBuilder: (context, style, variants) => FTextField.prefixIconBuilder(
+        context,
+        style,
+        variants,
+        _buildAttachmentMenu(foreground, palette),
+      ),
+      suffixBuilder: (context, style, variants) => Padding(
+        padding: const EdgeInsetsDirectional.only(end: 4),
+        child: ListenableBuilder(
+          listenable: controller.messageController,
+          builder: (context, _) {
+            final canSend = controller.messageController.text.trim().isNotEmpty;
+            return Semantics(
+              button: true,
+              label: 'Send message',
+              child: SizedBox(
+                width: 48,
+                height: 48,
+                child: FButton.icon(
+                  onPress: canSend ? _sendMessage : null,
+                  child: const Icon(FLucideIcons.send, size: 20),
+                ),
               ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                _buildAttachmentMenu(fg, palette),
-                const SizedBox(width: 7),
-                Expanded(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 104),
-                    child: TextField(
-                      focusNode: _focusNode,
-                      controller: controller.messageController,
-                      textInputAction: TextInputAction.newline,
-                      keyboardType: TextInputType.multiline,
-                      minLines: 1,
-                      maxLines: 4,
-                      style: TextStyle(
-                        color: palette.textPrimary,
-                        fontSize: 15,
-                        height: 1.35,
-                      ),
-                      decoration: InputDecoration(
-                        isDense: true,
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 3,
-                          vertical: 11,
-                        ),
-                        hintText: 'Message Jobodia',
-                        hintStyle: TextStyle(color: palette.textTertiary),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 5),
-                ListenableBuilder(
-                  listenable: controller.messageController,
-                  builder: (context, _) {
-                    final canSend = controller.messageController.text
-                        .trim()
-                        .isNotEmpty;
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 160),
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: canSend
-                            ? AppColors.brandTeal
-                            : palette.surfaceMuted.withValues(alpha: 0.82),
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        onPressed: canSend ? _sendMessage : null,
-                        padding: EdgeInsets.zero,
-                        tooltip: 'Send message',
-                        icon: Icon(
-                          FLucideIcons.arrowUp,
-                          size: 20,
-                          color: canSend ? Colors.white : palette.iconMuted,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
+            );
+          },
         ),
       ),
     );

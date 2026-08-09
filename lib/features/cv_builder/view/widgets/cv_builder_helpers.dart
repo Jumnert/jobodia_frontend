@@ -137,8 +137,9 @@ class HeadshotUploadTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            TextButton(
-              onPressed: controller.hasHeadshot
+            FButton(
+              variant: FButtonVariant.ghost,
+              onPress: controller.hasHeadshot
                   ? controller.removeHeadshot
                   : controller.chooseHeadshot,
               child: Text(controller.hasHeadshot ? 'Remove' : 'Choose'),
@@ -191,7 +192,7 @@ class ProfileSectionCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: palette.surface,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: palette.border),
       ),
       child: Column(
@@ -205,7 +206,7 @@ class ProfileSectionCard extends StatelessWidget {
                 height: 34,
                 decoration: BoxDecoration(
                   color: AppColors.brandTeal.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(7),
+                  borderRadius: BorderRadius.circular(11),
                 ),
                 child: Icon(icon, color: AppColors.brandTeal, size: 18),
               ),
@@ -403,7 +404,7 @@ class RepeatableEntryCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: palette.surface,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(18),
         border: Border(
           left: const BorderSide(color: AppColors.brandTeal, width: 3),
           top: BorderSide(color: palette.border),
@@ -427,10 +428,10 @@ class RepeatableEntryCard extends StatelessWidget {
                 ),
               ),
               if (canRemove)
-                IconButton(
-                  onPressed: onRemove,
-                  visualDensity: VisualDensity.compact,
-                  icon: const Icon(FLucideIcons.x, size: 20),
+                FButton.icon(
+                  variant: FButtonVariant.ghost,
+                  onPress: onRemove,
+                  child: const Icon(FLucideIcons.x, size: 18),
                 ),
             ],
           ),
@@ -461,18 +462,11 @@ class AddEntryButton extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: OutlinedButton.icon(
-            onPressed: onPressed,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: palette.textPrimary,
-              side: BorderSide(color: palette.textPrimary),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-            ),
-            icon: const Icon(FLucideIcons.plus),
-            label: Text(label),
+          child: FButton(
+            variant: FButtonVariant.outline,
+            onPress: onPressed,
+            prefix: const Icon(FLucideIcons.plus),
+            child: Text(label),
           ),
         ),
         const SizedBox(width: 10),
@@ -585,40 +579,15 @@ class CompactInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: palette.textSecondary,
-          ),
-        ),
-        const SizedBox(height: 6),
-        TextField(
-          controller: controller,
-          onSubmitted: onSubmitted,
-          keyboardType: keyboardType,
-          style: TextStyle(color: palette.textPrimary),
-          decoration: InputDecoration(
-            hintText: hintText,
-            filled: true,
-            fillColor: palette.surface,
-            hintStyle: TextStyle(color: palette.textTertiary, fontSize: 13),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 13,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: palette.border),
-            ),
-          ),
-        ),
-      ],
+    return FTextField(
+      control: FTextFieldControl.managed(controller: controller),
+      label: Text(label),
+      hint: hintText,
+      keyboardType: keyboardType,
+      textInputAction: onSubmitted == null
+          ? TextInputAction.next
+          : TextInputAction.done,
+      onSubmit: onSubmitted,
     );
   }
 }
@@ -638,23 +607,12 @@ class MultiLineField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
-    return TextField(
-      controller: controller,
+    return FTextField.multiline(
+      control: FTextFieldControl.managed(controller: controller),
+      hint: hintText,
       minLines: 3,
       maxLines: 5,
       maxLength: maxLength,
-      style: TextStyle(color: palette.textPrimary),
-      decoration: InputDecoration(
-        hintText: hintText,
-        filled: true,
-        fillColor: palette.surface,
-        hintStyle: TextStyle(color: palette.textTertiary, fontSize: 14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: palette.border),
-        ),
-      ),
     );
   }
 }

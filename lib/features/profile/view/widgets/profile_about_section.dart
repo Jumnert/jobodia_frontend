@@ -20,14 +20,14 @@ class ProfileAboutSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'About me',
+          'About',
           style: TextStyle(
             color: palette.textPrimary,
-            fontSize: 16,
-            fontWeight: FontWeight.w800,
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 9),
         Text.rich(
           TextSpan(
             children: [
@@ -54,8 +54,8 @@ class ProfileAboutSection extends StatelessWidget {
           overflow: isExpanded ? TextOverflow.visible : TextOverflow.clip,
           style: TextStyle(
             color: palette.textSecondary,
-            fontSize: 13,
-            height: 1.1,
+            fontSize: 13.5,
+            height: 1.45,
           ),
         ),
         if (isExpanded) ...[

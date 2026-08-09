@@ -54,7 +54,7 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
         return Stack(
           children: [
             RefreshIndicator(
-              color: AppColors.primary,
+              color: AppColors.brandPrimary,
               backgroundColor: palette.surface,
               onRefresh: () async {
                 await Future<void>.delayed(const Duration(milliseconds: 600));

@@ -135,6 +135,32 @@ Match screenshots as closely as possible.
 
 You may improve spacing and layout when beneficial.
 
+## ForUI Component Rules
+
+ForUI is the standard component library for this project. Agents must use ForUI
+components from `package:forui/forui.dart` whenever a suitable component exists.
+
+Before creating custom UI, check ForUI for the required component or pattern.
+Prefer ForUI components for buttons, text fields, cards, dialogs, sheets,
+menus, tabs, navigation, tiles, alerts, loading indicators, pickers, and other
+interactive or structural UI.
+
+Use the project ForUI theme and styles instead of duplicating component styling
+with raw Flutter widgets. Do not introduce another UI component library or
+recreate an existing ForUI component in `lib/core/widgets/`.
+
+Custom UI is allowed only when:
+
+1. ForUI does not provide an equivalent component or composition.
+2. The design is truly feature-specific and cannot reasonably be composed from
+   ForUI components.
+3. A custom visual is required for the product, such as a brand illustration,
+   job-specific visualization, or unique layout.
+
+When custom UI is necessary, compose it with ForUI primitives where possible,
+keep it scoped to the feature, follow the existing theme/palette, and briefly
+document why ForUI was insufficient.
+
 ---
 
 ## Reusable Widgets

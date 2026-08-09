@@ -1,118 +1,136 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/ai_chat/controller/ai_chat_controller.dart';
 
-class ChatHistoryDrawer extends StatelessWidget {
-  const ChatHistoryDrawer({super.key, required this.controller});
+Future<void> showChatHistorySheet(
+  BuildContext context, {
+  required AiChatController controller,
+}) async {
+  await showFSheet<void>(
+    context: context,
+    side: FLayout.rtl,
+    mainAxisMaxRatio: 0.9,
+    useSafeArea: true,
+    barrierDismissible: true,
+    constraints: const BoxConstraints(maxWidth: 380),
+    builder: (sheetContext) => _ChatHistorySheet(controller: controller),
+  );
+}
+
+class _ChatHistorySheet extends StatelessWidget {
+  const _ChatHistorySheet({required this.controller});
 
   final AiChatController controller;
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
-    return Drawer(
-      backgroundColor: palette.surface,
-      child: SafeArea(
+    final theme = FTheme.of(context);
+
+    return ClipRRect(
+      borderRadius: const BorderRadius.horizontal(left: Radius.circular(24)),
+      child: ColoredBox(
+        color: theme.colors.background,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Chat history',
-                style: TextStyle(
-                  color: palette.textPrimary,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                height: 46,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                decoration: BoxDecoration(
-                  color: palette.surfaceMuted,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Row(
-                  children: [
-                    Icon(FLucideIcons.search, color: palette.iconMuted),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextField(
-                        controller: controller.historySearchController,
-                        onChanged: controller.updateHistorySearch,
-                        style: TextStyle(color: palette.textPrimary),
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Search chats',
-                          hintStyle: TextStyle(
-                            color: palette.iconMuted,
-                            fontSize: 14,
-                          ),
-                        ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Chat history',
+                      style: theme.typography.display.sm.copyWith(
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  FButton.icon(
+                    variant: FButtonVariant.ghost,
+                    onPress: () => Navigator.of(context).pop(),
+                    child: const Icon(FLucideIcons.x),
+                  ),
+                ],
               ),
               const SizedBox(height: 14),
-              _NewChatTile(
-                onTap: () {
+              FTextField(
+                control: FTextFieldControl.managed(
+                  controller: controller.historySearchController,
+                  onChange: (value) =>
+                      controller.updateHistorySearch(value.text),
+                ),
+                hint: 'Search chats',
+                textInputAction: TextInputAction.search,
+                prefixBuilder: (context, style, variants) =>
+                    FTextField.prefixIconBuilder(
+                      context,
+                      style,
+                      variants,
+                      const Icon(FLucideIcons.search),
+                    ),
+              ),
+              const SizedBox(height: 12),
+              FButton(
+                variant: FButtonVariant.outline,
+                onPress: () {
                   controller.startNewChat();
                   Navigator.of(context).pop();
                 },
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(FLucideIcons.messageCirclePlus, size: 18),
+                    SizedBox(width: 8),
+                    Text('New chat'),
+                  ],
+                ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               Expanded(
                 child: Obx(() {
                   final sessions = controller.filteredSessions;
-
                   if (sessions.isEmpty) {
                     return Center(
                       child: Text(
                         'No chats found.',
-                        style: TextStyle(color: palette.textSecondary),
+                        style: theme.typography.body.sm.copyWith(
+                          color: theme.colors.mutedForeground,
+                        ),
                       ),
                     );
                   }
 
                   return ListView.separated(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
                     itemCount: sessions.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 4),
+                    separatorBuilder: (_, _) => const SizedBox(height: 6),
                     itemBuilder: (context, index) {
                       final session = sessions[index];
-                      return Dismissible(
-                        key: ValueKey(session.id),
-                        direction: DismissDirection.endToStart,
-                        background: Container(
-                          alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.only(right: 16),
-                          decoration: BoxDecoration(
-                            color: AppColors.error,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Icon(
-                            FLucideIcons.trash2,
-                            color: Colors.white,
-                          ),
+                      return FTile(
+                        prefix: const Icon(FLucideIcons.messageCircle),
+                        title: Text(
+                          session.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        onDismissed: (_) {
-                          unawaited(HapticFeedback.lightImpact());
-                          controller.deleteSession(index);
-                        },
-                        child: _HistoryTile(
-                          title: session.name,
-                          onTap: () {
-                            controller.loadSession(session);
-                            Navigator.of(context).pop();
+                        suffix: FButton.icon(
+                          variant: FButtonVariant.ghost,
+                          onPress: () {
+                            final sourceIndex = controller.sessions.indexWhere(
+                              (item) => item.id == session.id,
+                            );
+                            if (sourceIndex >= 0) {
+                              controller.deleteSession(sourceIndex);
+                            }
                           },
+                          child: const Icon(FLucideIcons.trash2, size: 17),
                         ),
+                        onPress: () {
+                          controller.loadSession(session);
+                          Navigator.of(context).pop();
+                        },
                       );
                     },
                   );
@@ -120,75 +138,6 @@ class ChatHistoryDrawer extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NewChatTile extends StatelessWidget {
-  const _NewChatTile({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    return InkWell(
-      borderRadius: BorderRadius.circular(10),
-      onTap: onTap,
-      child: SizedBox(
-        height: 42,
-        child: Row(
-          children: [
-            const SizedBox(width: 4),
-            Icon(FLucideIcons.messageCirclePlus, color: palette.textSecondary),
-            const SizedBox(width: 12),
-            Text(
-              'New chat',
-              style: TextStyle(
-                color: palette.textSecondary,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _HistoryTile extends StatelessWidget {
-  const _HistoryTile({required this.title, required this.onTap});
-
-  final String title;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(10),
-      onTap: onTap,
-      child: SizedBox(
-        height: 38,
-        child: Row(
-          children: [
-            const SizedBox(width: 4),
-            Expanded(
-              child: Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: context.palette.textSecondary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(width: 4),
-          ],
         ),
       ),
     );

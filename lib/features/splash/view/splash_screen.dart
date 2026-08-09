@@ -1,6 +1,9 @@
+import 'dart:math' as math;
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
-import 'package:jobodia_frontend/core/constants/app_spacing.dart';
 
 /// Brief branded startup layer shown above the app's resolved initial route.
 class SplashScreen extends StatefulWidget {
@@ -14,7 +17,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  static const _displayDuration = Duration(milliseconds: 1900);
+  static const _displayDuration = Duration(seconds: 5);
   static const _fadeDuration = Duration(milliseconds: 450);
 
   bool _isVisible = true;
@@ -56,145 +59,199 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 }
 
-class _SplashContent extends StatelessWidget {
+class _SplashContent extends StatefulWidget {
   const _SplashContent({super.key});
+
+  @override
+  State<_SplashContent> createState() => _SplashContentState();
+}
+
+class _SplashContentState extends State<_SplashContent>
+    with TickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 5),
+  );
+  late final AnimationController _ambientController = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 5),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _ambientController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final screenWidth = MediaQuery.sizeOf(context).width;
 
     return ColoredBox(
       color: palette.scaffold,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [palette.surface, palette.scaffold],
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          RepaintBoundary(
+            child: CustomPaint(
+              painter: _SplashAtmospherePainter(
+                animation: _ambientController,
+                background: palette.scaffold,
+                foreground: palette.textPrimary,
+              ),
+            ),
           ),
-        ),
-        child: Stack(
-          children: [
-            Positioned(
-              top: -90,
-              right: -80,
-              child: _AmbientCircle(
-                size: 250,
-                color: AppColors.brandTeal.withValues(alpha: 0.09),
-              ),
-            ),
-            Positioned(
-              bottom: -110,
-              left: -100,
-              child: _AmbientCircle(
-                size: 290,
-                color: AppColors.info.withValues(alpha: 0.07),
-              ),
-            ),
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xxl,
-                  vertical: AppSpacing.xl,
+          Center(
+            child: SizedBox(
+              width: screenWidth.clamp(260, 420),
+              child: AnimatedBuilder(
+                animation: _ambientController,
+                child: Lottie.asset(
+                  'assets/animations/nav_icons/Welcome.json',
+                  controller: _controller,
+                  fit: BoxFit.contain,
+                  repeat: false,
+                  renderCache: RenderCache.raster,
+                  onLoaded: (_) => _controller.forward(from: 0),
                 ),
-                child: Column(
-                  children: [
-                    const Spacer(flex: 4),
-                    TweenAnimationBuilder<double>(
-                      duration: reduceMotion
-                          ? Duration.zero
-                          : const Duration(milliseconds: 850),
-                      curve: Curves.easeOutBack,
-                      tween: Tween(begin: 0.82, end: 1),
-                      builder: (context, scale, child) =>
-                          Transform.scale(scale: scale, child: child),
-                      child: Container(
-                        width: 104,
-                        height: 104,
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: palette.surface,
-                          borderRadius: BorderRadius.circular(28),
-                          border: Border.all(
-                            color: AppColors.brandTeal.withValues(alpha: 0.14),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.brandTeal.withValues(
-                                alpha: 0.16,
-                              ),
-                              blurRadius: 32,
-                              offset: const Offset(0, 12),
-                            ),
-                          ],
-                        ),
-                        child: Image.asset(
-                          'assets/images/branding/jobodia_logo.png',
-                          fit: BoxFit.contain,
-                          filterQuality: FilterQuality.high,
-                        ),
-                      ),
+                builder: (context, child) => ShaderMask(
+                  blendMode: BlendMode.srcIn,
+                  shaderCallback: (bounds) => LinearGradient(
+                    colors: [
+                      Color.lerp(AppColors.brandPrimary, Colors.black, 0.24)!,
+                      AppColors.brandPrimary,
+                      Color.lerp(AppColors.brandPrimary, Colors.white, 0.36)!,
+                      AppColors.brandPrimary,
+                    ],
+                    stops: const [0, 0.34, 0.68, 1],
+                    transform: GradientRotation(
+                      _ambientController.value * math.pi * 2,
                     ),
-                    const SizedBox(height: AppSpacing.xl),
-                    Text(
-                      'Jobodia',
-                      style: Theme.of(context).textTheme.headlineLarge
-                          ?.copyWith(
-                            color: palette.textPrimary,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -1.2,
-                          ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      'Your next move starts here.',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: palette.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const Spacer(flex: 4),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(99),
-                      child: SizedBox(
-                        width: 72,
-                        height: 3,
-                        child: LinearProgressIndicator(
-                          color: AppColors.brandTeal,
-                          backgroundColor: AppColors.brandTeal.withValues(
-                            alpha: 0.14,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-                  ],
+                  ).createShader(bounds),
+                  child: child,
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _AmbientCircle extends StatelessWidget {
-  const _AmbientCircle({required this.size, required this.color});
+class _SplashAtmospherePainter extends CustomPainter {
+  _SplashAtmospherePainter({
+    required this.animation,
+    required this.background,
+    required this.foreground,
+  }) : super(repaint: animation);
 
-  final double size;
-  final Color color;
+  final Animation<double> animation;
+  final Color background;
+  final Color foreground;
 
   @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+  void paint(Canvas canvas, Size size) {
+    final t = animation.value;
+    final bounds = Offset.zero & size;
+    final cycle = t * math.pi * 2;
+
+    canvas.drawRect(
+      bounds,
+      Paint()
+        ..shader = ui.Gradient.linear(
+          Offset(size.width * (0.05 + 0.12 * math.sin(cycle)), 0),
+          Offset(size.width, size.height),
+          [
+            Color.lerp(background, AppColors.brandPrimary, 0.1)!,
+            background,
+            Color.lerp(background, AppColors.brandPrimary, 0.07)!,
+          ],
+          const [0, 0.5, 1],
+        ),
+    );
+
+    _drawGlow(
+      canvas,
+      bounds,
+      center: Offset(
+        size.width * (0.22 + 0.08 * math.sin(cycle)),
+        size.height * (0.35 + 0.06 * math.cos(cycle)),
       ),
+      radius: size.shortestSide * 0.72,
+      color: AppColors.brandPrimary.withValues(alpha: 0.17),
+    );
+    _drawGlow(
+      canvas,
+      bounds,
+      center: Offset(
+        size.width * (0.78 + 0.07 * math.cos(cycle)),
+        size.height * (0.64 + 0.08 * math.sin(cycle)),
+      ),
+      radius: size.shortestSide * 0.62,
+      color: Color.lerp(AppColors.brandPrimary, foreground, 0.2)!
+          .withValues(alpha: 0.13),
+    );
+
+    for (var index = 0; index < 34; index++) {
+      final phase = index * 1.731;
+      final x =
+          ((math.sin(index * 12.9898) + 1) * 0.5 * size.width +
+              t * (12 + index % 5)) %
+          size.width;
+      final y =
+          ((math.cos(index * 7.233) + 1) * 0.5 * size.height +
+              math.sin(cycle + phase) * 8) %
+          size.height;
+      final dotColor = index.isEven
+          ? AppColors.brandPrimary
+          : Color.lerp(AppColors.brandPrimary, foreground, 0.22)!;
+      canvas.drawCircle(
+        Offset(x, y),
+        1.2 + (index % 3) * 0.55,
+        Paint()..color = dotColor.withValues(alpha: 0.1),
+      );
+    }
+
+    final noiseStep = (t * 24).floor();
+    final noisePoints = List<Offset>.generate(150, (index) {
+      final seed = index * 37.719 + noiseStep * 11.13;
+      return Offset(
+        (math.sin(seed) + 1) * 0.5 * size.width,
+        (math.cos(seed * 1.417) + 1) * 0.5 * size.height,
+      );
+    });
+    canvas.drawPoints(
+      ui.PointMode.points,
+      noisePoints,
+      Paint()
+        ..color = foreground.withValues(alpha: 0.035)
+        ..strokeWidth = 1,
     );
   }
+
+  void _drawGlow(
+    Canvas canvas,
+    Rect bounds, {
+    required Offset center,
+    required double radius,
+    required Color color,
+  }) {
+    canvas.drawRect(
+      bounds,
+      Paint()
+        ..shader = ui.Gradient.radial(center, radius, [
+          color,
+          color.withValues(alpha: 0),
+        ]),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _SplashAtmospherePainter oldDelegate) =>
+      oldDelegate.background != background ||
+      oldDelegate.foreground != foreground ||
+      oldDelegate.animation != animation;
 }

@@ -1,38 +1,46 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/ai_chat/view/ai_chat_screen.dart';
+import 'package:jobodia_frontend/features/ai_chat/controller/ai_chat_controller.dart';
+import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
 import 'package:jobodia_frontend/features/cv_builder/view/cv_builder_screen.dart';
 import 'package:jobodia_frontend/features/home/controller/main_nav_controller.dart';
 import 'package:jobodia_frontend/features/home/view/home_screen.dart';
-import 'package:jobodia_frontend/features/profile/controller/profile_controller.dart';
-import 'package:jobodia_frontend/features/profile/view/profile_screen.dart';
+import 'package:jobodia_frontend/features/job_post/view/job_post_screen.dart';
+import 'package:jobodia_frontend/features/notifications/controller/notifications_controller.dart';
+import 'package:jobodia_frontend/features/notifications/view/notifications_screen.dart';
+import 'package:jobodia_frontend/features/settings/view/settings_screen.dart';
+import 'package:jobodia_frontend/features/role/controller/role_controller.dart';
 
 /// The main tabbed shell of the app.
 class MainShellScreen extends StatelessWidget {
   const MainShellScreen({super.key});
 
-  static const _searchTabIndex = 3;
-
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
     final nav = Get.find<MainNavController>();
-    Get.lazyPut<ProfileController>(ProfileController.new, fenix: true);
-    final pages = <Widget>[
-      const RepaintBoundary(child: HomeScreen()),
-      const RepaintBoundary(child: CvBuilderScreen(embedded: true)),
-      const RepaintBoundary(child: AiChatScreen()),
-      const RepaintBoundary(child: ProfileScreen(embedded: true)),
-    ];
-
+    final roleController = Get.find<RoleController>();
     return Obx(() {
       final index = nav.selectedTab.value;
-      final barIndex = index >= _searchTabIndex ? index + 1 : index;
+      final isEmployer = roleController.role.value == UserRole.employer;
+      final pages = <Widget>[
+        const RepaintBoundary(child: HomeScreen()),
+        RepaintBoundary(
+          child: isEmployer
+              ? const JobPostScreen()
+              : const CvBuilderScreen(embedded: true),
+        ),
+        const RepaintBoundary(child: SettingsScreen(showBottomNav: false)),
+        const RepaintBoundary(child: NotificationsScreen(embedded: true)),
+        const RepaintBoundary(child: AiChatScreen(embedded: true)),
+      ];
       return PopScope(
         canPop: index == 0,
         onPopInvokedWithResult: (didPop, _) {
@@ -40,24 +48,55 @@ class MainShellScreen extends StatelessWidget {
         },
         child: FScaffold(
           childPad: false,
-          child: Column(
+          child: Stack(
             children: [
-              Expanded(
+              Positioned.fill(
                 child: Container(
                   color: palette.scaffold,
-                  child: IndexedStack(index: index, children: pages),
+                  child: IndexedStack(
+                    index: index,
+                    children: [
+                      for (var tab = 0; tab < pages.length; tab++)
+                        KeyedSubtree(
+                          key: ValueKey(
+                            'main-tab-$tab-${nav.tabRevisions[tab]}',
+                          ),
+                          child: pages[tab],
+                        ),
+                    ],
+                  ),
                 ),
               ),
-              _BottomNavBar(
-                selectedIndex: barIndex,
-                onTap: (tapped) async {
-                  if (tapped == _searchTabIndex) {
-                    await Get.toNamed<void>(AppRoutes.search);
-                    return;
-                  }
-                  nav.goToTab(tapped > _searchTabIndex ? tapped - 1 : tapped);
-                },
-              ),
+              if (index != 4)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Transform.translate(
+                    offset: const Offset(0, 15),
+                    child: _BottomNavBar(
+                      selectedIndex: index,
+                      isEmployer: isEmployer,
+                      animateAiBorder: index == 0,
+                      onTap: (tapped) async {
+                        nav.goToTab(tapped);
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (tapped == 0 &&
+                              Get.isRegistered<HomeController>()) {
+                            final scroll =
+                                Get.find<HomeController>().scrollController;
+                            if (scroll.hasClients) scroll.jumpTo(0);
+                          }
+                          if (tapped == 4 &&
+                              Get.isRegistered<AiChatController>()) {
+                            Get.find<AiChatController>()
+                                .resetConversationViewport();
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -67,21 +106,42 @@ class MainShellScreen extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Fixed bottom navigation bar
+// Floating bottom navigation bar
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _BottomNavBar extends StatefulWidget {
-  const _BottomNavBar({required this.selectedIndex, required this.onTap});
+  const _BottomNavBar({
+    required this.selectedIndex,
+    required this.isEmployer,
+    required this.animateAiBorder,
+    required this.onTap,
+  });
 
   final int selectedIndex;
+  final bool isEmployer;
+  final bool animateAiBorder;
   final Future<void> Function(int) onTap;
 
-  static const _items = [
-    (asset: 'assets/animations/nav_icons/home.json', label: 'Home'),
-    (asset: 'assets/animations/nav_icons/cv.json', label: 'CV'),
-    (asset: 'assets/animations/nav_icons/chat.json', label: 'Chat'),
-    (asset: 'assets/animations/nav_icons/search.json', label: 'Search'),
-    (asset: 'assets/animations/nav_icons/profile.json', label: 'Profile'),
+  List<({String? asset, IconData? icon, String label})> get items => [
+    const (
+      asset: 'assets/animations/nav_icons/home.json',
+      icon: null,
+      label: 'nav_home',
+    ),
+    isEmployer
+        ? const (asset: null, icon: FLucideIcons.squarePlus, label: 'post_job')
+        : const (
+            asset: 'assets/animations/nav_icons/cv.json',
+            icon: null,
+            label: 'nav_cv',
+          ),
+    const (asset: null, icon: FLucideIcons.settings, label: 'settings'),
+    const (asset: null, icon: FLucideIcons.bell, label: 'nav_notifications'),
+    const (
+      asset: 'assets/animations/nav_icons/E V E.json',
+      icon: null,
+      label: 'AI',
+    ),
   ];
 
   @override
@@ -98,6 +158,10 @@ class _BottomNavBarState extends State<_BottomNavBar>
     vsync: this,
     duration: const Duration(milliseconds: 480),
   );
+  late final AnimationController _aiBorder = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2600),
+  )..repeat();
   double _fromIndex = 0;
   double _toIndex = 0;
   bool _dragging = false;
@@ -116,6 +180,7 @@ class _BottomNavBarState extends State<_BottomNavBar>
   void dispose() {
     _ctrl.dispose();
     _wobble.dispose();
+    _aiBorder.dispose();
     super.dispose();
   }
 
@@ -148,11 +213,17 @@ class _BottomNavBarState extends State<_BottomNavBar>
     }
   }
 
-  int _indexAt(double dx, double width) =>
-      (dx / (width / _count)).floor().clamp(0, _count - 1);
+  int _indexAt(double dx, double width) {
+    const aiExtent = 64.0;
+    const gap = 10.0;
+    final aiStart = width - aiExtent;
+    if (dx >= aiStart - gap / 2) return _count - 1;
 
-  double _pillAt(double dx, double width) =>
-      (dx / (width / _count) - 0.5).clamp(0.0, _count - 1.0);
+    final mainBarWidth = width - aiExtent - gap;
+    return (dx / (mainBarWidth / (_count - 1))).floor().clamp(0, _count - 2);
+  }
+
+  double _pillAt(double dx, double width) => _indexAt(dx, width).toDouble();
 
   void _updateDrag(double dx, double width) {
     final target = _indexAt(dx, width);
@@ -173,7 +244,7 @@ class _BottomNavBarState extends State<_BottomNavBar>
     _animateTo(start, index.toDouble());
     await widget.onTap(index);
 
-    // Search is a pushed route, not a persisted tab. Once it closes, glide
+    // Notifications is a pushed route, not a persisted tab. Once it closes, glide
     // the capsule back to the currently selected persisted tab.
     if (mounted && widget.selectedIndex != index) {
       _animateTo(_display, widget.selectedIndex.toDouble());
@@ -183,102 +254,221 @@ class _BottomNavBarState extends State<_BottomNavBar>
   @override
   Widget build(BuildContext context) {
     final theme = FTheme.of(context);
-    final bg = theme.colors.background;
     final border = theme.colors.border;
     final primary = theme.colors.primary;
-    final barColor = bg;
+    final barColor = theme.colors.background.withValues(alpha: 0.52);
 
-    return Container(
-      width: double.infinity,
-      clipBehavior: Clip.none,
-      decoration: BoxDecoration(
-        color: barColor,
-        border: Border(top: BorderSide(color: border)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final width = constraints.maxWidth;
+    return SafeArea(
+      top: false,
+      minimum: const EdgeInsets.fromLTRB(14, 0, 14, 0),
+      child: SizedBox(
+        height: 64,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
 
-              return GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTapUp: (details) =>
-                    _select(_indexAt(details.localPosition.dx, width)),
-                onHorizontalDragStart: (details) {
-                  _ctrl.stop();
-                  _dragging = true;
-                  _wobble.repeat();
-                  _updateDrag(details.localPosition.dx, width);
-                },
-                onHorizontalDragUpdate: (details) =>
-                    _updateDrag(details.localPosition.dx, width),
-                onHorizontalDragEnd: (_) =>
-                    _select(_dragTarget ?? _display.round()),
-                onHorizontalDragCancel: () {
-                  final start = _display;
-                  _wobble.stop();
-                  setState(() {
-                    _dragging = false;
-                    _dragTarget = null;
-                  });
-                  _animateTo(start, widget.selectedIndex.toDouble());
-                },
-                onLongPressStart: (details) {
-                  _ctrl.stop();
-                  HapticFeedback.mediumImpact();
-                  _dragging = true;
-                  _wobble.repeat();
-                  _updateDrag(details.localPosition.dx, width);
-                },
-                onLongPressMoveUpdate: (details) =>
-                    _updateDrag(details.localPosition.dx, width),
-                onLongPressEnd: (_) => _select(_dragTarget ?? _display.round()),
-                child: AnimatedBuilder(
-                  animation: Listenable.merge([_ctrl, _wobble]),
-                  builder: (context, _) {
-                    final visualIndex = (_dragging ? _dragIndex : _toIndex)
-                        .round()
-                        .clamp(0, _count - 1);
+            return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTapUp: (details) =>
+                  _select(_indexAt(details.localPosition.dx, width)),
+              onHorizontalDragStart: (details) {
+                _ctrl.stop();
+                _dragging = true;
+                _wobble.repeat();
+                _updateDrag(details.localPosition.dx, width);
+              },
+              onHorizontalDragUpdate: (details) =>
+                  _updateDrag(details.localPosition.dx, width),
+              onHorizontalDragEnd: (_) =>
+                  _select(_dragTarget ?? _display.round()),
+              onHorizontalDragCancel: () {
+                final start = _display;
+                _wobble.stop();
+                setState(() {
+                  _dragging = false;
+                  _dragTarget = null;
+                });
+                _animateTo(start, widget.selectedIndex.toDouble());
+              },
+              onLongPressStart: (details) {
+                _ctrl.stop();
+                HapticFeedback.mediumImpact();
+                _dragging = true;
+                _wobble.repeat();
+                _updateDrag(details.localPosition.dx, width);
+              },
+              onLongPressMoveUpdate: (details) =>
+                  _updateDrag(details.localPosition.dx, width),
+              onLongPressEnd: (_) => _select(_dragTarget ?? _display.round()),
+              child: AnimatedBuilder(
+                animation: Listenable.merge([_ctrl, _wobble, _aiBorder]),
+                builder: (context, _) {
+                  final visualIndex = (_dragging ? _dragIndex : _toIndex)
+                      .round()
+                      .clamp(0, _count - 1);
+                  final items = widget.items;
+                  final aiItem = items.last;
+                  final aiSelected = visualIndex == _count - 1;
+                  final animateAiBorder = widget.animateAiBorder;
 
-                    return Row(
-                      children: List.generate(_count, (i) {
-                        final item = _BottomNavBar._items[i];
-                        final selected = visualIndex == i;
-                        return Expanded(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _AnimatedNavIcon(
-                                asset: item.asset,
-                                selected: selected,
-                              ),
-                              const SizedBox(height: 3),
-                              AnimatedDefaultTextStyle(
-                                duration: const Duration(milliseconds: 180),
-                                style: theme.typography.body.xs.copyWith(
-                                  fontSize: 10,
-                                  height: 1,
-                                  color: selected
-                                      ? primary
-                                      : theme.colors.mutedForeground,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                child: Text(item.label),
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 62,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(32),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.12),
+                                blurRadius: 18,
+                                offset: const Offset(0, 7),
                               ),
                             ],
                           ),
-                        );
-                      }),
-                    );
-                  },
-                ),
-              );
-            },
-          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(32),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: barColor,
+                                  borderRadius: BorderRadius.circular(32),
+                                  border: Border.all(color: border),
+                                ),
+                                child: Row(
+                                  children: List.generate(_count - 1, (i) {
+                                    final item = items[i];
+                                    final selected = visualIndex == i;
+                                    return Expanded(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          if (i == 3)
+                                            _NotificationNavIcon(
+                                              selected: selected,
+                                            )
+                                          else
+                                            _AnimatedNavIcon(
+                                              asset: item.asset,
+                                              icon: item.icon,
+                                              selected: selected,
+                                            ),
+                                          const SizedBox(height: 3),
+                                          AnimatedDefaultTextStyle(
+                                            duration: const Duration(
+                                              milliseconds: 180,
+                                            ),
+                                            style: theme.typography.body.xs
+                                                .copyWith(
+                                                  fontSize: 10,
+                                                  height: 1,
+                                                  color: selected
+                                                      ? primary
+                                                      : theme
+                                                            .colors
+                                                            .mutedForeground,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                            child: FittedBox(
+                                              fit: BoxFit.scaleDown,
+                                              child: Text(
+                                                item.label.tr,
+                                                maxLines: 1,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Semantics(
+                        label: 'ai_assistant'.tr,
+                        button: true,
+                        selected: aiSelected,
+                        child: Container(
+                          width: 64,
+                          height: 64,
+                          padding: EdgeInsets.all(animateAiBorder ? 2.5 : 0),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: animateAiBorder
+                                ? SweepGradient(
+                                    transform: GradientRotation(
+                                      _aiBorder.value * 6.28318530718,
+                                    ),
+                                    colors: [
+                                      primary.withValues(alpha: 0),
+                                      primary.withValues(alpha: 0.75),
+                                      Colors.white.withValues(
+                                        alpha: context.isDark ? 0.42 : 0.9,
+                                      ),
+                                      primary,
+                                      primary.withValues(alpha: 0),
+                                    ],
+                                  )
+                                : null,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.2),
+                                blurRadius: 16,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: ClipOval(
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                              child: Container(
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color:
+                                      (context.isDark
+                                              ? Colors.black
+                                              : Colors.white)
+                                          .withValues(alpha: 0.68),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: aiSelected ? primary : border,
+                                    width: aiSelected ? 2.5 : 1,
+                                  ),
+                                ),
+                                child: Transform.scale(
+                                  scale: 1.18,
+                                  child: _AnimatedNavIcon(
+                                    asset: aiItem.asset,
+                                    icon: aiItem.icon,
+                                    selected: aiSelected,
+                                    size: 58,
+                                    alwaysAnimate: true,
+                                    useOriginalColors: true,
+                                    playbackSpeed: 1.65,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            );
+          },
         ),
       ),
     );
@@ -290,10 +480,23 @@ class _BottomNavBarState extends State<_BottomNavBar>
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _AnimatedNavIcon extends StatefulWidget {
-  const _AnimatedNavIcon({required this.asset, required this.selected});
+  const _AnimatedNavIcon({
+    this.asset,
+    this.icon,
+    required this.selected,
+    this.size = 28,
+    this.alwaysAnimate = false,
+    this.useOriginalColors = false,
+    this.playbackSpeed = 1,
+  });
 
-  final String asset;
+  final String? asset;
+  final IconData? icon;
   final bool selected;
+  final double size;
+  final bool alwaysAnimate;
+  final bool useOriginalColors;
+  final double playbackSpeed;
 
   @override
   State<_AnimatedNavIcon> createState() => _AnimatedNavIconState();
@@ -307,7 +510,13 @@ class _AnimatedNavIconState extends State<_AnimatedNavIcon>
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this);
+    // Lottie replaces this with the composition's duration when loaded. The
+    // fallback keeps selection changes safe before that callback runs and
+    // powers the static settings icon's rotation.
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
   }
 
   @override
@@ -317,7 +526,15 @@ class _AnimatedNavIconState extends State<_AnimatedNavIcon>
   }
 
   void _onLoaded(LottieComposition composition) {
-    _ctrl.duration = composition.duration;
+    _ctrl.duration = Duration(
+      microseconds: (composition.duration.inMicroseconds / widget.playbackSpeed)
+          .round(),
+    );
+    if (widget.alwaysAnimate) {
+      _initialised = true;
+      if (!_ctrl.isAnimating) _ctrl.repeat();
+      return;
+    }
     if (!_initialised) {
       _initialised = true;
       _ctrl.value = widget.selected ? 1.0 : 0.0;
@@ -327,6 +544,10 @@ class _AnimatedNavIconState extends State<_AnimatedNavIcon>
   @override
   void didUpdateWidget(_AnimatedNavIcon oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.alwaysAnimate) {
+      if (!_ctrl.isAnimating) _ctrl.repeat();
+      return;
+    }
     if (oldWidget.selected != widget.selected) {
       if (widget.selected) {
         _ctrl.forward();
@@ -343,18 +564,71 @@ class _AnimatedNavIconState extends State<_AnimatedNavIcon>
         ? theme.colors.primary
         : theme.colors.mutedForeground;
 
-    return AnimatedBuilder(
-      animation: _ctrl,
-      builder: (context, _) => ColorFiltered(
-        colorFilter: ColorFilter.mode(tint, BlendMode.srcATop),
-        child: Lottie.asset(
-          widget.asset,
-          controller: _ctrl,
-          width: 28,
-          height: 28,
-          onLoaded: _onLoaded,
-        ),
-      ),
+    if (widget.asset == null) {
+      if (widget.icon != FLucideIcons.settings) {
+        return Icon(widget.icon, color: tint, size: widget.size);
+      }
+      return RotationTransition(
+        turns: _ctrl,
+        child: Icon(widget.icon, color: tint, size: widget.size),
+      );
+    }
+
+    final lottie = Lottie.asset(
+      widget.asset!,
+      controller: _ctrl,
+      width: widget.size,
+      height: widget.size,
+      renderCache: RenderCache.raster,
+      onLoaded: _onLoaded,
+    );
+
+    if (widget.useOriginalColors) return lottie;
+    return ColorFiltered(
+      colorFilter: ColorFilter.mode(tint, BlendMode.srcATop),
+      child: lottie,
+    );
+  }
+}
+
+class _NotificationNavIcon extends StatelessWidget {
+  const _NotificationNavIcon({required this.selected});
+
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        _AnimatedNavIcon(icon: FLucideIcons.bell, selected: selected),
+        Obx(() {
+          final count = Get.find<NotificationsController>().unreadCount;
+          if (count == 0) return const SizedBox.shrink();
+          return Positioned(
+            right: -7,
+            top: -5,
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 15, minHeight: 15),
+              padding: const EdgeInsets.symmetric(horizontal: 3),
+              alignment: Alignment.center,
+              decoration: const BoxDecoration(
+                color: AppColors.error,
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                count > 9 ? '9+' : '$count',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 8,
+                  fontWeight: FontWeight.w700,
+                  height: 1,
+                ),
+              ),
+            ),
+          );
+        }),
+      ],
     );
   }
 }

@@ -24,6 +24,8 @@ abstract final class AppRoutes {
   static const notifications = '/notifications';
   static const settings = '/settings';
   static const selectRole = '/select-role';
+  static const roleWelcome = '/role-welcome';
+  static const preferences = '/preferences';
   static const devLogs = '/dev-logs';
   static const search = '/search';
   static const jobAlerts = '/job-alerts';

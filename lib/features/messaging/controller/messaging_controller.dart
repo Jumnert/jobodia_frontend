@@ -26,6 +26,40 @@ class MessagingController extends GetxController {
     }
   }
 
+  void markUnread(String id) {
+    final conversation = conversations.firstWhereOrNull((c) => c.id == id);
+    if (conversation == null) return;
+    conversation.unreadCount = conversation.unreadCount == 0
+        ? 1
+        : conversation.unreadCount;
+    conversations.refresh();
+  }
+
+  void toggleMuted(String id) {
+    final conversation = conversations.firstWhereOrNull((c) => c.id == id);
+    if (conversation == null) return;
+    conversation.isMuted = !conversation.isMuted;
+    conversations.refresh();
+  }
+
+  void archive(String id) {
+    final conversation = conversations.firstWhereOrNull((c) => c.id == id);
+    if (conversation == null) return;
+    conversation.isArchived = true;
+    conversations.refresh();
+  }
+
+  void block(String id) {
+    final conversation = conversations.firstWhereOrNull((c) => c.id == id);
+    if (conversation == null) return;
+    conversation.isBlocked = true;
+    conversations.refresh();
+  }
+
+  void deleteConversation(String id) {
+    conversations.removeWhere((conversation) => conversation.id == id);
+  }
+
   void sendMessage(String conversationId, String text) {
     final msg = MessageModel(
       id: _uuid.v4(),
@@ -53,6 +87,10 @@ class MessagingController extends GetxController {
         lastMessage: text,
         lastMessageTime: DateTime.now(),
         unreadCount: c.unreadCount,
+        isOrganization: c.isOrganization,
+        isMuted: c.isMuted,
+        isArchived: c.isArchived,
+        isBlocked: c.isBlocked,
       );
     }
   }
@@ -90,6 +128,7 @@ class MessagingController extends GetxController {
       lastMessage: 'Are you free for a call tomorrow?',
       lastMessageTime: DateTime.now().subtract(const Duration(minutes: 5)),
       unreadCount: 1,
+      isOrganization: true,
     ),
     ConversationModel(
       id: 'c2',
@@ -98,6 +137,42 @@ class MessagingController extends GetxController {
       jobTitle: 'Mobile Engineer',
       lastMessage: 'Thanks for applying!',
       lastMessageTime: DateTime.now().subtract(const Duration(days: 1)),
+      isOrganization: true,
+    ),
+    ConversationModel(
+      id: 'c3',
+      recruiterName: 'Sophea Lim',
+      recruiterCompany: 'Wing Bank',
+      jobTitle: 'Product Designer',
+      lastMessage: 'We would like to invite you for an interview.',
+      lastMessageTime: DateTime.now().subtract(const Duration(minutes: 28)),
+      unreadCount: 3,
+      isOrganization: true,
+    ),
+    ConversationModel(
+      id: 'c4',
+      recruiterName: 'Dara Sok',
+      recruiterCompany: 'Dara Sok',
+      jobTitle: 'Career connection',
+      lastMessage: 'Thank you for sharing your portfolio.',
+      lastMessageTime: DateTime.now().subtract(const Duration(hours: 3)),
+    ),
+    ConversationModel(
+      id: 'c5',
+      recruiterName: 'Malis Chan',
+      recruiterCompany: 'Smart Axiata',
+      jobTitle: 'Flutter Developer',
+      lastMessage: 'The hiring team has reviewed your application.',
+      lastMessageTime: DateTime.now().subtract(const Duration(days: 2)),
+      isOrganization: true,
+    ),
+    ConversationModel(
+      id: 'c6',
+      recruiterName: 'Vuthy Chea',
+      recruiterCompany: 'Vuthy Chea',
+      jobTitle: 'Mobile Engineer',
+      lastMessage: 'Are you available sometime next week?',
+      lastMessageTime: DateTime.now().subtract(const Duration(days: 7)),
     ),
   ];
 

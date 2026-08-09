@@ -19,18 +19,23 @@ import 'package:jobodia_frontend/features/search/controller/search_controller.da
 import 'package:jobodia_frontend/features/settings/controller/theme_controller.dart';
 import 'package:jobodia_frontend/features/job_detail/controller/notes_controller.dart';
 import 'package:jobodia_frontend/features/job_alerts/controller/job_alert_controller.dart';
+import 'package:jobodia_frontend/features/job_post/controller/job_post_controller.dart';
 import 'package:jobodia_frontend/features/feature_discovery/controller/feature_discovery_controller.dart';
 import 'package:jobodia_frontend/services/secure_storage_service.dart';
+import 'package:jobodia_frontend/services/app_security_service.dart';
+import 'package:jobodia_frontend/app/localization/language_controller.dart';
 
 class InitialBinding extends Bindings {
   @override
   void dependencies() {
     Get.put(SecureStorageService(), permanent: true);
+    Get.put(AppSecurityService(), permanent: true);
     Get.put(const AuthRepository(), permanent: true);
     Get.put(AuthController(Get.find<AuthRepository>()), permanent: true);
     Get.put(MainNavController(), permanent: true);
     Get.put(RoleController(), permanent: true);
     Get.put(ThemeController(), permanent: true);
+    Get.put(LanguageController(), permanent: true);
     Get.put(NotesController(), permanent: true);
     Get.put(SavedJobsController(), permanent: true);
     Get.put(ApplicationsController(), permanent: true);
@@ -43,6 +48,7 @@ class InitialBinding extends Bindings {
     Get.put(InterviewScheduleController(), permanent: true);
     Get.put(JobAlertController(), permanent: true);
     Get.put(FeatureDiscoveryController(), permanent: true);
+    Get.lazyPut(JobPostController.new, fenix: true);
 
     Get.lazyPut(() => jobodia_home.HomeController(), fenix: true);
     Get.lazyPut(() => jobodia_ai.AiChatController(), fenix: true);

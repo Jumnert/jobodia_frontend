@@ -52,6 +52,8 @@ dependencies:
   read_pdf_text: ^0.3.1
   archive: ^4.0.9
   lottie: ^3.5.1
+  fl_chart: ^1.2.0
+  local_auth: ^3.0.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -88,9 +90,24 @@ flutter:
     - assets/images/ai_chat/
     - assets/images/themes/
     - assets/images/profile_icons/
+    - assets/images/profile/
     - assets/images/pricing/
+    - assets/images/empty_states/
     - assets/data/
     - assets/animations/nav_icons/
+
+  fonts:
+    - family: GoogleSansFlex
+      fonts:
+        - asset: assets/fonts/google_sans_flex/GoogleSansFlex-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/google_sans_flex/GoogleSansFlex-Medium.ttf
+          weight: 500
+    - family: KantumruyPro
+      fonts:
+        - asset: assets/fonts/kantumruy_pro/KantumruyPro-Variable.ttf
+        - asset: assets/fonts/kantumruy_pro/KantumruyPro-Italic-Variable.ttf
+          style: italic
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

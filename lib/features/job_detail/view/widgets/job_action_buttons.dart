@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 class JobActionButtons extends StatelessWidget {
@@ -33,7 +34,7 @@ class JobActionButtons extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 10),
             ),
             child: Text(
-              isAboutExpanded ? 'Read less' : 'Read more',
+              isAboutExpanded ? 'show_less'.tr : 'read_more'.tr,
               style: const TextStyle(fontWeight: FontWeight.w800),
             ),
           ),
@@ -79,7 +80,7 @@ class JobActionButtons extends StatelessWidget {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                'Applied',
+                                'applied'.tr,
                                 style: TextStyle(
                                   color: palette.textSecondary,
                                   fontWeight: FontWeight.w800,
@@ -88,7 +89,7 @@ class JobActionButtons extends StatelessWidget {
                             ],
                           )
                         : Text(
-                            'Apply for this job',
+                            'apply_for_job'.tr,
                             style: TextStyle(
                               color: palette.scaffold,
                               fontWeight: FontWeight.w800,

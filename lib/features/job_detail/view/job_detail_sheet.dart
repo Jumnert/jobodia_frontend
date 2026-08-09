@@ -5,7 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
+import 'package:jobodia_frontend/core/utils/localized_time_ago.dart';
 import 'package:jobodia_frontend/features/home/model/job_feed_model.dart';
+import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
 import 'package:jobodia_frontend/features/job_detail/controller/job_detail_controller.dart';
 
 /// Opens a draggable, scrollable job preview as a Forui modal sheet.
@@ -13,12 +15,18 @@ import 'package:jobodia_frontend/features/job_detail/controller/job_detail_contr
 /// It intentionally blocks the screen behind it, so a tap on the scrim closes
 /// the preview just like the close button does.
 void showJobDetailSheet(BuildContext context, JobFeedModel job) {
-  unawaited(HapticFeedback.lightImpact());
+  unawaited(_showJobDetailSheets(context, job));
+}
 
-  final jobController = JobDetailController(source: job);
-
-  unawaited(
-    showFSheet<void>(
+Future<void> _showJobDetailSheets(
+  BuildContext context,
+  JobFeedModel initialJob,
+) async {
+  var currentJob = initialJob;
+  while (context.mounted) {
+    unawaited(HapticFeedback.lightImpact());
+    final jobController = JobDetailController(source: currentJob);
+    final selectedJob = await showFSheet<JobFeedModel>(
       context: context,
       side: FLayout.btt,
       // null lets the DraggableScrollableSheet own its sizing + drag behavior.
@@ -26,11 +34,14 @@ void showJobDetailSheet(BuildContext context, JobFeedModel job) {
       barrierDismissible: true,
       builder: (sheetContext) => _JobDetailSheet(
         controller: jobController,
-        source: job,
+        source: currentJob,
         onClose: () => Navigator.of(sheetContext).pop(),
+        onSelectSimilar: (job) => Navigator.of(sheetContext).pop(job),
       ),
-    ),
-  );
+    );
+    if (selectedJob == null || !context.mounted) return;
+    currentJob = selectedJob;
+  }
 }
 
 class _JobDetailSheet extends StatelessWidget {
@@ -38,11 +49,13 @@ class _JobDetailSheet extends StatelessWidget {
     required this.controller,
     required this.source,
     required this.onClose,
+    required this.onSelectSimilar,
   });
 
   final JobDetailController controller;
   final JobFeedModel source;
   final VoidCallback onClose;
+  final ValueChanged<JobFeedModel> onSelectSimilar;
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +94,7 @@ class _JobDetailSheet extends StatelessWidget {
                     const SizedBox(height: 20),
                     if (source.tags.isNotEmpty) ...[
                       Text(
-                        'Skills & requirements',
+                        'key_skills'.tr,
                         style: TextStyle(
                           color: palette.textPrimary,
                           fontSize: 16,
@@ -93,7 +106,7 @@ class _JobDetailSheet extends StatelessWidget {
                       const SizedBox(height: 18),
                     ],
                     Text(
-                      'Role overview',
+                      'role_overview'.tr,
                       style: TextStyle(
                         color: palette.textPrimary,
                         fontSize: 16,
@@ -102,13 +115,30 @@ class _JobDetailSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      source.description,
+                      source.fullDescription,
                       style: TextStyle(
                         color: palette.textSecondary,
                         fontSize: 14,
                         height: 1.5,
                       ),
                     ),
+                    const SizedBox(height: 20),
+                    _BulletSection(
+                      title: 'what_you_do'.tr,
+                      items: source.responsibilities,
+                    ),
+                    const SizedBox(height: 20),
+                    _BulletSection(
+                      title: 'what_looking_for'.tr,
+                      items: source.requirements,
+                    ),
+                    const SizedBox(height: 20),
+                    _BulletSection(
+                      title: 'what_we_offer'.tr,
+                      items: source.benefits,
+                    ),
+                    const SizedBox(height: 22),
+                    _SimilarJobs(source: source, onSelected: onSelectSimilar),
                   ],
                 ),
               ),
@@ -122,6 +152,118 @@ class _JobDetailSheet extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class _BulletSection extends StatelessWidget {
+  const _BulletSection({required this.title, required this.items});
+
+  final String title;
+  final List<String> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: palette.textPrimary,
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 9),
+        for (final item in items)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 7),
+                  child: Container(
+                    width: 5,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: FTheme.of(context).colors.primary,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    item,
+                    style: TextStyle(
+                      color: palette.textSecondary,
+                      fontSize: 14,
+                      height: 1.45,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _SimilarJobs extends StatelessWidget {
+  const _SimilarJobs({required this.source, required this.onSelected});
+
+  final JobFeedModel source;
+  final ValueChanged<JobFeedModel> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!Get.isRegistered<HomeController>()) return const SizedBox.shrink();
+    final jobs = List<JobFeedModel>.of(Get.find<HomeController>().jobs)
+      ..removeWhere((job) => job.id == source.id)
+      ..sort((a, b) => _score(b).compareTo(_score(a)));
+    final similar = jobs.take(4).toList(growable: false);
+    if (similar.isEmpty) return const SizedBox.shrink();
+
+    final palette = context.palette;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'similar_jobs'.tr,
+          style: TextStyle(
+            color: palette.textPrimary,
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 10),
+        FTileGroup(
+          children: [
+            for (final job in similar)
+              FTile(
+                prefix: const Icon(FLucideIcons.briefcaseBusiness),
+                title: Text(job.title),
+                subtitle: Text('${job.company} · ${job.location}'),
+                details: Text('${job.matchPercent}%'),
+                suffix: const Icon(FLucideIcons.chevronRight),
+                onPress: () => onSelected(job),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  int _score(JobFeedModel candidate) {
+    final sharedTags = candidate.tags
+        .where((tag) => source.tags.contains(tag))
+        .length;
+    return sharedTags * 5 +
+        (candidate.level == source.level ? 2 : 0) +
+        (candidate.location == source.location ? 1 : 0);
   }
 }
 
@@ -189,7 +331,9 @@ class _SheetHeader extends StatelessWidget {
             const SizedBox(width: 12),
             ClipOval(
               child: Material(
-                color: colors.primary,
+                color: colors.primary.withValues(
+                  alpha: context.isDark ? 0.14 : 0.1,
+                ),
                 child: InkWell(
                   onTap: onClose,
                   child: SizedBox(
@@ -198,7 +342,7 @@ class _SheetHeader extends StatelessWidget {
                     child: Icon(
                       FLucideIcons.x,
                       size: 18,
-                      color: colors.primaryForeground,
+                      color: colors.primary.withValues(alpha: 0.82),
                     ),
                   ),
                 ),
@@ -210,7 +354,9 @@ class _SheetHeader extends StatelessWidget {
           const SizedBox(height: 12),
           FBadge(
             variant: FBadgeVariant.primary,
-            child: Text('${source.matchPercent}% match'),
+            child: Text(
+              'match_percent'.trParams({'percent': '${source.matchPercent}'}),
+            ),
           ),
         ],
       ],
@@ -227,14 +373,14 @@ class _SheetOverview extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final items = <(IconData, String, String)>[
-      (FLucideIcons.mapPin, 'Location', source.location),
-      (FLucideIcons.briefcaseBusiness, 'Experience', source.level),
+      (FLucideIcons.mapPin, 'location'.tr, source.location),
+      (FLucideIcons.briefcaseBusiness, 'experience'.tr, source.level),
       if (source.salary.isNotEmpty)
-        (FLucideIcons.banknote, 'Salary', source.salary),
+        (FLucideIcons.banknote, 'salary'.tr, source.salary),
       if (source.distance.isNotEmpty)
-        (FLucideIcons.navigation, 'Distance', source.distance),
-      (FLucideIcons.clock3, 'Posted', source.timeAgo),
-      (FLucideIcons.building2, 'Company', source.companyTag),
+        (FLucideIcons.navigation, 'distance'.tr, source.distance),
+      (FLucideIcons.clock3, 'posted'.tr, localizedTimeAgo(source.timeAgo)),
+      (FLucideIcons.building2, 'company'.tr, source.companyTag),
     ];
 
     return Wrap(
@@ -371,7 +517,9 @@ class _SheetActions extends StatelessWidget {
             child: Obx(
               () => FButton(
                 onPress: controller.isApplied ? null : controller.applyForJob,
-                child: Text(controller.isApplied ? 'Applied' : 'Apply now'),
+                child: Text(
+                  controller.isApplied ? 'applied'.tr : 'apply_now'.tr,
+                ),
               ),
             ),
           ),

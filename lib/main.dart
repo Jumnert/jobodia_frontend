@@ -3,6 +3,8 @@ import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:jobodia_frontend/app/bindings/initial_binding.dart';
+import 'package:jobodia_frontend/app/localization/app_translations.dart';
+import 'package:jobodia_frontend/app/localization/language_controller.dart';
 import 'package:jobodia_frontend/app/routes/app_pages.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/app/theme/app_theme.dart';
@@ -27,6 +29,7 @@ class JobodiaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final preset = ThemeController.readStoredPreset();
+    final initialLanguage = LanguageController.readStoredLanguage();
     return GetMaterialApp(
       title: 'Jobodia',
       debugShowCheckedModeBanner: false,
@@ -37,34 +40,53 @@ class JobodiaApp extends StatelessWidget {
         page: () => const _UnknownRouteScreen(),
       ),
       getPages: AppPages.pages,
-      theme: AppTheme.forPreset(preset),
-      darkTheme: AppTheme.forPreset(preset, brightness: Brightness.dark),
+      translations: AppTranslations(),
+      locale: initialLanguage.locale,
+      fallbackLocale: const Locale('en'),
+      theme: AppTheme.forPreset(preset, fontFamily: initialLanguage.fontFamily),
+      darkTheme: AppTheme.forPreset(
+        preset,
+        brightness: Brightness.dark,
+        fontFamily: initialLanguage.fontFamily,
+      ),
       themeMode: _resolveThemeMode(),
       builder: (context, child) {
         final brightness = Theme.of(context).brightness;
         final media = MediaQuery.of(context);
         final appChild = child ?? const SizedBox.shrink();
         final themeController = Get.find<ThemeController>();
-        return Obx(
-          () => MediaQuery(
-            data: media.copyWith(platformBrightness: brightness),
-            child: FTheme(
-              data: brightness == Brightness.light
-                  ? forui_theme.lightTheme
-                  : forui_theme.darkTheme,
-              child: FToaster(
-                child: FTooltipGroup(
-                  child: SplashScreen(
-                    child: SeasonalAtmosphere(
-                      preset: themeController.preset.value,
-                      child: appChild,
+        final languageController = Get.find<LanguageController>();
+        return Obx(() {
+          final fontFamily = languageController.current.fontFamily;
+          final materialTheme = AppTheme.forPreset(
+            themeController.preset.value,
+            brightness: brightness,
+            fontFamily: fontFamily,
+          );
+          final foruiTheme = brightness == Brightness.light
+              ? forui_theme.lightThemeWithFont(fontFamily: fontFamily)
+              : forui_theme.darkThemeWithFont(fontFamily: fontFamily);
+
+          return Theme(
+            data: materialTheme,
+            child: MediaQuery(
+              data: media.copyWith(platformBrightness: brightness),
+              child: FTheme(
+                data: foruiTheme,
+                child: FToaster(
+                  child: FTooltipGroup(
+                    child: SplashScreen(
+                      child: SeasonalAtmosphere(
+                        preset: themeController.preset.value,
+                        child: appChild,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        );
+          );
+        });
       },
     );
   }

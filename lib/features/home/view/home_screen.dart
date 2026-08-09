@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
@@ -8,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/app/theme/app_theme.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
+import 'package:jobodia_frontend/core/widgets/company_avatar.dart';
 import 'package:jobodia_frontend/core/widgets/error_state.dart';
 import 'package:jobodia_frontend/core/widgets/paginated_list_view.dart';
 import 'package:jobodia_frontend/core/widgets/skeleton_card.dart';
@@ -42,8 +42,8 @@ class HomeScreen extends GetView<AuthController> {
             child: Obx(() {
               if (homeController.hasError.value) {
                 return ErrorState(
-                  message: 'Failed to load jobs',
-                  subtitle: 'Please check your connection and try again.',
+                  message: 'failed_load_jobs'.tr,
+                  subtitle: 'check_connection'.tr,
                   onRetry: homeController.retryLoading,
                 );
               }
@@ -61,7 +61,7 @@ class HomeScreen extends GetView<AuthController> {
               final pagedJobs = jobs;
 
               return RefreshIndicator(
-                color: AppColors.primary,
+                color: AppColors.brandPrimary,
                 backgroundColor: palette.surface,
                 onRefresh: () async {
                   await Future<void>.delayed(const Duration(milliseconds: 600));
@@ -124,7 +124,6 @@ class HomeScreen extends GetView<AuthController> {
             child: HomeTopBar(
               name: user?.name ?? 'User',
               avatarUrl: user?.avatarUrl,
-              onNotifications: () => Get.toNamed<void>(AppRoutes.notifications),
             ),
           ),
         ],
@@ -145,7 +144,7 @@ class _JobListingHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Find your next move',
+          'find_next_move'.tr,
           style: TextStyle(
             color: palette.textPrimary,
             fontSize: 25,
@@ -156,7 +155,7 @@ class _JobListingHeader extends StatelessWidget {
         ),
         const SizedBox(height: 7),
         Text(
-          '$jobCount opportunities picked for you',
+          'opportunities_picked'.trParams({'count': '$jobCount'}),
           style: TextStyle(
             color: palette.textSecondary,
             fontSize: 13,
@@ -182,36 +181,27 @@ class _EmptyJobListing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    const title = 'No jobs found';
+    final title = hasSearch || hasFilters
+        ? 'no_jobs_match'.tr
+        : 'no_jobs_available'.tr;
     final subtitle = hasSearch || hasFilters
-        ? 'Try clearing your search and filters to see every opportunity.'
-        : 'There are no opportunities to show right now.';
+        ? 'empty_search_help'.tr
+        : 'empty_jobs_help'.tr;
 
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(top: 2),
-      padding: const EdgeInsets.fromLTRB(24, 32, 24, 28),
-      decoration: BoxDecoration(
-        color: palette.surface.withValues(alpha: 0.88),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: palette.border),
-      ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
       child: Column(
         children: [
-          Container(
-            width: 58,
-            height: 58,
-            decoration: BoxDecoration(
-              color: AppColors.brandTeal.withValues(alpha: 0.11),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              FLucideIcons.compass,
-              color: AppColors.brandTeal,
-              size: 28,
+          SizedBox(
+            width: 220,
+            height: 220,
+            child: Image.asset(
+              'assets/images/empty_states/no_jobs_available.png',
+              fit: BoxFit.contain,
+              semanticLabel: 'No jobs available',
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           Text(
             title,
             textAlign: TextAlign.center,
@@ -231,23 +221,15 @@ class _EmptyJobListing extends StatelessWidget {
               height: 1.4,
             ),
           ),
-          const SizedBox(height: 18),
-          FilledButton.icon(
-            onPressed: onReset,
-            style: FilledButton.styleFrom(
-              backgroundColor: palette.textPrimary,
-              foregroundColor: palette.scaffold,
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
+          if (hasSearch || hasFilters) ...[
+            const SizedBox(height: 18),
+            FButton(
+              variant: FButtonVariant.outline,
+              onPress: onReset,
+              prefix: const Icon(FLucideIcons.rotateCcw, size: 17),
+              child: Text('clear_search_filters'.tr),
             ),
-            icon: const Icon(FLucideIcons.refreshCw, size: 18),
-            label: const Text(
-              'Show all jobs',
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
-          ),
+          ],
         ],
       ),
     );
@@ -614,77 +596,261 @@ class _JobFeedContextMenu extends StatelessWidget {
     final homeController = Get.find<HomeController>();
     return LayoutBuilder(
       builder: (context, constraints) {
-        return CupertinoContextMenu(
-          actions: [
-            CupertinoContextMenuAction(
-              trailingIcon: CupertinoIcons.flag,
-              onPressed: () {
+        return SizedBox(
+          width: constraints.maxWidth,
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(24),
+              onTap: () {
                 unawaited(HapticFeedback.lightImpact());
-                Navigator.of(context).pop();
-                Get.toNamed<void>(
-                  AppRoutes.report,
-                  arguments: {'jobId': job.id, 'jobTitle': job.title},
+                showJobDetailSheet(context, job);
+              },
+              onLongPress: () {
+                unawaited(HapticFeedback.mediumImpact());
+                _showJobActions(
+                  context,
+                  job: job,
+                  savedJobs: savedJobs,
+                  homeController: homeController,
                 );
               },
-              child: const Text('Report'),
-            ),
-            CupertinoContextMenuAction(
-              trailingIcon: savedJobs.isSaved(job.id)
-                  ? CupertinoIcons.heart_fill
-                  : CupertinoIcons.heart,
-              onPressed: () {
-                unawaited(HapticFeedback.lightImpact());
-                savedJobs.toggleSave(job);
-                Navigator.of(context).pop();
-              },
-              child: Text(savedJobs.isSaved(job.id) ? 'Unfave' : 'Fave'),
-            ),
-            CupertinoContextMenuAction(
-              trailingIcon: CupertinoIcons.share,
-              onPressed: () {
-                unawaited(HapticFeedback.lightImpact());
-                Navigator.of(context).pop();
-                SharePlus.instance.share(
-                  ShareParams(
-                    text: '${job.title} at ${job.company} — ${job.location}',
-                  ),
-                );
-              },
-              child: const Text('Share'),
-            ),
-            CupertinoContextMenuAction(
-              trailingIcon: CupertinoIcons.hand_thumbsdown,
-              isDestructiveAction: true,
-              onPressed: () {
-                unawaited(HapticFeedback.lightImpact());
-                Navigator.of(context).pop();
-                homeController.dismiss(job);
-              },
-              child: const Text('Not interested'),
-            ),
-          ],
-          child: SizedBox(
-            width: constraints.maxWidth,
-            child: Material(
-              type: MaterialType.transparency,
-              child: InkWell(
-                onTap: () {
-                  unawaited(HapticFeedback.lightImpact());
-                  showJobDetailSheet(context, job);
-                },
-                child: Obx(
-                  () => JobFeedCard(
-                    job: job,
-                    colorIndex: colorIndex,
-                    isSaved: savedJobs.isSaved(job.id),
-                    onToggleSave: () => savedJobs.toggleSave(job),
-                  ),
+              child: Obx(
+                () => JobFeedCard(
+                  job: job,
+                  colorIndex: colorIndex,
+                  isSaved: savedJobs.isSaved(job.id),
+                  onToggleSave: () => savedJobs.toggleSave(job),
                 ),
               ),
             ),
           ),
         );
       },
+    );
+  }
+
+  void _showJobActions(
+    BuildContext context, {
+    required JobFeedModel job,
+    required SavedJobsController savedJobs,
+    required HomeController homeController,
+  }) {
+    showFSheet<void>(
+      context: context,
+      side: FLayout.btt,
+      mainAxisMaxRatio: 0.72,
+      useSafeArea: true,
+      barrierDismissible: true,
+      builder: (sheetContext) => _JobActionsSheet(
+        job: job,
+        isSaved: savedJobs.isSaved(job.id),
+        onView: () {
+          Navigator.of(sheetContext).pop();
+          showJobDetailSheet(context, job);
+        },
+        onSave: () {
+          savedJobs.toggleSave(job);
+          Navigator.of(sheetContext).pop();
+        },
+        onShare: () {
+          Navigator.of(sheetContext).pop();
+          SharePlus.instance.share(
+            ShareParams(
+              text: '${job.title} at ${job.company} — ${job.location}',
+            ),
+          );
+        },
+        onDismiss: () {
+          homeController.dismiss(job);
+          Navigator.of(sheetContext).pop();
+        },
+        onReport: () {
+          Navigator.of(sheetContext).pop();
+          Get.toNamed<void>(
+            AppRoutes.report,
+            arguments: {'jobId': job.id, 'jobTitle': job.title},
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _JobActionsSheet extends StatelessWidget {
+  const _JobActionsSheet({
+    required this.job,
+    required this.isSaved,
+    required this.onView,
+    required this.onSave,
+    required this.onShare,
+    required this.onDismiss,
+    required this.onReport,
+  });
+
+  final JobFeedModel job;
+  final bool isSaved;
+  final VoidCallback onView;
+  final VoidCallback onSave;
+  final VoidCallback onShare;
+  final VoidCallback onDismiss;
+  final VoidCallback onReport;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = FTheme.of(context);
+    final palette = context.palette;
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
+      child: ColoredBox(
+        color: theme.colors.background,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            16,
+            10,
+            16,
+            MediaQuery.paddingOf(context).bottom + 18,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 38,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.colors.border,
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Row(
+                  children: [
+                    CompanyAvatar(companyName: job.company, size: 46),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            job.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.typography.body.md.copyWith(
+                              color: palette.textPrimary,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            '${job.company} · ${job.location}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.typography.body.xs.copyWith(
+                              color: palette.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: FButton(
+                      onPress: onView,
+                      prefix: const Icon(FLucideIcons.eye, size: 17),
+                      child: Text('view_job'.tr),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FButton(
+                      variant: FButtonVariant.outline,
+                      onPress: onSave,
+                      prefix: Icon(
+                        isSaved
+                            ? FLucideIcons.bookmarkCheck
+                            : FLucideIcons.bookmark,
+                        size: 17,
+                      ),
+                      child: Text(isSaved ? 'saved'.tr : 'save'.tr),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              FTileGroup(
+                children: [
+                  FTile(
+                    prefix: const _JobActionIcon(
+                      icon: FLucideIcons.share2,
+                      color: AppColors.info,
+                    ),
+                    title: Text('share_opportunity'.tr),
+                    subtitle: Text('share_opportunity_help'.tr),
+                    suffix: const Icon(FLucideIcons.chevronRight),
+                    onPress: onShare,
+                  ),
+                  FTile(
+                    prefix: const _JobActionIcon(
+                      icon: FLucideIcons.eyeOff,
+                      color: AppColors.warning,
+                    ),
+                    title: Text('not_interested'.tr),
+                    subtitle: Text('not_interested_help'.tr),
+                    suffix: const Icon(FLucideIcons.chevronRight),
+                    onPress: onDismiss,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              FTileGroup(
+                children: [
+                  FTile(
+                    variant: FItemVariant.destructive,
+                    prefix: const _JobActionIcon(
+                      icon: FLucideIcons.flag,
+                      color: AppColors.error,
+                    ),
+                    title: Text('report_job'.tr),
+                    subtitle: Text('report_job_help'.tr),
+                    suffix: const Icon(FLucideIcons.chevronRight),
+                    onPress: onReport,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _JobActionIcon extends StatelessWidget {
+  const _JobActionIcon({required this.icon, required this.color});
+
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 36,
+      height: 36,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.11),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(icon, color: color, size: 17),
     );
   }
 }

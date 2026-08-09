@@ -1,96 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:get/get.dart';
-import 'package:jobodia_frontend/core/constants/app_colors.dart';
+import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/widgets/quiet_glass_button.dart';
-import 'package:jobodia_frontend/features/home/controller/main_nav_controller.dart';
-import 'package:jobodia_frontend/features/notifications/controller/notifications_controller.dart';
+import 'package:jobodia_frontend/features/profile/controller/profile_controller.dart';
+import 'package:jobodia_frontend/features/profile/view/profile_screen.dart';
 
 class HomeTopBar extends StatelessWidget {
-  const HomeTopBar({
-    required this.name,
-    required this.avatarUrl,
-    required this.onNotifications,
-    super.key,
-  });
+  const HomeTopBar({required this.name, required this.avatarUrl, super.key});
 
   final String name;
   final String? avatarUrl;
-  final VoidCallback onNotifications;
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
-    final foreground = context.isDark ? Colors.white : palette.textPrimary;
+    final fallbackInitial = name.trim().isEmpty
+        ? 'U'
+        : name.trim().substring(0, 1).toUpperCase();
+    final avatar = avatarUrl == null || avatarUrl!.trim().isEmpty
+        ? FAvatar.raw(
+            size: 42,
+            child: Text(
+              fallbackInitial,
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+          )
+        : FAvatar(
+            size: 42,
+            image: NetworkImage(avatarUrl!),
+            fallback: Text(
+              fallbackInitial,
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+          );
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        TextButton(
-          onPressed: () {},
-          style: TextButton.styleFrom(
-            foregroundColor: foreground,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(22),
+        Semantics(
+          label: 'Open profile for $name',
+          button: true,
+          child: FButton.raw(
+            onPress: () => Get.to<void>(
+              () => const ProfileScreen(),
+              binding: BindingsBuilder(
+                () => Get.lazyPut<ProfileController>(ProfileController.new),
+              ),
             ),
-          ),
-          child: Text(
-            'Hi, $name',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            variant: FButtonVariant.ghost,
+            style: const FButtonStyleDelta.delta(
+              contentStyle: FButtonContentStyleDelta.delta(
+                constraints: BoxConstraints(minWidth: 42, minHeight: 42),
+                padding: EdgeInsetsGeometryDelta.value(EdgeInsets.zero),
+              ),
+            ),
+            child: avatar,
           ),
         ),
         const Spacer(),
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Semantics(
-              label: 'Notifications',
-              button: true,
-              child: IconButton(
-                onPressed: onNotifications,
-                icon: Icon(FLucideIcons.bell, color: foreground),
-                style: IconButton.styleFrom(
-                  backgroundColor: palette.surfaceMuted.withValues(alpha: 0.76),
-                  shape: const CircleBorder(),
-                ),
-              ),
-            ),
-            Obx(() {
-              final count = Get.isRegistered<NotificationsController>()
-                  ? Get.find<NotificationsController>().unreadCount
-                  : 0;
-              if (count == 0) return const SizedBox.shrink();
-              return Positioned(
-                right: -2,
-                top: -2,
-                child: Container(
-                  width: 18,
-                  height: 18,
-                  decoration: const BoxDecoration(
-                    color: AppColors.error,
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    count > 9 ? '9+' : '$count',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ],
-        ),
-        const SizedBox(width: 8),
         QuietGlassIconButton(
           icon: FLucideIcons.messageCircle,
-          tooltip: 'Chat with Jobodia AI',
+          tooltip: 'Messages',
           lightHaptic: true,
-          onPressed: () => Get.find<MainNavController>().goToTab(2),
+          onPressed: () => Get.toNamed<void>(AppRoutes.conversations),
         ),
       ],
     );

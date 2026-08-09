@@ -14,6 +14,7 @@ class HomeController extends GetxController {
 
   static const _dismissedKey = 'dismissedJobIds';
   static const _selectedTabKey = 'homeSelectedTab';
+  static const _publishedJobsKey = 'employerPublishedJobs';
 
   final GetStorage _storage;
 
@@ -23,6 +24,7 @@ class HomeController extends GetxController {
   final RxnString selectedLocation = RxnString();
   final RxDouble minSalaryFilter = 2800.0.obs;
   final RxDouble maxSalaryFilter = 7200.0.obs;
+  final RxInt jobsRevision = 0.obs;
 
   final RxSet<String> dismissedJobIds = <String>{}.obs;
 
@@ -53,6 +55,7 @@ class HomeController extends GetxController {
     if (storedTab != null) {
       selectedTab.value = storedTab;
     }
+    _loadLocallyPublishedJobs();
   }
 
   @override
@@ -124,7 +127,7 @@ class HomeController extends GetxController {
 
   void _resetPagination() => currentPage.value = 1;
 
-  final jobs = const <JobFeedModel>[
+  final RxList<JobFeedModel> jobs = <JobFeedModel>[
     JobFeedModel(
       id: 'novatech-product-designer',
       company: 'NovaTech Labs',
@@ -635,7 +638,88 @@ class HomeController extends GetxController {
       salary: '\$2,800 - \$3,600',
       distance: '5.1 km away',
     ),
-  ];
+  ].obs;
+
+  void _loadLocallyPublishedJobs() {
+    final stored = _storage.read<List>(_publishedJobsKey) ?? const [];
+    final localJobs = stored
+        .whereType<Map>()
+        .map((item) => _localJobFromJson(Map<String, dynamic>.from(item)))
+        .toList(growable: false);
+
+    final localIds = localJobs.map((job) => job.id).toSet();
+    jobs
+      ..removeWhere((job) => localIds.contains(job.id))
+      ..insertAll(0, localJobs);
+    jobsRevision.value++;
+  }
+
+  /// Adds a newly published employer listing to the feed immediately. The
+  /// publishing controller owns persistence; this method updates feed state.
+  void addLocallyPublishedJob(Map<String, dynamic> value) {
+    final job = _localJobFromJson(value);
+    jobs
+      ..removeWhere((item) => item.id == job.id)
+      ..insert(0, job);
+    jobsRevision.value++;
+    _resetPagination();
+  }
+
+  JobFeedModel _localJobFromJson(Map<String, dynamic> value) {
+    final arrangement = value['workArrangement']?.toString().trim() ?? '';
+    final location = value['location']?.toString().trim() ?? '';
+    final publishedAt = DateTime.tryParse(
+      value['publishedAt']?.toString() ?? '',
+    );
+
+    return JobFeedModel(
+      id:
+          value['id']?.toString() ??
+          'local-${value['title']}-${value['company']}',
+      company: _valueOr(value['company'], 'Local employer'),
+      companyTag: arrangement.isEmpty ? 'New' : arrangement,
+      matchPercent: 95,
+      title: _valueOr(value['title'], 'New opportunity'),
+      level: _valueOr(value['experienceLevel'], 'Mid-level'),
+      location: location.isEmpty ? 'Location to be confirmed' : location,
+      timeAgo: _publishedTimeAgo(publishedAt),
+      description: _valueOr(
+        value['description'],
+        'Open this listing to learn more about the opportunity.',
+      ),
+      tags: _parseLocalTags(value['tags']?.toString() ?? ''),
+      salary: _valueOr(value['salary'], 'Salary not specified'),
+      distance: arrangement.toLowerCase() == 'remote'
+          ? 'Fully remote'
+          : 'Local listing',
+      requirementsText: value['requirements']?.toString().trim() ?? '',
+    );
+  }
+
+  String _valueOr(Object? value, String fallback) {
+    final text = value?.toString().trim() ?? '';
+    return text.isEmpty ? fallback : text;
+  }
+
+  List<String> _parseLocalTags(String value) => value
+      .split(RegExp(r'[,\n]'))
+      .map((tag) => tag.trim())
+      .where((tag) => tag.isNotEmpty)
+      .take(6)
+      .toList(growable: false);
+
+  String _publishedTimeAgo(DateTime? publishedAt) {
+    if (publishedAt == null) return 'Just now';
+    final elapsed = DateTime.now().difference(publishedAt.toLocal());
+    if (elapsed.inMinutes < 1) return 'Just now';
+    if (elapsed.inHours < 1) {
+      return '${elapsed.inMinutes} min ago';
+    }
+    if (elapsed.inDays < 1) {
+      return '${elapsed.inHours} ${elapsed.inHours == 1 ? 'hour' : 'hours'} ago';
+    }
+    return '${elapsed.inDays} ${elapsed.inDays == 1 ? 'day' : 'days'} ago';
+  }
 
   void selectTab(int index) {
     selectedTab.value = index;
@@ -665,49 +749,51 @@ class HomeController extends GetxController {
     final tab = selectedTab.value;
     final savedIds = tab == 2 ? Get.find<SavedJobsController>().savedIds : null;
 
-    return jobs.where((job) {
-      if (dismissedJobIds.contains(job.id)) {
-        return false;
-      }
+    return jobs
+        .where((job) {
+          if (dismissedJobIds.contains(job.id)) {
+            return false;
+          }
 
-      if (tab == 1 && job.matchPercent < 90) {
-        return false;
-      }
-      if (tab == 2 && (savedIds == null || !savedIds.contains(job.id))) {
-        return false;
-      }
+          if (tab == 1 && job.matchPercent < 90) {
+            return false;
+          }
+          if (tab == 2 && (savedIds == null || !savedIds.contains(job.id))) {
+            return false;
+          }
 
-      if (level != null && job.level != level) {
-        return false;
-      }
+          if (level != null && job.level != level) {
+            return false;
+          }
 
-      if (location != null && job.location != location) {
-        return false;
-      }
+          if (location != null && job.location != location) {
+            return false;
+          }
 
-      final salaryRange = _parseSalaryRange(job.salary);
-      if (salaryRange.$2 < minSalary || salaryRange.$1 > maxSalary) {
-        return false;
-      }
+          final salaryRange = _parseSalaryRange(job.salary);
+          if (salaryRange.$2 < minSalary || salaryRange.$1 > maxSalary) {
+            return false;
+          }
 
-      if (query.isEmpty) {
-        return true;
-      }
+          if (query.isEmpty) {
+            return true;
+          }
 
-      final searchableText = [
-        job.company,
-        job.companyTag,
-        job.title,
-        job.level,
-        job.location,
-        job.description,
-        job.salary,
-        job.distance,
-        ...job.tags,
-      ].join(' ').toLowerCase();
+          final searchableText = [
+            job.company,
+            job.companyTag,
+            job.title,
+            job.level,
+            job.location,
+            job.description,
+            job.salary,
+            job.distance,
+            ...job.tags,
+          ].join(' ').toLowerCase();
 
-      return searchableText.contains(query);
-    }).toList();
+          return searchableText.contains(query);
+        })
+        .toList(growable: jobsRevision.value >= 0);
   }
 
   List<String> get levels {

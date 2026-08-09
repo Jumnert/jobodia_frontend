@@ -10,6 +10,8 @@
 	<string>Jobodia needs permission to save your finished CV pages to Photos.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Jobodia needs camera access so you can take a headshot for your CV.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Jobodia uses Face ID to confirm sensitive account actions.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

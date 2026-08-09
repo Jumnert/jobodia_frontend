@@ -332,7 +332,7 @@ class _NotesCardState extends State<_NotesCard> {
               Icon(FLucideIcons.filePen, size: 20, color: palette.textPrimary),
               const SizedBox(width: 8),
               Text(
-                'My Notes',
+                'my_notes'.tr,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
@@ -355,7 +355,7 @@ class _NotesCardState extends State<_NotesCard> {
             onChanged: (text) =>
                 notesController.saveNote(widget.controller.jobId, text),
             decoration: InputDecoration(
-              hintText: 'Write your notes about this job...',
+              hintText: 'notes_hint'.tr,
               hintStyle: TextStyle(color: palette.textSecondary),
               filled: true,
               fillColor: palette.scaffold,
@@ -436,16 +436,16 @@ class _JobDetailsSliver extends StatelessWidget {
             _MatchBadgeTile(controller: controller),
             const DashedDivider(),
             const SizedBox(height: 12),
-            JobTextSection(title: 'Job Description', body: job.description),
+            JobTextSection(title: 'job_description'.tr, body: job.description),
             const SizedBox(height: 14),
             Obx(
               () => JobTextSection(
-                title: 'About the role',
+                title: 'about_role'.tr,
                 body: job.aboutRole,
                 isExpanded: controller.isAboutRoleExpanded.value,
                 actionLabel: controller.isAboutRoleExpanded.value
-                    ? 'Show less'
-                    : 'Read more',
+                    ? 'show_less'.tr
+                    : 'read_more'.tr,
                 onActionPressed: controller.toggleAboutRole,
               ),
             ),
@@ -507,7 +507,7 @@ class _JobDetailsSliver extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'How your CV matches',
+                          'cv_match'.tr,
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
@@ -538,7 +538,7 @@ class _JobDetailsSliver extends StatelessWidget {
                     if (matchedSkills.isNotEmpty) ...[
                       const SizedBox(height: 12),
                       Text(
-                        'Matched skills',
+                        'matched_skills'.tr,
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -584,10 +584,10 @@ class _JobDetailsSliver extends StatelessWidget {
                               size: 14,
                             ),
                             const SizedBox(width: 4),
-                            const Expanded(
+                            Expanded(
                               child: Text(
-                                'Flutter is in high demand (+12% this quarter)',
-                                style: TextStyle(
+                                'flutter_demand'.tr,
+                                style: const TextStyle(
                                   color: AppColors.success,
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
@@ -601,7 +601,7 @@ class _JobDetailsSliver extends StatelessWidget {
                     if (missingSkills.isNotEmpty) ...[
                       const SizedBox(height: 10),
                       Text(
-                        'Skills to add',
+                        'skills_to_add'.tr,
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -634,7 +634,9 @@ class _JobDetailsSliver extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Add ${missingSkills.take(3).join(", ")} to your CV to improve your match.',
+                        'add_skills_cv'.trParams({
+                          'skills': missingSkills.take(3).join(', '),
+                        }),
                         style: TextStyle(
                           fontSize: 12,
                           color: palette.textTertiary,
@@ -648,7 +650,7 @@ class _JobDetailsSliver extends StatelessWidget {
                       child: OutlinedButton.icon(
                         onPressed: () => Get.toNamed(AppRoutes.cvBuilder),
                         icon: const Icon(FLucideIcons.fileText, size: 18),
-                        label: const Text('Improve CV'),
+                        label: Text('improve_cv'.tr),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.primary,
                           side: const BorderSide(color: AppColors.primary),

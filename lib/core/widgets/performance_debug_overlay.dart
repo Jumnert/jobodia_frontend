@@ -61,8 +61,13 @@ class _PerformanceDebugOverlayState extends State<PerformanceDebugOverlay> {
   }
 
   void _push(List<double> values, double value) {
-    values.removeAt(0);
-    values.add(value);
+    if (values.isEmpty) return;
+    // The sample buffers are intentionally fixed-size. Shift values in place
+    // instead of calling remove/add, which throws on fixed-length lists.
+    for (var index = 1; index < values.length; index++) {
+      values[index - 1] = values[index];
+    }
+    values[values.length - 1] = value;
   }
 
   @override
@@ -178,8 +183,15 @@ class _MetricGraph extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text(label, style: FTheme.of(context).typography.body.xs),
-            const Spacer(),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: FTheme.of(context).typography.body.xs,
+              ),
+            ),
+            const SizedBox(width: 8),
             Text(
               value,
               style: FTheme.of(context).typography.body.xs.copyWith(

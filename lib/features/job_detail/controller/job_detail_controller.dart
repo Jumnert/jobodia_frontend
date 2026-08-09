@@ -4,6 +4,7 @@ import 'package:jobodia_frontend/features/applications/controller/applications_c
 import 'package:jobodia_frontend/features/home/model/job_feed_model.dart';
 import 'package:jobodia_frontend/features/job_detail/model/job_detail_model.dart';
 import 'package:jobodia_frontend/features/job_detail/view/widgets/apply_confirmation_dialog.dart';
+import 'package:jobodia_frontend/core/widgets/passcode_screen.dart';
 import 'package:jobodia_frontend/features/saved_jobs/controller/saved_jobs_controller.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -127,6 +128,13 @@ class JobDetailController extends GetxController {
         // User cancelled.
         return;
       }
+
+      if (!context.mounted) return;
+      final authenticated = await requestAppAuthentication(
+        context,
+        reason: 'Confirm your identity to apply for this job.',
+      );
+      if (!authenticated) return;
 
       _recordApplication(coverLetter.isEmpty ? null : coverLetter);
       Get.snackbar('Application sent', 'Your application has been submitted.');

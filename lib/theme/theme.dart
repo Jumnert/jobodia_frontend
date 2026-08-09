@@ -23,12 +23,20 @@ part 'icons.dart';
 /// * https://forui.dev/docs/guides/customizing-themes for customizing themes.
 /// * https://forui.dev/docs/guides/customizing-widget-styles for customizing individual widget styles.
 FThemeData get lightTheme {
+  return lightThemeWithFont();
+}
+
+FThemeData lightThemeWithFont({String fontFamily = 'GoogleSansFlex'}) {
   // Change this to false to use the desktop variant of this theme.
   const touch = true;
 
   final colors = lightColors;
 
-  final typography = _typography(colors: colors, touch: touch);
+  final typography = _typography(
+    colors: colors,
+    touch: touch,
+    fontFamily: fontFamily,
+  );
 
   final icons = _icons();
 
@@ -44,12 +52,20 @@ FThemeData get lightTheme {
 }
 
 FThemeData get darkTheme {
+  return darkThemeWithFont();
+}
+
+FThemeData darkThemeWithFont({String fontFamily = 'GoogleSansFlex'}) {
   // Change this to false to use the desktop variant of this theme.
   const touch = true;
 
   final colors = darkColors;
 
-  final typography = _typography(colors: colors, touch: touch);
+  final typography = _typography(
+    colors: colors,
+    touch: touch,
+    fontFamily: fontFamily,
+  );
 
   final icons = _icons();
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
+import 'package:jobodia_frontend/services/app_security_service.dart';
 import 'package:jobodia_frontend/core/utils/input_sanitizer.dart';
 import 'package:jobodia_frontend/features/auth/model/user_model.dart';
 import 'package:jobodia_frontend/features/auth/repository/auth_repository.dart';
@@ -330,7 +331,10 @@ class AuthController extends GetxController with FormValidationMixin {
     Get.offAllNamed(AppRoutes.login);
   }
 
-  void logout() {
+  Future<void> logout() async {
+    if (Get.isRegistered<AppSecurityService>()) {
+      await Get.find<AppSecurityService>().clearPasscode();
+    }
     currentUser.value = null;
     usernameController.clear();
     emailController.clear();

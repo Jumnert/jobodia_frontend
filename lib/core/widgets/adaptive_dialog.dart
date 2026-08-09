@@ -97,7 +97,7 @@ class _AdaptiveDialogContent extends StatelessWidget {
     final fg = isDark ? Colors.white : Colors.black;
 
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: Row(
         children: [
           if (icon != null) ...[
@@ -188,7 +188,7 @@ class _InputDialogContentState extends State<_InputDialogContent> {
     final fg = isDark ? Colors.white : Colors.black;
 
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: Row(
         children: [
           if (widget.icon != null) ...[

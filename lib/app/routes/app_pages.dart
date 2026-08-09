@@ -10,6 +10,9 @@ import 'package:jobodia_frontend/features/applications/view/applications_screen.
 import 'package:jobodia_frontend/features/company/view/company_profile_screen.dart';
 import 'package:jobodia_frontend/features/auth/view/login_screen.dart';
 import 'package:jobodia_frontend/features/role/view/role_selection_screen.dart';
+import 'package:jobodia_frontend/features/role/view/role_welcome_screen.dart';
+import 'package:jobodia_frontend/features/preferences/controller/preferences_controller.dart';
+import 'package:jobodia_frontend/features/preferences/view/preferences_wizard_screen.dart';
 import 'package:jobodia_frontend/features/settings/view/dev_logs_screen.dart';
 import 'package:jobodia_frontend/features/auth/view/otp_verification_screen.dart';
 import 'package:jobodia_frontend/features/auth/view/reset_password_screen.dart';
@@ -246,6 +249,23 @@ abstract final class AppPages {
       name: AppRoutes.selectRole,
       page: () => const RoleSelectionScreen(),
       transition: Transition.fadeIn,
+      transitionDuration: _defaultDuration,
+      curve: _defaultCurve,
+    ),
+    GetPage(
+      name: AppRoutes.roleWelcome,
+      page: () => const RoleWelcomeScreen(),
+      transition: Transition.fadeIn,
+      transitionDuration: _defaultDuration,
+      curve: _defaultCurve,
+    ),
+    GetPage(
+      name: AppRoutes.preferences,
+      page: () => const PreferencesWizardScreen(),
+      binding: BindingsBuilder(
+        () => Get.lazyPut<PreferencesController>(PreferencesController.new),
+      ),
+      transition: Transition.rightToLeft,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
     ),

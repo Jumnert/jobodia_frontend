@@ -29,6 +29,7 @@ class CvBuilderController extends GetxController {
   final RxInt stepIndex = 0.obs;
   final RxInt selectedTemplateIndex = 0.obs;
   final RxBool isGenerated = false.obs;
+  final RxBool isLoadingSavedCv = true.obs;
   bool showGeneratedSnackBar = true;
 
   /// Bytes of the chosen headshot, null when none selected.
@@ -432,7 +433,7 @@ class CvBuilderController extends GetxController {
     secure.writeSecure(savedCvKey, jsonEncode(cv.toJson()));
   }
 
-  void _loadSavedCv() async {
+  Future<void> _loadSavedCv() async {
     try {
       final secure = SecureStorageService.to;
       final raw = await secure.readSecure(savedCvKey);
@@ -445,7 +446,14 @@ class CvBuilderController extends GetxController {
       }
     } on Object catch (e, st) {
       AppLogger.error('Failed to load CV from secure storage', e, st);
+    } finally {
+      isLoadingSavedCv.value = false;
     }
+  }
+
+  void startCreation() {
+    generateError.value = '';
+    stepIndex.value = 0;
   }
 
   void _restoreEditableFields(CvData cv) {

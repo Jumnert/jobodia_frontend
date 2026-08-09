@@ -22,7 +22,7 @@ class MoreCompanyJobs extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 24),
         child: Center(
           child: Text(
-            'No other jobs from this company',
+            'no_company_jobs'.tr,
             style: TextStyle(
               color: palette.textSecondary,
               fontSize: 14,
@@ -49,7 +49,7 @@ class MoreCompanyJobs extends StatelessWidget {
           child: Row(
             children: [
               Text(
-                'More from this Company',
+                'more_from_company'.tr,
                 style: TextStyle(
                   color: palette.textPrimary,
                   fontSize: 18,
@@ -122,8 +122,8 @@ class _RelatedJobCard extends StatelessWidget {
               );
             } else {
               Get.snackbar(
-                'Coming soon',
-                'Full detail for ${job.title} will be available later.',
+                'coming_soon'.tr,
+                'job_detail_later'.trParams({'job': job.title}),
                 snackPosition: SnackPosition.BOTTOM,
                 margin: const EdgeInsets.all(16),
               );

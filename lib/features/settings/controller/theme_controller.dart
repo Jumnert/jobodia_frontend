@@ -15,6 +15,10 @@ class ThemeController extends GetxController {
   static const themeKey = 'isDarkMode';
   static const presetKey = 'visualThemePreset';
   static const profileIconKey = 'profileIconIndex';
+  static const supportedPresets = [
+    AppThemePreset.defaultTheme,
+    AppThemePreset.midnight,
+  ];
 
   final GetStorage _storage;
 
@@ -48,6 +52,7 @@ class ThemeController extends GetxController {
   }
 
   void selectPreset(AppThemePreset value) {
+    if (!supportedPresets.contains(value)) return;
     preset.value = value;
     _storage.write(presetKey, value.storageValue);
     Get.changeTheme(
@@ -66,7 +71,7 @@ class ThemeController extends GetxController {
   static AppThemePreset readStoredPreset([GetStorage? storage]) {
     try {
       final stored = (storage ?? GetStorage()).read<String>(presetKey);
-      return AppThemePreset.values.firstWhere(
+      return supportedPresets.firstWhere(
         (preset) => preset.storageValue == stored,
         orElse: () => AppThemePreset.defaultTheme,
       );

@@ -3,11 +3,13 @@ import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
+import 'package:jobodia_frontend/app/localization/language_controller.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/blurred_header.dart';
 import 'package:jobodia_frontend/core/widgets/performance_debug_overlay.dart';
-import 'package:jobodia_frontend/core/widgets/adaptive_dialog.dart'
-    hide FDialog;
+import 'package:jobodia_frontend/core/widgets/passcode_screen.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
+import 'package:jobodia_frontend/features/profile/controller/profile_controller.dart';
 import 'package:jobodia_frontend/features/settings/controller/feedback_controller.dart';
 import 'package:jobodia_frontend/features/settings/controller/theme_controller.dart';
 import 'package:jobodia_frontend/features/settings/view/widgets/theme_picker.dart';
@@ -16,6 +18,7 @@ import 'package:jobodia_frontend/features/onboarding/controllers/onboarding_cont
 import 'package:jobodia_frontend/features/onboarding/views/onboarding_view.dart';
 import 'package:jobodia_frontend/features/role/view/role_selection_screen.dart';
 import 'package:jobodia_frontend/features/splash/view/splash_screen.dart';
+import 'package:jobodia_frontend/services/app_security_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key, this.showBottomNav = true});
@@ -27,48 +30,158 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  static const _faceIdKey = 'mockFaceIdEnabled';
+  static const _roundedTileGroupStyle = FTileGroupStyleDelta.delta(
+    decoration: DecorationDelta.boxDelta(
+      borderRadius: BorderRadius.all(Radius.circular(20)),
+    ),
+  );
+  static const _roundedDialogStyle = FDialogStyleDelta.delta(
+    decoration: DecorationDelta.boxDelta(
+      borderRadius: BorderRadius.all(Radius.circular(20)),
+    ),
+  );
+
   bool _faceIdEnabled = false;
   OverlayEntry? _performanceOverlay;
+  final ScrollController _scrollController = ScrollController(
+    keepScrollOffset: false,
+  );
 
   @override
   void initState() {
     super.initState();
-    _faceIdEnabled = GetStorage().read<bool>(_faceIdKey) ?? false;
+    _syncSecurityState();
+    Get.lazyPut<ProfileController>(ProfileController.new, fenix: true);
+  }
+
+  Future<void> _syncSecurityState() async {
+    await AppSecurityService.to.ready;
+    if (!mounted) return;
+    setState(() {
+      _faceIdEnabled = AppSecurityService.to.biometricEnabled.value;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = FTheme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final safeArea = MediaQuery.paddingOf(context);
+    final bottomPadding = widget.showBottomNav == false
+        ? safeArea.bottom + 112
+        : 32.0;
+    final isKhmer = Localizations.localeOf(context).languageCode == 'km';
+    Text tileTitle(String key) => Text(
+      key.tr,
+      style: theme.typography.body.sm.copyWith(
+        fontWeight: isKhmer ? FontWeight.w400 : FontWeight.w600,
+        height: isKhmer ? 1.2 : null,
+      ),
+    );
+    Text tileSubtitle(String key) => Text(
+      key.tr,
+      style: theme.typography.body.xs.copyWith(
+        color: theme.colors.mutedForeground,
+        fontWeight: isKhmer ? FontWeight.w400 : FontWeight.w500,
+        height: isKhmer ? 1.2 : null,
+      ),
+    );
+    Text sectionLabel(String key) => Text(
+      key.tr,
+      style: theme.typography.body.sm.copyWith(
+        fontWeight: isKhmer ? FontWeight.w500 : FontWeight.w700,
+        height: isKhmer ? 1.2 : null,
+      ),
+    );
+    final profileController = Get.find<ProfileController>();
 
     final content = ListView(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        MediaQuery.paddingOf(context).top + 64,
-        16,
-        32,
-      ),
+      controller: _scrollController,
+      padding: EdgeInsets.fromLTRB(16, safeArea.top + 64, 16, bottomPadding),
       children: [
+        Obx(() {
+          final profile = profileController.profileRx.value;
+          final trimmedName = profile.name.trim();
+          final initial = trimmedName.isEmpty
+              ? 'U'
+              : trimmedName.substring(0, 1).toUpperCase();
+          final avatar = profile.hasAvatarBytes
+              ? FAvatar(
+                  size: 52,
+                  image: MemoryImage(profile.avatarBytes!),
+                  fallback: Text(initial),
+                )
+              : profile.avatarImageUrl.trim().isNotEmpty
+              ? FAvatar(
+                  size: 52,
+                  image: NetworkImage(profile.avatarImageUrl),
+                  fallback: Text(initial),
+                )
+              : FAvatar.raw(
+                  size: 52,
+                  child: Text(
+                    initial,
+                    style: theme.typography.body.lg.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                );
+
+          return FTileGroup(
+            style: _roundedTileGroupStyle,
+            children: [
+              FTile(
+                prefix: avatar,
+                title: Text(
+                  trimmedName.isEmpty ? 'User' : trimmedName,
+                  style: theme.typography.body.md.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                subtitle: Text(
+                  profile.role,
+                  style: theme.typography.body.xs.copyWith(
+                    color: theme.colors.mutedForeground,
+                    fontWeight: isKhmer ? FontWeight.w400 : FontWeight.w500,
+                    height: isKhmer ? 1.2 : null,
+                  ),
+                ),
+                suffix: const Icon(FLucideIcons.chevronRight),
+                onPress: _openProfile,
+              ),
+            ],
+          );
+        }),
+        const SizedBox(height: 24),
         FTileGroup(
-          label: const Text('Other settings'),
+          style: _roundedTileGroupStyle,
+          label: sectionLabel('other_settings'),
           children: [
             FTile(
-              prefix: const Icon(FLucideIcons.circleUser),
-              title: const Text('Profile details'),
+              prefix: const Icon(FLucideIcons.languages),
+              title: tileTitle('language'),
+              subtitle: Obx(
+                () => Text(
+                  Get.find<LanguageController>().current.label,
+                  style: theme.typography.body.xs.copyWith(
+                    color: theme.colors.mutedForeground,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
               suffix: const Icon(FLucideIcons.chevronRight),
-              onPress: () => Get.toNamed<void>(AppRoutes.profile),
+              onPress: () => _showLanguageDialog(context),
             ),
             FTile(
               prefix: const Icon(FLucideIcons.lock),
-              title: const Text('App PIN'),
+              title: tileTitle('app_pin'),
               suffix: const Icon(FLucideIcons.chevronRight),
               onPress: () => _showPinDialog(context),
             ),
             FTile(
               prefix: const Icon(FLucideIcons.scanFace),
-              title: const Text('Face ID'),
-              subtitle: const Text('Unlock with biometrics'),
+              title: tileTitle('face_id'),
+              subtitle: tileSubtitle('unlock_biometrics'),
               suffix: FSwitch(
                 value: _faceIdEnabled,
                 onChange: (value) => _setFaceId(context, value),
@@ -76,13 +189,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             FTile(
               prefix: const Icon(FLucideIcons.workflow),
-              title: const Text('Plans & pricing'),
+              title: tileTitle('plans_pricing'),
               suffix: const Icon(FLucideIcons.chevronRight),
               onPress: () => Get.toNamed<void>(AppRoutes.pricing),
             ),
             FTile(
               prefix: const Icon(FLucideIcons.compass),
-              title: const Text('Discover Features'),
+              title: tileTitle('discover_features'),
               suffix: const Icon(FLucideIcons.chevronRight),
               onPress: () {
                 if (Get.isRegistered<FeatureDiscoveryController>()) {
@@ -96,8 +209,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             FTile(
               prefix: const Icon(FLucideIcons.moon),
-              title: const Text('Dark mode'),
-              subtitle: const Text('Switch between light and dark'),
+              title: tileTitle('dark_mode'),
+              subtitle: tileSubtitle('switch_theme'),
               suffix: FSwitch(
                 value: isDark,
                 onChange: (val) {
@@ -111,35 +224,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const SizedBox(height: 24),
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text('Visual theme', style: theme.typography.body.sm),
+          child: sectionLabel('visual_theme'),
         ),
         const ThemePicker(),
         const SizedBox(height: 24),
         FTileGroup(
-          label: const Text('Testing'),
+          style: _roundedTileGroupStyle,
+          label: sectionLabel('testing'),
           children: [
             FTile(
               prefix: const Icon(FLucideIcons.circlePlay),
-              title: const Text('Onboarding preview'),
+              title: tileTitle('onboarding_preview'),
               suffix: const Icon(FLucideIcons.chevronRight),
               onPress: _openOnboardingPreview,
             ),
             FTile(
               prefix: const Icon(FLucideIcons.rocket),
-              title: const Text('Splash screen preview'),
+              title: tileTitle('splash_preview'),
               suffix: const Icon(FLucideIcons.chevronRight),
               onPress: _openSplashPreview,
             ),
             FTile(
               prefix: const Icon(FLucideIcons.userCog),
-              title: const Text('Select role'),
+              title: tileTitle('select_role'),
               suffix: const Icon(FLucideIcons.chevronRight),
               onPress: _openRolePreview,
             ),
             FTile(
               prefix: const Icon(FLucideIcons.chartNoAxesCombined),
-              title: const Text('Performance overlay'),
-              subtitle: const Text('Frame time and CPU load graphs'),
+              title: tileTitle('performance_overlay'),
+              subtitle: tileSubtitle('performance_subtitle'),
               suffix: const Icon(FLucideIcons.chevronRight),
               onPress: () => _togglePerformanceOverlay(context),
             ),
@@ -147,54 +261,69 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         const SizedBox(height: 24),
         FTileGroup(
+          style: _roundedTileGroupStyle,
           children: [
             FTile(
               prefix: const Icon(FLucideIcons.info),
-              title: const Text('About application'),
+              title: tileTitle('about_application'),
               suffix: const Icon(FLucideIcons.chevronRight),
               onPress: () => Get.toNamed<void>(AppRoutes.aboutUs),
             ),
             FTile(
               prefix: const Icon(FLucideIcons.circleHelp),
-              title: const Text('Help/FAQ'),
+              title: tileTitle('help_faq'),
               suffix: const Icon(FLucideIcons.chevronRight),
               onPress: () => _showFaqSheet(context),
             ),
             FTile(
               prefix: const Icon(FLucideIcons.messageSquare),
-              title: const Text('Leave Feedback'),
+              title: tileTitle('leave_feedback'),
               suffix: const Icon(FLucideIcons.chevronRight),
               onPress: () => _showFeedbackSheet(context),
             ),
             FTile(
               prefix: const Icon(FLucideIcons.scrollText),
-              title: const Text('Dev Logs'),
+              title: tileTitle('dev_logs'),
               suffix: const Icon(FLucideIcons.chevronRight),
               onPress: () => Get.toNamed<void>(AppRoutes.devLogs),
             ),
             FTile(
               prefix: const Icon(FLucideIcons.sparkles),
-              title: const Text('Clear Cache'),
+              title: tileTitle('clear_cache'),
               suffix: const Icon(FLucideIcons.chevronRight),
               onPress: () => _clearCache(context),
             ),
             FTile(
               variant: FItemVariant.destructive,
+              prefix: const Icon(FLucideIcons.trash2),
+              title: tileTitle('delete_account'),
+              suffix: const Icon(FLucideIcons.chevronRight),
+              onPress: () => _showDeleteAccountDialog(context),
+            ),
+            FTile(
+              variant: FItemVariant.destructive,
               prefix: const Icon(FLucideIcons.logOut),
-              title: const Text('Sign out'),
+              title: tileTitle('sign_out'),
               suffix: const Icon(FLucideIcons.chevronRight),
               onPress: () => _showLogoutDialog(context),
             ),
           ],
         ),
+        const SizedBox(height: 24),
+        const _AppCredits(),
       ],
     );
 
     // Build the header widget separately so we can measure its height.
     final header = BlurredHeader(
       child: FHeader.nested(
-        title: const Text('Settings'),
-        prefixes: [FHeaderAction.back(onPress: () => Get.back<void>())],
+        title: Text(
+          'settings'.tr,
+          style: theme.typography.body.lg.copyWith(fontWeight: FontWeight.w700),
+        ),
+        prefixes: widget.showBottomNav ?? true
+            ? [FHeaderAction.back(onPress: () => Get.back<void>())]
+            : const [],
         suffixes: [
           FHeaderAction(
             icon: const Icon(FLucideIcons.flag),
@@ -204,29 +333,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
 
-    return FScaffold(
-      child: Stack(
-        children: [
-          Positioned.fill(child: content),
-          Positioned(top: 0, left: 0, right: 0, child: header),
-        ],
-      ),
+    final body = Stack(
+      children: [
+        Positioned.fill(child: content),
+        Positioned(top: 0, left: 0, right: 0, child: header),
+      ],
     );
+
+    // The tab shell already provides an FScaffold. Avoid nesting another
+    // ForUI scaffold/FSheets tree, which can trigger duplicate global-key and
+    // adaptive-scope assertions when switching to Settings.
+    if (widget.showBottomNav == false) return body;
+    return FScaffold(child: body);
   }
 
-  void _setFaceId(BuildContext context, bool value) {
-    if (!value) {
-      setState(() => _faceIdEnabled = false);
-      GetStorage().write(_faceIdKey, false);
-      return;
-    }
+  void _openProfile() {
+    Get.toNamed<void>(AppRoutes.profile);
+  }
+
+  void _showLanguageDialog(BuildContext context) {
+    final controller = Get.find<LanguageController>();
 
     showFDialog<void>(
       context: context,
       builder: (dialogContext, _, animation) => FDialog(
+        style: _roundedDialogStyle,
         animation: animation,
         clipBehavior: Clip.antiAlias,
-        semanticsLabel: 'Allow Face ID',
+        semanticsLabel: 'choose_language'.tr,
         builder: (dialogContext, _) => Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -234,35 +368,83 @@ class _SettingsScreenState extends State<SettingsScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Allow Face ID?',
+                'choose_language'.tr,
                 style: FTheme.of(dialogContext).typography.display.lg,
               ),
-              const SizedBox(height: 8),
-              Text(
-                'This is a preview setting. Device authentication will be connected later.',
-                style: FTheme.of(dialogContext).typography.body.sm,
-              ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
+              for (final language in AppLanguage.values) ...[
+                Obx(
+                  () => FButton(
+                    variant: controller.current == language
+                        ? FButtonVariant.primary
+                        : FButtonVariant.secondary,
+                    onPress: () {
+                      controller.selectLanguage(language);
+                      Navigator.of(dialogContext).pop();
+                    },
+                    prefix: controller.current == language
+                        ? const Icon(FLucideIcons.check)
+                        : const Icon(FLucideIcons.languages),
+                    child: Text(
+                      language == AppLanguage.english ? 'English' : 'ខ្មែរ',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
               FButton(
-                onPress: () {
-                  Navigator.of(dialogContext).pop();
-                  if (!mounted) return;
-                  setState(() => _faceIdEnabled = true);
-                  GetStorage().write(_faceIdKey, true);
-                },
-                child: const Text('Allow'),
-              ),
-              const SizedBox(height: 10),
-              FButton(
-                variant: FButtonVariant.secondary,
+                variant: FButtonVariant.ghost,
                 onPress: () => Navigator.of(dialogContext).pop(),
-                child: const Text('Not now'),
+                child: Text('cancel'.tr),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _setFaceId(BuildContext context, bool value) async {
+    if (!value) {
+      await AppSecurityService.to.setBiometricEnabled(false);
+      if (!mounted) return;
+      setState(() => _faceIdEnabled = false);
+      return;
+    }
+
+    await AppSecurityService.to.ready;
+    if (!AppSecurityService.to.hasPin.value) {
+      Get.snackbar(
+        'Set a passcode first',
+        'A passcode is required as a fallback when Face ID is unavailable.',
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+      return;
+    }
+
+    final available = await AppSecurityService.to.canUseBiometrics();
+    if (!available) {
+      Get.snackbar(
+        'Face ID unavailable',
+        'No enrolled biometric was found on this device.',
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+      return;
+    }
+
+    // Enable temporarily so the service permits this enrollment check.
+    await AppSecurityService.to.setBiometricEnabled(true);
+    final verified = await AppSecurityService.to.authenticateBiometrically(
+      'Confirm Face ID to enable it for Jobodia',
+    );
+    if (!verified) {
+      await AppSecurityService.to.setBiometricEnabled(false);
+      return;
+    }
+    if (!mounted) return;
+    setState(() => _faceIdEnabled = true);
   }
 
   void _openRolePreview() {
@@ -311,10 +493,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showFeedbackSheet(BuildContext context) {
-    showModalBottomSheet(
+    showFSheet<void>(
       context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
+      side: FLayout.btt,
+      mainAxisMaxRatio: 0.82,
+      useSafeArea: true,
+      barrierDismissible: true,
       builder: (_) => const _FeedbackSheet(),
     );
   }
@@ -323,6 +507,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showFDialog<void>(
       context: context,
       builder: (dialogContext, _, animation) => FDialog(
+        style: _roundedDialogStyle,
         animation: animation,
         clipBehavior: Clip.antiAlias,
         semanticsLabel: 'Log out confirmation',
@@ -344,9 +529,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 20),
               FButton(
                 variant: FButtonVariant.destructive,
-                onPress: () {
+                onPress: () async {
                   Navigator.of(dialogContext).pop();
-                  Get.find<AuthController>().logout();
+                  final authenticated = await requestAppAuthentication(
+                    context,
+                    reason: 'Confirm your identity to log out.',
+                  );
+                  if (!authenticated) return;
+                  await Get.find<AuthController>().logout();
                 },
                 child: const Text('Log out'),
               ),
@@ -355,6 +545,86 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 variant: FButtonVariant.secondary,
                 onPress: () => Navigator.of(dialogContext).pop(),
                 child: const Text('Cancel'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context) {
+    showFDialog<void>(
+      context: context,
+      builder: (dialogContext, _, animation) => FDialog(
+        style: _roundedDialogStyle,
+        animation: animation,
+        clipBehavior: Clip.antiAlias,
+        semanticsLabel: 'delete_account_title'.tr,
+        builder: (dialogContext, _) => Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: FTheme.of(
+                      dialogContext,
+                    ).colors.destructive.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    FLucideIcons.triangleAlert,
+                    color: FTheme.of(dialogContext).colors.destructive,
+                    size: 22,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'delete_account_title'.tr,
+                style: FTheme.of(
+                  dialogContext,
+                ).typography.display.lg.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'delete_account_warning'.tr,
+                style: FTheme.of(dialogContext).typography.body.sm.copyWith(
+                  color: FTheme.of(dialogContext).colors.mutedForeground,
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: 20),
+              FButton(
+                variant: FButtonVariant.destructive,
+                onPress: () async {
+                  Navigator.of(dialogContext).pop();
+                  final authenticated = await requestAppAuthentication(
+                    context,
+                    reason: 'Confirm your identity to delete your account.',
+                  );
+                  if (!authenticated) return;
+                  Get.snackbar(
+                    'delete_unavailable_title'.tr,
+                    'delete_unavailable_message'.tr,
+                    snackPosition: SnackPosition.BOTTOM,
+                    margin: const EdgeInsets.all(16),
+                  );
+                },
+                child: Text('delete_account_confirm'.tr),
+              ),
+              const SizedBox(height: 10),
+              FButton(
+                variant: FButtonVariant.secondary,
+                onPress: () => Navigator.of(dialogContext).pop(),
+                child: Text('cancel'.tr),
               ),
             ],
           ),
@@ -385,71 +655,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _showPinDialog(BuildContext context) async {
-    final storage = GetStorage();
-    const pinKey = 'appPin';
-    final existingPin = storage.read<String>(pinKey);
+    final security = AppSecurityService.to;
+    await security.ready;
+    if (!context.mounted) return;
 
-    // inputShow auto-pops and resolves to the entered text; we track which
-    // button was tapped via this flag because there can be three actions.
-    var tapped = 'cancel';
-
-    final result = await AdaptiveDialog.inputShow(
-      context: context,
-      title: existingPin != null ? 'Change PIN' : 'Set PIN',
-      input: const AdaptiveDialogInput(
-        placeholder: 'Enter 4-digit PIN',
-        keyboardType: TextInputType.number,
-        obscureText: true,
-        maxLength: 4,
-      ),
-      actions: [
-        if (existingPin != null)
-          DialogAction(
-            title: 'Remove PIN',
-            style: DialogActionStyle.destructive,
-            onPressed: () => tapped = 'remove',
-          ),
-        DialogAction(
-          title: 'Cancel',
-          style: DialogActionStyle.cancel,
-          onPressed: () => tapped = 'cancel',
-        ),
-        DialogAction(
-          title: 'Save',
-          style: DialogActionStyle.primary,
-          onPressed: () => tapped = 'save',
-        ),
-      ],
-    );
-
-    switch (tapped) {
-      case 'remove':
-        storage.remove(pinKey);
-        Get.snackbar(
-          'PIN Removed',
-          'App PIN has been cleared.',
-          snackPosition: SnackPosition.BOTTOM,
-          margin: const EdgeInsets.all(16),
-        );
-      case 'save':
-        final pin = result?.trim() ?? '';
-        if (pin.length == 4 && RegExp(r'^\d{4}$').hasMatch(pin)) {
-          storage.write(pinKey, pin);
-          Get.snackbar(
-            'PIN Set',
-            'Your 4-digit PIN has been saved.',
-            snackPosition: SnackPosition.BOTTOM,
-            margin: const EdgeInsets.all(16),
-          );
-        } else {
-          Get.snackbar(
-            'Invalid',
-            'Please enter exactly 4 digits.',
-            snackPosition: SnackPosition.BOTTOM,
-            margin: const EdgeInsets.all(16),
-          );
-        }
+    if (security.hasPin.value) {
+      final authenticated = await requestAppAuthentication(
+        context,
+        reason: 'Confirm your current passcode to change it.',
+      );
+      if (!authenticated || !context.mounted) return;
     }
+
+    final saved = await createAppPasscode(context);
+    if (!mounted || !saved) return;
+    Get.snackbar(
+      'Passcode saved',
+      'Sensitive actions are now protected.',
+      snackPosition: SnackPosition.BOTTOM,
+      margin: const EdgeInsets.all(16),
+    );
   }
 
   void _showFaqSheet(BuildContext context) {
@@ -515,6 +740,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void dispose() {
     _removePerformanceOverlay();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -563,81 +789,161 @@ class _FeedbackSheetState extends State<_FeedbackSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final foregroundColor = isDark ? Colors.white : Colors.black;
+    final theme = FTheme.of(context);
+
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      child: ColoredBox(
+        color: theme.colors.background,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            10,
+            20,
+            MediaQuery.viewInsetsOf(context).bottom + 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 38,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.colors.border,
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                'Leave Feedback',
+                style: theme.typography.display.sm.copyWith(
+                  color: theme.colors.foreground,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'We appreciate your thoughts!',
+                style: theme.typography.body.sm.copyWith(
+                  color: theme.colors.mutedForeground,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(5, (i) {
+                  final filled = i < _selectedRating;
+                  return FButton.raw(
+                    onPress: () => setState(() => _selectedRating = i + 1),
+                    variant: FButtonVariant.ghost,
+                    style: const FButtonStyleDelta.delta(
+                      contentStyle: FButtonContentStyleDelta.delta(
+                        constraints: BoxConstraints(
+                          minWidth: 44,
+                          minHeight: 44,
+                        ),
+                        padding: EdgeInsetsGeometryDelta.value(EdgeInsets.zero),
+                      ),
+                    ),
+                    child: Icon(
+                      FLucideIcons.star,
+                      color: filled
+                          ? const Color(0xFFFFC107)
+                          : theme.colors.mutedForeground.withValues(alpha: 0.5),
+                      size: 30,
+                    ),
+                  );
+                }),
+              ),
+              const SizedBox(height: 12),
+              FTextField.multiline(
+                control: FTextFieldControl.managed(controller: _commentCtrl),
+                hint: 'Tell us what you think...',
+                minLines: 4,
+                maxLines: 4,
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: FButton(
+                  onPress: _selectedRating == 0
+                      ? null
+                      : () {
+                          if (!Get.isRegistered<FeedbackController>()) {
+                            Get.lazyPut<FeedbackController>(
+                              FeedbackController.new,
+                            );
+                          }
+                          Get.find<FeedbackController>().submit(
+                            _selectedRating,
+                            _commentCtrl.text.trim(),
+                          );
+                          Navigator.of(context).pop();
+                          Get.snackbar(
+                            'Thank you!',
+                            'Thanks for your feedback!',
+                            snackPosition: SnackPosition.BOTTOM,
+                            margin: const EdgeInsets.all(16),
+                          );
+                        },
+                  child: const Text('Submit'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AppCredits extends StatelessWidget {
+  const _AppCredits();
+
+  static const _assetRoot = 'assets/images/branding';
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final typography = FTheme.of(context).typography;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        4,
-        20,
-        MediaQuery.of(context).viewInsets.bottom + 20,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Leave Feedback',
-            style: TextStyle(
-              color: foregroundColor,
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
+            'app_version'.tr,
+            style: typography.body.xs.copyWith(
+              color: palette.textTertiary,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            'We appreciate your thoughts!',
-            style: TextStyle(
-              color: foregroundColor.withValues(alpha: 0.6),
-              fontSize: 13,
-            ),
-          ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(5, (i) {
-              final filled = i < _selectedRating;
-              return IconButton(
-                onPressed: () => setState(() => _selectedRating = i + 1),
-                icon: Icon(
-                  filled ? FLucideIcons.star : FLucideIcons.star,
-                  color: filled
-                      ? const Color(0xFFFFC107)
-                      : foregroundColor.withValues(alpha: 0.4),
-                  size: 32,
+            children: [
+              Text(
+                'made_by'.tr,
+                style: typography.body.sm.copyWith(
+                  color: palette.textSecondary,
+                  fontWeight: FontWeight.w600,
                 ),
-              );
-            }),
-          ),
-          const SizedBox(height: 12),
-          FTextField.multiline(
-            control: FTextFieldControl.managed(controller: _commentCtrl),
-            hint: 'Tell us what you think...',
-            minLines: 4,
-            maxLines: 4,
-          ),
-          const SizedBox(height: 16),
-          FButton(
-            onPress: _selectedRating == 0
-                ? null
-                : () {
-                    if (!Get.isRegistered<FeedbackController>()) {
-                      Get.lazyPut<FeedbackController>(FeedbackController.new);
-                    }
-                    Get.find<FeedbackController>().submit(
-                      _selectedRating,
-                      _commentCtrl.text.trim(),
-                    );
-                    Navigator.of(context).pop();
-                    Get.snackbar(
-                      'Thank you!',
-                      'Thanks for your feedback!',
-                      snackPosition: SnackPosition.BOTTOM,
-                      margin: const EdgeInsets.all(16),
-                    );
-                  },
-            child: const Text('Submit'),
+              ),
+              const SizedBox(width: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: Image.asset(
+                  '$_assetRoot/cambodia_flag.png',
+                  width: 28,
+                  height: 18,
+                  fit: BoxFit.cover,
+                  cacheWidth: 84,
+                ),
+              ),
+            ],
           ),
         ],
       ),

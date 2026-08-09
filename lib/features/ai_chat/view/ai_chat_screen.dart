@@ -11,9 +11,12 @@ import 'package:jobodia_frontend/features/ai_chat/view/widgets/bot_avatar.dart';
 import 'package:jobodia_frontend/features/ai_chat/view/widgets/chat_history_drawer.dart';
 import 'package:jobodia_frontend/features/ai_chat/view/widgets/message_bubble.dart';
 import 'package:jobodia_frontend/features/ai_chat/view/widgets/message_composer.dart';
+import 'package:jobodia_frontend/features/home/controller/main_nav_controller.dart';
 
 class AiChatScreen extends StatefulWidget {
-  const AiChatScreen({super.key});
+  const AiChatScreen({this.embedded = false, super.key});
+
+  final bool embedded;
 
   @override
   State<AiChatScreen> createState() => _AiChatScreenState();
@@ -21,27 +24,36 @@ class AiChatScreen extends StatefulWidget {
 
 class _AiChatScreenState extends State<AiChatScreen>
     with AutomaticKeepAliveClientMixin {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
-
   AiChatController get controller => Get.find<AiChatController>();
 
   @override
   bool get wantKeepAlive => true;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) controller.resetConversationViewport();
+    });
+  }
+
+  void _goBack() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    if (widget.embedded) {
+      Get.find<MainNavController>().leaveAi();
+    } else {
+      Get.back<void>();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
     final palette = context.palette;
     final isDark = context.isDark;
-    final keyboardVisible = MediaQuery.viewInsetsOf(context).bottom > 0;
-    final composerBottomPadding = keyboardVisible
-        ? 10.0
-        : 8.0;
     final topInset = MediaQuery.paddingOf(context).top;
 
     return Scaffold(
-      key: _scaffoldKey,
-      endDrawer: ChatHistoryDrawer(controller: controller),
       body: Container(
         color: palette.scaffold,
         child: Stack(
@@ -58,11 +70,11 @@ class _AiChatScreenState extends State<AiChatScreen>
               child: Column(
                 children: [
                   Expanded(child: _ChatContent(controller: controller)),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
+                  SafeArea(
+                    top: false,
+                    minimum: const EdgeInsets.fromLTRB(14, 8, 14, 12),
                     child: MessageComposer(controller: controller),
                   ),
-                  SizedBox(height: composerBottomPadding),
                 ],
               ),
             ),
@@ -72,8 +84,10 @@ class _AiChatScreenState extends State<AiChatScreen>
               right: 16,
               child: Row(
                 children: [
+                  QuietGlassBackButton(onPressed: _goBack),
+                  const SizedBox(width: 8),
                   SizedBox(
-                    width: 152,
+                    width: 132,
                     child: Obx(
                       () => _ModelMultiSelect(
                         selectedModel: controller.selectedModel.value,
@@ -93,7 +107,8 @@ class _AiChatScreenState extends State<AiChatScreen>
                   ),
                   const SizedBox(width: 8),
                   QuietGlassIconButton(
-                    onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+                    onPressed: () =>
+                        showChatHistorySheet(context, controller: controller),
                     icon: FLucideIcons.history,
                     tooltip: 'Chat history',
                     lightHaptic: true,
@@ -747,9 +762,11 @@ class _ProcessingGradientPainter extends CustomPainter {
         size.height * (.53 + math.sin(phase + .9) * .08),
       ),
       size.width * .70,
-      Color.lerp(AppColors.brandTeal, Colors.white, .42)!.withValues(
-        alpha: isDark ? .2 : .16,
-      ),
+      Color.lerp(
+        AppColors.brandTeal,
+        Colors.white,
+        .42,
+      )!.withValues(alpha: isDark ? .2 : .16),
     );
     _paintGlow(
       canvas,
@@ -758,9 +775,11 @@ class _ProcessingGradientPainter extends CustomPainter {
         size.height * (.76 + math.cos(phase * 2 + 1.7) * .05),
       ),
       size.width * .66,
-      Color.lerp(AppColors.brandTeal, Colors.black, .14)!.withValues(
-        alpha: isDark ? .2 : .15,
-      ),
+      Color.lerp(
+        AppColors.brandTeal,
+        Colors.black,
+        .14,
+      )!.withValues(alpha: isDark ? .2 : .15),
     );
   }
 

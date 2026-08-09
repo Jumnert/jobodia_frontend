@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
@@ -12,25 +13,24 @@ class PreferencesWizardScreen extends GetView<PreferencesController> {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final overlayBrightness = context.isDark
+        ? Brightness.light
+        : Brightness.dark;
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
+        statusBarIconBrightness: overlayBrightness,
         systemNavigationBarColor: palette.scaffold,
-        systemNavigationBarIconBrightness: Brightness.light,
+        systemNavigationBarIconBrightness: overlayBrightness,
       ),
-      child: Scaffold(
-        backgroundColor: palette.scaffold,
-        body: SafeArea(
+      child: FScaffold(
+        childPad: false,
+        child: SafeArea(
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                child: Obx(
-                  () => _WizardBody(step: controller.currentStep.value),
-                ),
-              ),
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: Obx(() => _WizardBody(step: controller.currentStep.value)),
             ),
           ),
         ),
@@ -46,412 +46,447 @@ class _WizardBody extends GetView<PreferencesController> {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Header row: back + step counter
-        Row(
-          children: [
-            if (step > 0)
-              Tooltip(
-                message: 'Back',
-                child: IconButton(
-                  onPressed: controller.goBack,
-                  icon: Icon(
-                    FLucideIcons.arrowLeft,
-                    color: palette.iconPrimary,
-                  ),
-                ),
-              )
-            else
-              const SizedBox(width: 24),
-            const Spacer(),
-            Text(
-              'Step ${step + 1} of 3',
-              style: TextStyle(
-                color: palette.textSecondary,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        // Progress bar
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: (step + 1) / 3,
-            minHeight: 3,
-            backgroundColor: palette.border,
-            valueColor: const AlwaysStoppedAnimation(AppColors.accentPurple),
-          ),
-        ),
-        const SizedBox(height: 28),
+        _WizardHeader(step: step),
         Expanded(
           child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 280),
+            duration: const Duration(milliseconds: 320),
             switchInCurve: Curves.easeOutCubic,
             switchOutCurve: Curves.easeInCubic,
-            transitionBuilder: (child, animation) => FadeTransition(
-              opacity: animation,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0.06, 0),
-                  end: Offset.zero,
-                ).animate(animation),
-                child: child,
-              ),
-            ),
+            transitionBuilder: (child, animation) {
+              final offset = Tween<Offset>(
+                begin: const Offset(0.04, 0),
+                end: Offset.zero,
+              ).animate(animation);
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(position: offset, child: child),
+              );
+            },
             child: KeyedSubtree(
               key: ValueKey(step),
               child: switch (step) {
-                0 => const _RoleStep(),
-                1 => const _LevelStep(),
+                0 => const _InterestsStep(),
+                1 => const _RoleStep(),
+                2 => const _LevelStep(),
                 _ => const _LocationStep(),
               },
             ),
           ),
         ),
+        _WizardFooter(step: step),
       ],
     );
   }
 }
 
-// ---------------------------------------------------------------------------
-// Step 1 — Desired role
-// ---------------------------------------------------------------------------
+class _WizardHeader extends GetView<PreferencesController> {
+  const _WizardHeader({required this.step});
+
+  final int step;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = FTheme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 44,
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 44,
+                  child: step == 0
+                      ? null
+                      : FButton.icon(
+                          variant: FButtonVariant.ghost,
+                          onPress: controller.goBack,
+                          child: const Icon(FLucideIcons.arrowLeft),
+                        ),
+                ),
+                Expanded(
+                  child: Text(
+                    'personalize_title'.tr,
+                    textAlign: TextAlign.center,
+                    style: theme.typography.body.lg.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 44,
+                  child: Center(
+                    child: Text(
+                      '${step + 1}/4',
+                      style: theme.typography.body.xs.copyWith(
+                        color: theme.colors.mutedForeground,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: List.generate(
+              4,
+              (index) => Expanded(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 240),
+                  height: 4,
+                  margin: EdgeInsets.only(right: index == 3 ? 0 : 7),
+                  decoration: BoxDecoration(
+                    color: index <= step
+                        ? theme.colors.primary
+                        : theme.colors.secondary,
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InterestsStep extends GetView<PreferencesController> {
+  const _InterestsStep();
+
+  @override
+  Widget build(BuildContext context) {
+    return _StepLayout(
+      icon: FLucideIcons.sparkles,
+      title: 'interests_title'.tr,
+      subtitle: 'interests_subtitle'.tr,
+      child: Wrap(
+        spacing: 10,
+        runSpacing: 10,
+        children: [
+          for (final interest in PreferencesController.interests)
+            Obx(
+              () => _ChoiceButton(
+                label: _preferenceLabel(interest),
+                selected: controller.selectedInterests.contains(interest),
+                onPress: () => controller.toggleInterest(interest),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
 
 class _RoleStep extends GetView<PreferencesController> {
   const _RoleStep();
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
-    return _StepCard(
-      title: "What role are\nyou looking for?",
-      subtitle: 'Type it in or pick one below.',
-      content: Column(
+    final theme = FTheme.of(context);
+    return _StepLayout(
+      icon: FLucideIcons.searchCheck,
+      title: 'desired_role_title'.tr,
+      subtitle: 'desired_role_subtitle'.tr,
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Free-text field
-          TextField(
-            onChanged: controller.selectRole,
-            style: TextStyle(color: palette.textPrimary),
-            decoration: InputDecoration(
-              hintText: 'e.g. Flutter Developer',
-              hintStyle: TextStyle(color: palette.textTertiary, fontSize: 14),
-              filled: true,
-              fillColor: palette.surfaceMuted,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: AppColors.accentPurple),
-              ),
+          FTextField(
+            control: FTextFieldControl.managed(
+              controller: controller.desiredRoleController,
+              onChange: (value) => controller.selectRole(value.text),
+            ),
+            label: Text('role_or_job_title'.tr),
+            hint: 'role_hint'.tr,
+            textInputAction: TextInputAction.done,
+            prefixBuilder: (context, style, variants) =>
+                FTextField.prefixIconBuilder(
+                  context,
+                  style,
+                  variants,
+                  const Icon(FLucideIcons.briefcaseBusiness),
+                ),
+          ),
+          const SizedBox(height: 22),
+          Text(
+            'popular_roles'.tr,
+            style: theme.typography.body.sm.copyWith(
+              color: theme.colors.mutedForeground,
+              fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
           Wrap(
-            spacing: 8,
+            spacing: 10,
             runSpacing: 10,
-            children: PreferencesController.roles
-                .map(
-                  (role) => Obx(
-                    () => _SelectChip(
-                      label: role,
-                      selected: controller.desiredRole.value == role,
-                      onTap: () => controller.selectRole(role),
+            children: [
+              for (final role in PreferencesController.roles)
+                Obx(
+                  () => _ChoiceButton(
+                    label: _preferenceLabel(role),
+                    selected: controller.desiredRole.value == role,
+                    onPress: () => controller.selectRole(
+                      role,
+                      displayLabel: _preferenceLabel(role),
                     ),
                   ),
-                )
-                .toList(),
-          ),
-          const Spacer(),
-          _NextButton(
-            label: 'Next',
-            enabled: true,
-            onPressed: controller.goNext,
+                ),
+            ],
           ),
         ],
       ),
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Step 2 — Experience level
-// ---------------------------------------------------------------------------
 
 class _LevelStep extends GetView<PreferencesController> {
   const _LevelStep();
 
+  static const _details = {
+    'Mid-level': 'level_mid_detail',
+    'Intermediate': 'level_intermediate_detail',
+    'Senior': 'level_senior_detail',
+    'Expert': 'level_expert_detail',
+    'Internship': 'level_internship_detail',
+  };
+
   @override
   Widget build(BuildContext context) {
-    return _StepCard(
-      title: 'Your experience\nlevel?',
-      subtitle: 'We\'ll filter jobs that fit you best.',
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 10,
-            children: PreferencesController.levels
-                .map(
-                  (level) => Obx(
-                    () => _SelectChip(
-                      label: level,
-                      selected: controller.experienceLevel.value == level,
-                      onTap: () => controller.selectLevel(level),
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-          const Spacer(),
-          Obx(
-            () => _NextButton(
-              label: 'Next',
-              enabled: controller.experienceLevel.value.isNotEmpty,
-              onPressed: controller.goNext,
-            ),
-          ),
-        ],
+    return _StepLayout(
+      icon: FLucideIcons.chartNoAxesColumnIncreasing,
+      title: 'experience_title'.tr,
+      subtitle: 'experience_subtitle'.tr,
+      child: Obx(
+        () => FTileGroup(
+          children: [
+            for (final level in PreferencesController.levels)
+              FTile(
+                prefix: const Icon(FLucideIcons.badgeCheck),
+                title: Text(_preferenceLabel(level)),
+                subtitle: Text(_details[level]!.tr),
+                suffix: Icon(
+                  controller.experienceLevel.value == level
+                      ? FLucideIcons.circleCheckBig
+                      : FLucideIcons.circle,
+                ),
+                onPress: () => controller.selectLevel(level),
+              ),
+          ],
+        ),
       ),
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Step 3 — Preferred location
-// ---------------------------------------------------------------------------
 
 class _LocationStep extends GetView<PreferencesController> {
   const _LocationStep();
 
+  static const _details = {
+    'Remote': 'location_remote_detail',
+    'Singapore': 'location_singapore_detail',
+    'Washington, DC': 'location_washington_dc_detail',
+    'Any': 'location_any_detail',
+  };
+
   @override
   Widget build(BuildContext context) {
-    return _StepCard(
-      title: 'Where do you\nwant to work?',
-      subtitle: 'Pick your preferred work location.',
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 10,
-            children: PreferencesController.locations
-                .map(
-                  (loc) => Obx(
-                    () => _SelectChip(
-                      label: loc,
-                      selected: controller.preferredLocation.value == loc,
-                      onTap: () => controller.selectLocation(loc),
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-          const Spacer(),
-          Obx(
-            () => _NextButton(
-              label: 'Done',
-              enabled: controller.preferredLocation.value.isNotEmpty,
-              onPressed: controller.complete,
-            ),
-          ),
-        ],
+    return _StepLayout(
+      icon: FLucideIcons.mapPinned,
+      title: 'location_title'.tr,
+      subtitle: 'location_subtitle'.tr,
+      child: Obx(
+        () => FTileGroup(
+          children: [
+            for (final location in PreferencesController.locations)
+              FTile(
+                prefix: Icon(
+                  location == 'Remote'
+                      ? FLucideIcons.houseWifi
+                      : location == 'Any'
+                      ? FLucideIcons.globe2
+                      : FLucideIcons.mapPin,
+                ),
+                title: Text(_preferenceLabel(location)),
+                subtitle: Text(_details[location]!.tr),
+                suffix: Icon(
+                  controller.preferredLocation.value == location
+                      ? FLucideIcons.circleCheckBig
+                      : FLucideIcons.circle,
+                ),
+                onPress: () => controller.selectLocation(location),
+              ),
+          ],
+        ),
       ),
     );
   }
 }
 
-// ---------------------------------------------------------------------------
-// Shared card wrapper
-// ---------------------------------------------------------------------------
-
-class _StepCard extends StatelessWidget {
-  const _StepCard({
+class _StepLayout extends StatelessWidget {
+  const _StepLayout({
+    required this.icon,
     required this.title,
     required this.subtitle,
-    required this.content,
+    required this.child,
   });
 
+  final IconData icon;
   final String title;
   final String subtitle;
-  final Widget content;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(22, 26, 22, 22),
-      decoration: BoxDecoration(
-        color: palette.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: palette.border),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.accentPurple.withValues(alpha: 0.08),
-            blurRadius: 40,
-            spreadRadius: 4,
-          ),
-        ],
-      ),
+    final theme = FTheme.of(context);
+    return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            width: 52,
+            height: 52,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: theme.colors.primary.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 24, color: theme.colors.primary),
+          ),
+          const SizedBox(height: 20),
           Text(
-            title,
-            style: TextStyle(
-              color: palette.textPrimary,
-              fontSize: 26,
+            title.replaceAll('\n', ' '),
+            style: theme.typography.display.lg.copyWith(
               fontWeight: FontWeight.w800,
-              height: 1.15,
+              height: 1.12,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             subtitle,
-            style: TextStyle(
-              color: palette.textSecondary,
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
+            style: theme.typography.body.sm.copyWith(
+              color: theme.colors.mutedForeground,
+              height: 1.45,
             ),
           ),
-          const SizedBox(height: 18),
-          Expanded(child: content),
+          const SizedBox(height: 26),
+          child,
         ],
       ),
     );
   }
 }
 
-// ---------------------------------------------------------------------------
-// Chip
-// ---------------------------------------------------------------------------
-
-class _SelectChip extends StatelessWidget {
-  const _SelectChip({
+class _ChoiceButton extends StatelessWidget {
+  const _ChoiceButton({
     required this.label,
     required this.selected,
-    required this.onTap,
+    required this.onPress,
   });
 
   final String label;
   final bool selected;
-  final VoidCallback onTap;
+  final VoidCallback onPress;
+
+  @override
+  Widget build(BuildContext context) {
+    return FButton(
+      variant: selected ? FButtonVariant.primary : FButtonVariant.outline,
+      onPress: () {
+        unawaited(HapticFeedback.selectionClick());
+        onPress();
+      },
+      prefix: selected ? const Icon(FLucideIcons.check, size: 16) : null,
+      child: Text(label),
+    );
+  }
+}
+
+class _WizardFooter extends GetView<PreferencesController> {
+  const _WizardFooter({required this.step});
+
+  final int step;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return GestureDetector(
-      onTap: () {
-        unawaited(HapticFeedback.lightImpact());
-        onTap();
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppColors.accentPurple.withValues(alpha: 0.22)
-              : palette.surfaceMuted,
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(
-            color: selected ? AppColors.accentPurple : palette.border,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected ? palette.textPrimary : palette.textSecondary,
-            fontSize: 13.5,
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-          ),
-        ),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: palette.scaffold,
+        border: Border(top: BorderSide(color: palette.divider)),
       ),
-    );
-  }
-}
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
+        child: Obx(() {
+          final enabled = switch (step) {
+            0 => controller.selectedInterests.isNotEmpty,
+            1 => controller.desiredRole.value.isNotEmpty,
+            2 => controller.experienceLevel.value.isNotEmpty,
+            _ => controller.preferredLocation.value.isNotEmpty,
+          };
 
-// ---------------------------------------------------------------------------
-// Next / Done button
-// ---------------------------------------------------------------------------
-
-class _NextButton extends StatelessWidget {
-  const _NextButton({
-    required this.label,
-    required this.enabled,
-    required this.onPressed,
-  });
-
-  final String label;
-  final bool enabled;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedOpacity(
-      opacity: enabled ? 1 : 0.45,
-      duration: const Duration(milliseconds: 180),
-      child: Container(
-        height: 54,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(26),
-          gradient: const LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [AppColors.accentPurpleDark, AppColors.accentPurple],
-          ),
-          boxShadow: enabled
-              ? [
-                  BoxShadow(
-                    color: AppColors.accentPurple.withValues(alpha: 0.28),
-                    blurRadius: 18,
-                    offset: const Offset(0, 8),
+          return Row(
+            children: [
+              if (step > 0) ...[
+                Expanded(
+                  child: FButton(
+                    variant: FButtonVariant.outline,
+                    onPress: controller.goBack,
+                    child: Text('back'.tr),
                   ),
-                ]
-              : null,
-        ),
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(26),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: enabled ? onPressed : null,
-            child: Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                    ),
+                ),
+                const SizedBox(width: 10),
+              ],
+              Expanded(
+                flex: step > 0 ? 1 : 2,
+                child: FButton(
+                  onPress: enabled
+                      ? step == 3
+                            ? controller.complete
+                            : controller.goNext
+                      : null,
+                  suffix: Icon(
+                    step == 3 ? FLucideIcons.check : FLucideIcons.arrowRight,
                   ),
-                  const SizedBox(width: 10),
-                  const Icon(
-                    FLucideIcons.arrowRight,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                ],
+                  child: Text(step == 3 ? 'done'.tr : 'next'.tr),
+                ),
               ),
-            ),
-          ),
-        ),
+            ],
+          );
+        }),
       ),
     );
   }
 }
+
+String _preferenceLabel(String value) => switch (value) {
+  'Technology' => 'interest_technology'.tr,
+  'Design' => 'interest_design'.tr,
+  'Business' => 'interest_business'.tr,
+  'Marketing' => 'interest_marketing'.tr,
+  'Finance' => 'interest_finance'.tr,
+  'Education' => 'interest_education'.tr,
+  'Healthcare' => 'interest_healthcare'.tr,
+  'Remote work' => 'interest_remote_work'.tr,
+  'Designer' => 'role_designer'.tr,
+  'Developer' => 'role_developer'.tr,
+  'Product Manager' => 'role_product_manager'.tr,
+  'Other' => 'other'.tr,
+  'Mid-level' => 'level_mid'.tr,
+  'Intermediate' => 'level_intermediate'.tr,
+  'Senior' => 'level_senior'.tr,
+  'Expert' => 'level_expert'.tr,
+  'Internship' => 'level_internship'.tr,
+  'Remote' => 'location_remote'.tr,
+  'Singapore' => 'location_singapore'.tr,
+  'Washington, DC' => 'location_washington_dc'.tr,
+  'Any' => 'location_any'.tr,
+  _ => value,
+};

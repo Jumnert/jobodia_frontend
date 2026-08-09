@@ -2,17 +2,13 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
-/// Interactive screenshot upload tile for the Report screen.
-/// Shows a dashed-border + icon when empty, or a thumbnail when an image is
-/// attached. [onTap] opens the picker; [onRemove] clears the selection.
 class ScreenshotUploadBox extends StatelessWidget {
   const ScreenshotUploadBox({
-    super.key,
     required this.onTap,
     this.imageBytes,
     this.onRemove,
+    super.key,
   });
 
   final VoidCallback onTap;
@@ -21,94 +17,64 @@ class ScreenshotUploadBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
-    final hasImage = imageBytes != null && imageBytes!.isNotEmpty;
-
-    return GestureDetector(
-      onTap: hasImage ? null : onTap,
-      child: Container(
-        width: 82,
-        height: 82,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: hasImage ? null : Colors.transparent,
-          image: hasImage
-              ? DecorationImage(
-                  image: MemoryImage(imageBytes!),
-                  fit: BoxFit.cover,
-                )
-              : null,
+    final bytes = imageBytes;
+    if (bytes == null || bytes.isEmpty) {
+      return FButton(
+        variant: FButtonVariant.outline,
+        onPress: onTap,
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(FLucideIcons.imagePlus, size: 18),
+            SizedBox(width: 8),
+            Text('Choose screenshot'),
+          ],
         ),
-        clipBehavior: Clip.antiAlias,
-        child: hasImage
-            ? Stack(
-                children: [
-                  Positioned(
-                    top: 4,
-                    right: 4,
-                    child: GestureDetector(
-                      onTap: onRemove,
-                      child: Container(
-                        width: 22,
-                        height: 22,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.55),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          FLucideIcons.x,
-                          size: 14,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              )
-            : CustomPaint(
-                painter: _DashedBorderPainter(palette.border),
-                child: Center(
-                  child: Icon(
-                    FLucideIcons.plus,
-                    color: palette.textSecondary,
-                    size: 30,
+      );
+    }
+
+    final theme = FTheme.of(context);
+    return FCard(
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.memory(
+              bytes,
+              width: 64,
+              height: 64,
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.medium,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Screenshot attached',
+                  style: theme.typography.body.sm.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              ),
+                const SizedBox(height: 2),
+                Text(
+                  'Ready to include with your report',
+                  style: theme.typography.body.xs.copyWith(
+                    color: theme.colors.mutedForeground,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          FButton.icon(
+            variant: FButtonVariant.ghost,
+            onPress: onRemove,
+            child: const Icon(FLucideIcons.trash2),
+          ),
+        ],
       ),
     );
   }
-}
-
-class _DashedBorderPainter extends CustomPainter {
-  const _DashedBorderPainter(this.borderColor);
-
-  final Color borderColor;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const dashLength = 5.0;
-    const gapLength = 4.0;
-    const radius = Radius.circular(12);
-    final paint = Paint()
-      ..color = borderColor
-      ..strokeWidth = 1.2
-      ..style = PaintingStyle.stroke;
-    final path = Path()
-      ..addRRect(RRect.fromRectAndRadius(Offset.zero & size, radius));
-
-    for (final metric in path.computeMetrics()) {
-      var distance = 0.0;
-      while (distance < metric.length) {
-        canvas.drawPath(
-          metric.extractPath(distance, distance + dashLength),
-          paint,
-        );
-        distance += dashLength + gapLength;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(_DashedBorderPainter oldDelegate) => false;
 }
