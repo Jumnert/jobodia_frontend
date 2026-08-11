@@ -72,29 +72,25 @@ class MainShellScreen extends StatelessWidget {
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  child: Transform.translate(
-                    offset: const Offset(0, 15),
-                    child: _BottomNavBar(
-                      selectedIndex: index,
-                      isEmployer: isEmployer,
-                      animateAiBorder: index == 0,
-                      onTap: (tapped) async {
-                        nav.goToTab(tapped);
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (tapped == 0 &&
-                              Get.isRegistered<HomeController>()) {
-                            final scroll =
-                                Get.find<HomeController>().scrollController;
-                            if (scroll.hasClients) scroll.jumpTo(0);
-                          }
-                          if (tapped == 4 &&
-                              Get.isRegistered<AiChatController>()) {
-                            Get.find<AiChatController>()
-                                .resetConversationViewport();
-                          }
-                        });
-                      },
-                    ),
+                  child: _BottomNavBar(
+                    selectedIndex: index,
+                    isEmployer: isEmployer,
+                    animateAiBorder: index == 0,
+                    onTap: (tapped) async {
+                      nav.goToTab(tapped);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (tapped == 0 && Get.isRegistered<HomeController>()) {
+                          final scroll =
+                              Get.find<HomeController>().scrollController;
+                          if (scroll.hasClients) scroll.jumpTo(0);
+                        }
+                        if (tapped == 4 &&
+                            Get.isRegistered<AiChatController>()) {
+                          Get.find<AiChatController>()
+                              .resetConversationViewport();
+                        }
+                      });
+                    },
                   ),
                 ),
             ],

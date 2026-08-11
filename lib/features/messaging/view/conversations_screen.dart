@@ -22,7 +22,9 @@ class ConversationsScreen extends StatefulWidget {
 
 class _ConversationsScreenState extends State<ConversationsScreen> {
   late final MessagingController _controller;
+  late final TextEditingController _searchController;
   _ChatFilter _filter = _ChatFilter.all;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -30,13 +32,20 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
     _controller = Get.isRegistered<MessagingController>()
         ? Get.find<MessagingController>()
         : Get.put(MessagingController());
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   List<ConversationModel> _filtered(List<ConversationModel> source) {
     final active = source
         .where((chat) => !chat.isArchived && !chat.isBlocked)
         .toList(growable: false);
-    return switch (_filter) {
+    final filteredByType = switch (_filter) {
       _ChatFilter.all => active,
       _ChatFilter.unread =>
         active.where((chat) => chat.unreadCount > 0).toList(growable: false),
@@ -45,6 +54,18 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
       _ChatFilter.organizations =>
         active.where((chat) => chat.isOrganization).toList(growable: false),
     };
+
+    final query = _searchQuery.trim().toLowerCase();
+    if (query.isEmpty) return filteredByType;
+
+    return filteredByType
+        .where(
+          (chat) =>
+              chat.recruiterName.toLowerCase().contains(query) ||
+              chat.recruiterCompany.toLowerCase().contains(query) ||
+              chat.jobTitle.toLowerCase().contains(query),
+        )
+        .toList(growable: false);
   }
 
   void _openConversation(ConversationModel conversation) {
@@ -109,8 +130,28 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
             ),
           ),
           const SizedBox(height: 14),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: FTextField(
+              control: FTextFieldControl.managed(
+                controller: _searchController,
+                onChange: (value) => setState(() => _searchQuery = value.text),
+              ),
+              hint: 'search_chats'.tr,
+              textInputAction: TextInputAction.search,
+              prefixBuilder: (context, style, variants) =>
+                  FTextField.prefixIconBuilder(
+                    context,
+                    style,
+                    variants,
+                    const Icon(FLucideIcons.search),
+                  ),
+              clearable: (value) => value.text.isNotEmpty,
+            ),
+          ),
+          const SizedBox(height: 12),
           SizedBox(
-            height: 38,
+            height: 44,
             child: ListView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -140,7 +181,9 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
               if (conversations.isEmpty) {
                 return Center(
                   child: Text(
-                    _filter == _ChatFilter.unread
+                    _searchQuery.trim().isNotEmpty
+                        ? 'no_users_found'.tr
+                        : _filter == _ChatFilter.unread
                         ? 'no_unread_chats'.tr
                         : 'no_messages'.tr,
                     style: TextStyle(color: palette.textSecondary),

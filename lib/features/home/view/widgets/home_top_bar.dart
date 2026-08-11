@@ -59,6 +59,13 @@ class HomeTopBar extends StatelessWidget {
         ),
         const Spacer(),
         QuietGlassIconButton(
+          icon: FLucideIcons.search,
+          tooltip: 'Search jobs',
+          lightHaptic: true,
+          onPressed: () => Get.toNamed<void>(AppRoutes.search),
+        ),
+        const SizedBox(width: 8),
+        QuietGlassIconButton(
           icon: FLucideIcons.messageCircle,
           tooltip: 'Messages',
           lightHaptic: true,

@@ -142,6 +142,60 @@ class _ResetPasswordForm extends GetView<AuthController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        FTextField(
+          control: FTextFieldControl.managed(
+            controller: controller.resetEmailController,
+          ),
+          label: const Text('Account Email'),
+          hint: 'you@example.com',
+          keyboardType: TextInputType.emailAddress,
+          textInputAction: TextInputAction.next,
+          prefixBuilder: (context, style, variants) =>
+              FTextField.prefixIconBuilder(
+                context,
+                style,
+                variants,
+                const Icon(FLucideIcons.mail),
+              ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              child: FTextField(
+                control: FTextFieldControl.managed(
+                  controller: controller.resetOtpController,
+                ),
+                label: const Text('Reset Code'),
+                hint: '6 digits',
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.next,
+                maxLength: 6,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                prefixBuilder: (context, style, variants) =>
+                    FTextField.prefixIconBuilder(
+                      context,
+                      style,
+                      variants,
+                      const Icon(FLucideIcons.shieldCheck),
+                    ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Obx(
+              () => FButton(
+                onPress: controller.isResendingOtp.value
+                    ? null
+                    : controller.sendResetOtp,
+                child: Text(
+                  controller.isResendingOtp.value ? 'Sending' : 'Send code',
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
         Obx(
           () => FTextField(
             control: FTextFieldControl.managed(

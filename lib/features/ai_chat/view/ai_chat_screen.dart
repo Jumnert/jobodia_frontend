@@ -54,6 +54,10 @@ class _AiChatScreenState extends State<AiChatScreen>
     final topInset = MediaQuery.paddingOf(context).top;
 
     return Scaffold(
+      // The main shell's FScaffold already avoids the keyboard. Letting this
+      // nested scaffold resize too applies the same inset twice and pushes the
+      // composer far above the keyboard.
+      resizeToAvoidBottomInset: !widget.embedded,
       body: Container(
         color: palette.scaffold,
         child: Stack(

@@ -45,6 +45,9 @@ abstract final class AppColors {
   static const chatOutgoingStart = chart4;
   static const chatOutgoingEnd = chart5;
 
+  /// Deep action color used by the compact chat composer send control.
+  static const chatComposerAction = Color(0xFF2D0738);
+
   /// Legacy onboarding CTA tokens mapped to the new warm chart scale.
   static const onboardingCtaLight = chart2;
   static const onboardingCtaDark = chart4;

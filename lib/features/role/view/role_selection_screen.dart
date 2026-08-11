@@ -6,6 +6,7 @@ import 'package:jobodia_frontend/core/widgets/blurred_header.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/features/role/controller/role_controller.dart';
+import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 
 /// Shown after sign up (and re-openable from Settings) so the user picks
 /// whether they use Jobodia as a Job Seeker or an Employer.
@@ -19,6 +20,7 @@ class RoleSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<RoleController>();
+    final authController = Get.find<AuthController>();
     final theme = FTheme.of(context);
 
     return FScaffold(
@@ -101,10 +103,16 @@ class RoleSelectionScreen extends StatelessWidget {
                       const SizedBox(height: 12),
                       Obx(
                         () => FButton(
-                          onPress: controller.hasRole
-                              ? () => _continue(controller)
+                          onPress:
+                              controller.hasRole &&
+                                  !authController.isLoading.value
+                              ? () => _continue(controller, authController)
                               : null,
-                          child: Text('next'.tr),
+                          child: Text(
+                            authController.isLoading.value
+                                ? 'Completing account…'
+                                : 'next'.tr,
+                          ),
                         ),
                       ),
                       SizedBox(height: compact ? 10 : 14),
@@ -134,9 +142,16 @@ class RoleSelectionScreen extends StatelessWidget {
     }
   }
 
-  void _continue(RoleController controller) {
+  Future<void> _continue(
+    RoleController controller,
+    AuthController authController,
+  ) async {
     if (!controller.hasRole) return;
     HapticFeedback.lightImpact();
+    final completed = await authController.completePendingOAuthSignup(
+      controller.role.value!,
+    );
+    if (!completed) return;
     Get.offNamed<void>(AppRoutes.roleWelcome);
   }
 }

@@ -45,7 +45,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     Get.testMode = true;
-    Get.put<AuthController>(AuthController(const AuthRepository()));
+    Get.put<AuthController>(AuthController(AuthRepository()));
     Get.put<LanguageController>(
       LanguageController(storage: GetStorage('language_dialog_test')),
     );

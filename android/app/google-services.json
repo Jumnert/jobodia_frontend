@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1021034468238",
+    "project_id": "jobodia-a80d6",
+    "storage_bucket": "jobodia-a80d6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1021034468238:android:5fd8f1a9086732f0a38adf",
+        "android_client_info": {
+          "package_name": "com.jobodia.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPsQjwdXpgAFh9QiVk5fCMggVK2vGu68w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

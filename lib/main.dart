@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:get/get.dart';
@@ -9,13 +11,28 @@ import 'package:jobodia_frontend/app/routes/app_pages.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/app/theme/app_theme.dart';
 import 'package:jobodia_frontend/core/widgets/seasonal_atmosphere.dart';
+import 'package:jobodia_frontend/core/config/app_environment.dart';
 import 'package:jobodia_frontend/features/onboarding/controllers/onboarding_controller.dart';
 import 'package:jobodia_frontend/features/settings/controller/theme_controller.dart';
 import 'package:jobodia_frontend/features/splash/view/splash_screen.dart';
+import 'package:jobodia_frontend/firebase_options.dart';
 import 'package:jobodia_frontend/theme/theme.dart' as forui_theme;
 
-Future<void> main() async {
+Future<void> main() => bootstrap(AppEnvironment.uat);
+
+Future<void> bootstrap(AppEnvironment environment) async {
   WidgetsFlutterBinding.ensureInitialized();
+  AppConfig.configure(environment);
+  final supportsFirebase =
+      AppConfig.enableFirebase &&
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
+  if (supportsFirebase) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
   await GetStorage.init();
   runApp(const JobodiaApp());
 }
@@ -31,7 +48,7 @@ class JobodiaApp extends StatelessWidget {
     final preset = ThemeController.readStoredPreset();
     final initialLanguage = LanguageController.readStoredLanguage();
     return GetMaterialApp(
-      title: 'Jobodia',
+      title: AppConfig.displayName,
       debugShowCheckedModeBanner: false,
       initialBinding: InitialBinding(),
       initialRoute: initialRoute ?? _resolveInitialRoute(),

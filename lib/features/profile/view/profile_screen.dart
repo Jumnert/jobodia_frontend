@@ -163,14 +163,11 @@ class _ProfilePresentation extends StatelessWidget {
         Positioned(
           top: _coverTop + _coverHeight + 30,
           right: 18,
-          child: SizedBox(
-            height: 38,
-            child: FButton(
-              variant: FButtonVariant.outline,
-              onPress: () => Get.toNamed<void>(AppRoutes.editProfile),
-              prefix: const Icon(FLucideIcons.penLine, size: 15),
-              child: const Text('Edit Profile'),
-            ),
+          child: FButton(
+            variant: FButtonVariant.outline,
+            onPress: () => Get.toNamed<void>(AppRoutes.editProfile),
+            prefix: const Icon(FLucideIcons.penLine, size: 15),
+            child: const Text('Edit Profile'),
           ),
         ),
       ],

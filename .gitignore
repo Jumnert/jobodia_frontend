@@ -58,6 +58,10 @@ app.*.map.json
 key.properties
 google-services.json
 GoogleService-Info.plist
+# Firebase client configuration is public app metadata and is required by
+# FlutterFire builds. Server service-account credentials remain ignored above.
+!android/app/google-services.json
+!ios/Runner/GoogleService-Info.plist
 secrets/
 credentials/
 
@@ -85,3 +89,7 @@ api-docs.html
 API_ENDPOINTS.md
 diagnose_build.sh
 test_device.sh
+
+# Local backend repository (kept as a separate Git project)
+/backend/
+/artifacts/

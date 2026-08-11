@@ -43,7 +43,7 @@ void main() {
     tearDown(Get.reset);
 
     test('changeAuthTab updates the selected tab and clears the error', () {
-      final controller = AuthController(const AuthRepository());
+      final controller = AuthController(AuthRepository());
       controller.errorMessage.value = 'previous error';
 
       controller.changeAuthTab(1);
@@ -53,7 +53,7 @@ void main() {
     });
 
     test('changeAuthTab is a no-op while loading', () {
-      final controller = AuthController(const AuthRepository());
+      final controller = AuthController(AuthRepository());
       controller.isLoading.value = true;
 
       controller.changeAuthTab(1);
@@ -66,7 +66,7 @@ void main() {
     tester,
   ) async {
     Get.testMode = true;
-    final controller = AuthController(const AuthRepository());
+    final controller = AuthController(AuthRepository());
     Get.put<AuthController>(controller);
     addTearDown(Get.reset);
 

@@ -76,54 +76,76 @@ class _ConversationDetailScreenState extends State<ConversationDetailScreen> {
               // Input Area
               Container(
                 padding: const EdgeInsets.fromLTRB(
-                  16,
-                  10,
-                  16,
+                  12,
+                  12,
+                  12,
                   12,
                 ).copyWith(bottom: MediaQuery.of(context).padding.bottom + 12),
                 decoration: BoxDecoration(
-                  color: palette.surface,
+                  color: palette.surfaceMuted,
                   border: Border(top: BorderSide(color: palette.border)),
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _textCtrl,
-                        style: TextStyle(color: palette.textPrimary),
-                        decoration: InputDecoration(
-                          hintText: 'Type a message...',
-                          hintStyle: TextStyle(color: palette.textSecondary),
-                          filled: true,
-                          fillColor: palette.surfaceMuted,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(24),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 12,
+                child: FTextField(
+                  control: FTextFieldControl.managed(controller: _textCtrl),
+                  size: FTextFieldSizeVariant.lg,
+                  style: FTextFieldStyleDelta.delta(
+                    color: FVariantsValueDelta.delta([
+                      FVariantValueDeltaOperation.all(palette.surface),
+                    ]),
+                    constraints: const BoxConstraints(minHeight: 56),
+                    contentPadding: const EdgeInsetsGeometryDelta.value(
+                      EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+                    ),
+                    border: FVariantsValueDelta.delta([
+                      FVariantValueDeltaOperation.all(
+                        OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide(color: palette.border),
+                        ),
+                      ),
+                    ]),
+                  ),
+                  hint: 'Type Message..',
+                  textCapitalization: TextCapitalization.sentences,
+                  textInputAction: TextInputAction.send,
+                  autocorrect: true,
+                  enableSuggestions: true,
+                  onSubmit: (_) => _sendMessage(ctrl, c.id),
+                  prefixBuilder: (context, style, variants) =>
+                      FTextField.prefixIconBuilder(
+                        context,
+                        style,
+                        variants,
+                        _ComposerIconButton(
+                          tooltip: 'Attach file',
+                          onPress: () {},
+                          child: const Icon(
+                            Icons.attach_file_rounded,
+                            size: 21,
                           ),
                         ),
-                        onSubmitted: (_) => _sendMessage(ctrl, c.id),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(
-                      decoration: const BoxDecoration(
-                        color: AppColors.brandTeal,
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        icon: const Icon(
-                          FLucideIcons.send,
-                          color: Colors.white,
-                          size: 20,
+                  suffixBuilder: (_, _, _) => Padding(
+                    padding: const EdgeInsetsDirectional.only(end: 6),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _ComposerIconButton(
+                          tooltip: 'Record voice message',
+                          onPress: () {},
+                          child: const Icon(Icons.mic_none_rounded, size: 22),
                         ),
-                        onPressed: () => _sendMessage(ctrl, c.id),
-                      ),
+                        const SizedBox(width: 2),
+                        _ComposerIconButton(
+                          tooltip: 'Send message',
+                          onPress: () => _sendMessage(ctrl, c.id),
+                          backgroundColor: AppColors.chatComposerAction,
+                          foregroundColor: Colors.white,
+                          child: const Icon(Icons.send_rounded, size: 19),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],
@@ -163,6 +185,53 @@ class _ConversationDetailScreenState extends State<ConversationDetailScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ComposerIconButton extends StatelessWidget {
+  const _ComposerIconButton({
+    required this.tooltip,
+    required this.onPress,
+    required this.child,
+    this.backgroundColor,
+    this.foregroundColor,
+  });
+
+  final String tooltip;
+  final VoidCallback onPress;
+  final Widget child;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+
+    return Tooltip(
+      message: tooltip,
+      child: SizedBox.square(
+        dimension: 40,
+        child: FButton.raw(
+          variant: FButtonVariant.ghost,
+          onPress: onPress,
+          semanticsLabel: tooltip,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: backgroundColor ?? Colors.transparent,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Center(
+              child: IconTheme(
+                data: IconThemeData(
+                  color: foregroundColor ?? palette.iconPrimary,
+                ),
+                child: child,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

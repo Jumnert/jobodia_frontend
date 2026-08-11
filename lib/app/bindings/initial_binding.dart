@@ -23,6 +23,7 @@ import 'package:jobodia_frontend/features/job_post/controller/job_post_controlle
 import 'package:jobodia_frontend/features/feature_discovery/controller/feature_discovery_controller.dart';
 import 'package:jobodia_frontend/services/secure_storage_service.dart';
 import 'package:jobodia_frontend/services/app_security_service.dart';
+import 'package:jobodia_frontend/services/push_notification_service.dart';
 import 'package:jobodia_frontend/app/localization/language_controller.dart';
 
 class InitialBinding extends Bindings {
@@ -30,7 +31,8 @@ class InitialBinding extends Bindings {
   void dependencies() {
     Get.put(SecureStorageService(), permanent: true);
     Get.put(AppSecurityService(), permanent: true);
-    Get.put(const AuthRepository(), permanent: true);
+    Get.put(PushNotificationService(), permanent: true);
+    Get.put(AuthRepository(), permanent: true);
     Get.put(AuthController(Get.find<AuthRepository>()), permanent: true);
     Get.put(MainNavController(), permanent: true);
     Get.put(RoleController(), permanent: true);
