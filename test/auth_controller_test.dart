@@ -109,5 +109,27 @@ void main() {
         verify(mockRepo.fakeLogin('user@example.com', 'Password1')).called(1);
       });
     });
+
+    group('signUp', () {
+      test('registers with backend auth and logs in without OTP', () async {
+        when(mockRepo.fakeSignUp(any, any, any)).thenAnswer((_) async => true);
+        when(mockRepo.fakeLogin(any, any)).thenAnswer((_) async => true);
+
+        final c = AuthController(mockRepo);
+        c.usernameController.text = 'Test User';
+        c.emailController.text = 'new@example.com';
+        c.passwordController.text = 'Password1';
+        c.confirmPasswordController.text = 'Password1';
+
+        await c.signUp();
+
+        verify(
+          mockRepo.fakeSignUp('Test User', 'new@example.com', 'Password1'),
+        ).called(1);
+        verify(mockRepo.fakeLogin('new@example.com', 'Password1')).called(1);
+        verifyNever(mockRepo.fakeVerifyOtp(any, any));
+        expect(c.currentUser.value?.email, 'new@example.com');
+      });
+    });
   });
 }

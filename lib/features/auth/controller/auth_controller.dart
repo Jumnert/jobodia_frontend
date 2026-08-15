@@ -197,44 +197,9 @@ class AuthController extends GetxController with FormValidationMixin {
     FocusManager.instance.primaryFocus?.unfocus();
 
     try {
-      final isSuccess = await _authRepository.fakeLogin(email, password);
-      if (!isSuccess) {
+      if (!await _authenticateWithPassword(email, password)) {
         _showErrorSnackBar('Login failed', 'Invalid email or password.');
         return;
-      }
-
-      final loginResult = _authRepository.lastPasswordLoginResult;
-      if (loginResult != null) {
-        await SecureStorageService.to.writeSecure(
-          authTokenStorageKey,
-          loginResult.token,
-        );
-        if (Get.isRegistered<PushNotificationService>()) {
-          await Get.find<PushNotificationService>().registerAuthenticatedDevice(
-            loginResult.token,
-          );
-        }
-        final backendRole = loginResult.role.toUpperCase();
-        currentUser.value = UserModel(
-          id: loginResult.userId,
-          name: loginResult.username,
-          email: loginResult.email,
-          role: backendRole,
-          avatarUrl: loginResult.avatarUrl,
-        );
-        if (Get.isRegistered<RoleController>()) {
-          Get.find<RoleController>().selectRole(
-            backendRole == 'EMPLOYER' ? UserRole.employer : UserRole.jobSeeker,
-          );
-        }
-      } else {
-        currentUser.value = UserModel(
-          id: '1',
-          name: 'User',
-          email: email,
-          role: 'Candidate',
-          avatarUrl: null,
-        );
       }
       // First-time users pick a role (Job Seeker / Employer) before entering.
       final hasRole = Get.isRegistered<RoleController>()
@@ -314,13 +279,67 @@ class AuthController extends GetxController with FormValidationMixin {
       }
 
       registeredEmail.value = email;
-      otpController.clear();
-      Get.toNamed(AppRoutes.otpVerification);
+      if (!await _authenticateWithPassword(email, password)) {
+        selectedAuthTab.value = 0;
+        _showErrorSnackBar(
+          'Account created',
+          'Your account was saved. Please log in with your new credentials.',
+        );
+        return;
+      }
+
+      final hasRole = Get.isRegistered<RoleController>()
+          ? Get.find<RoleController>().hasRole
+          : false;
+      Get.offAllNamed(hasRole ? AppRoutes.home : AppRoutes.selectRole);
     } on AuthRepositoryException catch (error) {
       _showErrorSnackBar('Sign up failed', error.message);
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<bool> _authenticateWithPassword(String email, String password) async {
+    final isSuccess = await _authRepository.fakeLogin(email, password);
+    if (!isSuccess) return false;
+
+    final loginResult = _authRepository.lastPasswordLoginResult;
+    if (loginResult == null) {
+      currentUser.value = UserModel(
+        id: email,
+        name: email.split('@').first,
+        email: email,
+        role: 'SEEKER',
+        avatarUrl: null,
+      );
+      return true;
+    }
+
+    if (Get.isRegistered<SecureStorageService>()) {
+      await SecureStorageService.to.writeSecure(
+        authTokenStorageKey,
+        loginResult.token,
+      );
+    }
+    if (Get.isRegistered<PushNotificationService>()) {
+      await Get.find<PushNotificationService>().registerAuthenticatedDevice(
+        loginResult.token,
+      );
+    }
+    final backendRole = loginResult.role.toUpperCase();
+    currentUser.value = UserModel(
+      id: loginResult.userId,
+      name: loginResult.username,
+      email: loginResult.email,
+      role: backendRole,
+      avatarUrl: loginResult.avatarUrl,
+    );
+    if (Get.isRegistered<RoleController>()) {
+      Get.find<RoleController>().selectRole(
+        backendRole == 'EMPLOYER' ? UserRole.employer : UserRole.jobSeeker,
+      );
+    }
+    return true;
   }
 
   Future<void> verifyOtp() async {

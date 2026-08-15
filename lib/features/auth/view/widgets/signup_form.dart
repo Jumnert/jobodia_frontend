@@ -5,7 +5,6 @@ import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
-import 'package:jobodia_frontend/features/auth/view/widgets/social_login_section.dart';
 
 /// Register form UI. Validation and actions live in AuthController.
 class SignUpForm extends GetView<AuthController> {
@@ -134,8 +133,6 @@ class SignUpForm extends GetView<AuthController> {
             child: Text(controller.isLoading.value ? 'Please wait' : 'Sign up'),
           ),
         ),
-        const SizedBox(height: 20),
-        const SocialLoginSection(title: 'Or sign up with'),
         const SizedBox(height: 24),
         Wrap(
           alignment: WrapAlignment.center,
