@@ -96,7 +96,10 @@ void main() {
   late AiChatController ctrl;
 
   setUp(() {
-    ctrl = AiChatController(allowMockFallback: true);
+    ctrl = AiChatController(
+      chatService: DeepSeekChatService(proxyUrl: ''),
+      allowMockFallback: true,
+    );
   });
 
   tearDown(() {

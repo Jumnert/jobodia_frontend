@@ -3,8 +3,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:get/get.dart';
+import 'package:jobodia_frontend/core/config/app_environment.dart';
 import 'package:jobodia_frontend/features/ai_chat/model/chat_message_model.dart';
 import 'package:jobodia_frontend/features/ai_chat/model/resume_analysis.dart';
+import 'package:jobodia_frontend/services/secure_storage_service.dart';
 
 class DeepSeekChatService {
   DeepSeekChatService({
@@ -13,8 +16,14 @@ class DeepSeekChatService {
     String? proxyUrl,
     String? modelName,
   }) : _client = client ?? http.Client(),
-       _resolvedApiKey = apiKey ?? _apiKey,
-       _resolvedProxyUrl = proxyUrl ?? _proxyUrl,
+       _resolvedApiKey = apiKey ?? '',
+       _resolvedProxyUrl =
+           proxyUrl ??
+           ((apiKey?.isNotEmpty ?? false)
+               ? ''
+               : (_proxyUrl.isNotEmpty
+                     ? _proxyUrl
+                     : '${AppConfig.apiBaseUrl}/api/v1/ai/chat')),
        modelName = modelName ?? model,
        _ownsClient = client == null;
 
@@ -22,7 +31,6 @@ class DeepSeekChatService {
     'DEEPSEEK_MODEL',
     defaultValue: 'deepseek-v4-flash',
   );
-  static const _apiKey = String.fromEnvironment('DEEPSEEK_API_KEY');
   static const _proxyUrl = String.fromEnvironment('JOBODIA_AI_PROXY_URL');
   static const _directUrl = 'https://api.deepseek.com/chat/completions';
 
@@ -247,16 +255,42 @@ Experience level: $experienceLevel''',
     Map<String, String> headers,
     String requestBody,
   ) async {
+    if (_resolvedProxyUrl.isNotEmpty &&
+        Get.isRegistered<SecureStorageService>()) {
+      final token = await SecureStorageService.to.readSecure(
+        'jobodiaAuthToken',
+      );
+      if (token != null && token.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $token';
+      }
+    }
     final response = await _postWithNetworkRetry(
       endpoint,
       headers,
       requestBody,
     );
 
+    if (response.statusCode >= 300 && response.statusCode < 400) {
+      final location = response.headers['location'] ?? '';
+      if (_resolvedProxyUrl.isNotEmpty && location.contains('/login')) {
+        throw const DeepSeekException(
+          'Your Jobodia session expired. Sign in again and retry.',
+        );
+      }
+      throw DeepSeekException(
+        'The AI service redirected unexpectedly (${response.statusCode}).',
+      );
+    }
+
     Object? decoded;
     try {
       decoded = jsonDecode(response.body);
     } on Object {
+      if (response.statusCode == 401 || response.statusCode == 403) {
+        throw const DeepSeekException(
+          'Your Jobodia session expired. Sign in again and retry.',
+        );
+      }
       throw DeepSeekException(
         'DeepSeek returned an unreadable response (${response.statusCode}).',
       );

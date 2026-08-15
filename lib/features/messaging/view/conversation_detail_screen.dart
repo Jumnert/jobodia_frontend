@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:get/get.dart';
+import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/quiet_glass_button.dart';
 import 'package:jobodia_frontend/features/messaging/controller/messaging_controller.dart';
@@ -17,28 +18,54 @@ class ConversationDetailScreen extends StatefulWidget {
 class _ConversationDetailScreenState extends State<ConversationDetailScreen> {
   final _textCtrl = TextEditingController();
   final _scrollCtrl = ScrollController();
+  late final ConversationModel _conversation;
+
+  @override
+  void initState() {
+    super.initState();
+    _conversation = Get.arguments as ConversationModel;
+  }
 
   @override
   void dispose() {
+    if (Get.isRegistered<MessagingController>()) {
+      Get.find<MessagingController>().leaveConversation(_conversation.id);
+    }
     _textCtrl.dispose();
     _scrollCtrl.dispose();
     super.dispose();
   }
 
-  void _sendMessage(MessagingController ctrl, String conversationId) {
+  Future<void> _sendMessage(
+    MessagingController ctrl,
+    String conversationId,
+  ) async {
     final text = _textCtrl.text.trim();
     if (text.isEmpty) return;
 
-    ctrl.sendMessage(conversationId, text);
     _textCtrl.clear();
-    FocusManager.instance.primaryFocus?.unfocus();
+    try {
+      await ctrl.sendMessage(conversationId, text);
+    } on Object {
+      if (!mounted) return;
+      _textCtrl.text = text;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ctrl.errorMessage.value.isEmpty
+                ? 'Message failed to send.'
+                : ctrl.errorMessage.value,
+          ),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
     final ctrl = Get.find<MessagingController>();
-    final c = Get.arguments as ConversationModel;
+    final c = _conversation;
 
     return Scaffold(
       backgroundColor: palette.scaffold,
@@ -49,27 +76,33 @@ class _ConversationDetailScreenState extends State<ConversationDetailScreen> {
               SizedBox(height: MediaQuery.paddingOf(context).top + 70),
               Expanded(
                 child: Obx(
-                  () => ListView.separated(
-                    controller: _scrollCtrl,
-                    reverse: true,
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-                    itemCount:
-                        ctrl.currentMessages.length +
-                        (ctrl.isTyping.value ? 1 : 0),
-                    separatorBuilder: (_, _) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      if (ctrl.isTyping.value && index == 0) {
-                        return _TypingIndicator(palette: palette);
-                      }
+                  () => ctrl.isLoadingMessages.value
+                      ? const Center(child: FCircularProgress())
+                      : ListView.separated(
+                          controller: _scrollCtrl,
+                          reverse: true,
+                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                          itemCount:
+                              ctrl.currentMessages.length +
+                              (ctrl.isTyping.value ? 1 : 0),
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            if (ctrl.isTyping.value && index == 0) {
+                              return _TypingIndicator(palette: palette);
+                            }
 
-                      final actualIndex = ctrl.isTyping.value
-                          ? index - 1
-                          : index;
-                      final msg = ctrl.currentMessages[actualIndex];
+                            final actualIndex = ctrl.isTyping.value
+                                ? index - 1
+                                : index;
+                            final msg = ctrl.currentMessages[actualIndex];
 
-                      return _MessageBubble(message: msg, palette: palette);
-                    },
-                  ),
+                            return _MessageBubble(
+                              message: msg,
+                              palette: palette,
+                            );
+                          },
+                        ),
                 ),
               ),
 
@@ -158,20 +191,51 @@ class _ConversationDetailScreenState extends State<ConversationDetailScreen> {
               children: [
                 QuietGlassBackButton(onPressed: Get.back),
                 const SizedBox(width: 10),
-                Container(
-                  height: 44,
-                  padding: const EdgeInsets.symmetric(horizontal: 18),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: palette.surface.withValues(alpha: 0.84),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: palette.border),
-                  ),
-                  child: Text(
-                    'Messages',
-                    style: TextStyle(
-                      color: palette.textPrimary,
-                      fontWeight: FontWeight.w800,
+                Flexible(
+                  child: GestureDetector(
+                    onTap: () => Get.toNamed<void>(
+                      AppRoutes.publicProfile,
+                      arguments: c.otherUser,
+                    ),
+                    child: Container(
+                      height: 44,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: palette.surface.withValues(alpha: 0.84),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(color: palette.border),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircleAvatar(
+                            radius: 15,
+                            backgroundColor: palette.surfaceMuted,
+                            backgroundImage: c.avatarUrl?.isNotEmpty == true
+                                ? NetworkImage(c.avatarUrl!)
+                                : null,
+                            child: c.avatarUrl?.isNotEmpty == true
+                                ? null
+                                : Text(
+                                    c.recruiterName.characters.first
+                                        .toUpperCase(),
+                                    style: const TextStyle(fontSize: 11),
+                                  ),
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              c.recruiterName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: palette.textPrimary,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -245,7 +309,8 @@ class _MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isMe = message.isFromUser;
+    final userId = Get.find<MessagingController>().currentUserId;
+    final isMe = message.isFrom(userId);
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,

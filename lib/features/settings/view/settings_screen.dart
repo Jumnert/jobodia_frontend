@@ -101,7 +101,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         Obx(() {
           final profile = profileController.profileRx.value;
-          final trimmedName = profile.name.trim();
+          final authUser = Get.isRegistered<AuthController>()
+              ? Get.find<AuthController>().currentUser.value
+              : null;
+          final trimmedName = (authUser?.name ?? profile.name).trim();
+          final socialAvatar = authUser?.avatarUrl?.trim() ?? '';
           final initial = trimmedName.isEmpty
               ? 'U'
               : trimmedName.substring(0, 1).toUpperCase();
@@ -109,6 +113,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ? FAvatar(
                   size: 52,
                   image: MemoryImage(profile.avatarBytes!),
+                  fallback: Text(initial),
+                )
+              : socialAvatar.isNotEmpty
+              ? FAvatar(
+                  size: 52,
+                  image: NetworkImage(socialAvatar),
                   fallback: Text(initial),
                 )
               : profile.avatarImageUrl.trim().isNotEmpty
@@ -139,14 +149,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
                 subtitle: Text(
-                  profile.role,
+                  authUser?.role ?? profile.role,
                   style: theme.typography.body.xs.copyWith(
                     color: theme.colors.mutedForeground,
                     fontWeight: isKhmer ? FontWeight.w400 : FontWeight.w500,
                     height: isKhmer ? 1.2 : null,
                   ),
                 ),
-                suffix: const Icon(FLucideIcons.chevronRight),
+                suffix: SizedBox.square(
+                  dimension: 42,
+                  child: FButton.raw(
+                    variant: FButtonVariant.ghost,
+                    onPress: () => Get.toNamed<void>(AppRoutes.myQr),
+                    semanticsLabel: 'Show my QR code',
+                    child: const Icon(FLucideIcons.qrCode),
+                  ),
+                ),
                 onPress: _openProfile,
               ),
             ],
@@ -157,6 +175,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           style: _roundedTileGroupStyle,
           label: sectionLabel('other_settings'),
           children: [
+            FTile(
+              prefix: const Icon(FLucideIcons.scanLine),
+              title: const Text('Scan user QR'),
+              subtitle: const Text('Open another Jobodia user profile'),
+              suffix: const Icon(FLucideIcons.chevronRight),
+              onPress: () => Get.toNamed<void>(AppRoutes.scanQr),
+            ),
             FTile(
               prefix: const Icon(FLucideIcons.languages),
               title: tileTitle('language'),

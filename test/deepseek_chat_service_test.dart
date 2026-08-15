@@ -7,6 +7,51 @@ import 'package:jobodia_frontend/features/ai_chat/model/chat_message_model.dart'
 import 'package:jobodia_frontend/features/ai_chat/service/deepseek_chat_service.dart';
 
 void main() {
+  test(
+    'defaults production requests to the authenticated backend proxy',
+    () async {
+      late http.Request capturedRequest;
+      final client = MockClient((request) async {
+        capturedRequest = request;
+        return http.Response(
+          '{"choices":[{"message":{"content":"Proxy answer"}}]}',
+          200,
+        );
+      });
+      final service = DeepSeekChatService(client: client);
+
+      await service.createReply([
+        ChatMessageModel(text: 'Hello', sender: ChatMessageSender.user),
+      ]);
+
+      expect(capturedRequest.url.path, '/api/v1/ai/chat');
+      expect(service.usesDirectKey, isFalse);
+    },
+  );
+
+  test('explains backend login redirects as an expired session', () async {
+    final client = MockClient(
+      (_) async => http.Response('', 302, headers: {'location': '/login'}),
+    );
+    final service = DeepSeekChatService(
+      client: client,
+      proxyUrl: 'https://v1.jobodia.com/api/v1/ai/chat',
+    );
+
+    expect(
+      () => service.createReply([
+        ChatMessageModel(text: 'Hello', sender: ChatMessageSender.user),
+      ]),
+      throwsA(
+        isA<DeepSeekException>().having(
+          (error) => error.message,
+          'message',
+          contains('session expired'),
+        ),
+      ),
+    );
+  });
+
   test('sends V4 Flash request in low-cost non-thinking mode', () async {
     late http.Request capturedRequest;
     final client = MockClient((request) async {

@@ -36,9 +36,7 @@ void main() {
 
   tearDown(Get.reset);
 
-  testWidgets('UAT confirmation opens a laid-out language chooser', (
-    tester,
-  ) async {
+  Future<void> pumpLoginScreen(WidgetTester tester) async {
     tester.view.physicalSize = const Size(360, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -58,6 +56,28 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+  }
+
+  testWidgets('shows OAuth options on login and sign-up tabs', (tester) async {
+    await pumpLoginScreen(tester);
+
+    expect(find.text('Or continue with'), findsOneWidget);
+    expect(find.text('Google'), findsOneWidget);
+    expect(find.text('GitHub'), findsOneWidget);
+
+    await tester.tap(find.text('Sign up').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Or sign up with'), findsOneWidget);
+    expect(find.text('Google'), findsOneWidget);
+    expect(find.text('GitHub'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('UAT confirmation opens a laid-out language chooser', (
+    tester,
+  ) async {
+    await pumpLoginScreen(tester);
 
     await tester.tap(find.text('Skip login'));
     await tester.pumpAndSettle();

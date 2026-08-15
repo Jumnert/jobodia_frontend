@@ -135,11 +135,12 @@ class AuthController extends GetxController with FormValidationMixin {
     }
     final email = result.email;
     currentUser.value = UserModel(
-      id: email,
-      name: email.isEmpty ? 'User' : email.split('@').first,
+      id: result.userId ?? email,
+      name:
+          result.username ?? (email.isEmpty ? 'User' : email.split('@').first),
       email: email,
       role: backendRole,
-      avatarUrl: null,
+      avatarUrl: result.avatarUrl,
     );
   }
 
@@ -215,11 +216,11 @@ class AuthController extends GetxController with FormValidationMixin {
         }
         final backendRole = loginResult.role.toUpperCase();
         currentUser.value = UserModel(
-          id: loginResult.email,
-          name: loginResult.email.split('@').first,
+          id: loginResult.userId,
+          name: loginResult.username,
           email: loginResult.email,
           role: backendRole,
-          avatarUrl: null,
+          avatarUrl: loginResult.avatarUrl,
         );
         if (Get.isRegistered<RoleController>()) {
           Get.find<RoleController>().selectRole(

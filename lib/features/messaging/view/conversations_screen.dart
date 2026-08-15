@@ -69,7 +69,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
   }
 
   void _openConversation(ConversationModel conversation) {
-    _controller.openConversation(conversation.id);
+    unawaited(_controller.openConversation(conversation.id));
     Get.toNamed<void>(AppRoutes.conversationDetail, arguments: conversation);
   }
 
@@ -135,7 +135,10 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
             child: FTextField(
               control: FTextFieldControl.managed(
                 controller: _searchController,
-                onChange: (value) => setState(() => _searchQuery = value.text),
+                onChange: (value) {
+                  setState(() => _searchQuery = value.text);
+                  unawaited(_controller.searchUsers(value.text));
+                },
               ),
               hint: 'search_chats'.tr,
               textInputAction: TextInputAction.search,
@@ -178,37 +181,77 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
           Expanded(
             child: Obx(() {
               final conversations = _filtered(_controller.conversations);
-              if (conversations.isEmpty) {
+              final showPeople = _searchQuery.trim().length >= 2;
+              final people = showPeople
+                  ? _controller.userSearchResults.toList(growable: false)
+                  : const <PublicUserModel>[];
+              if (_controller.isLoading.value &&
+                  _controller.conversations.isEmpty) {
+                return const Center(child: FCircularProgress());
+              }
+              if (conversations.isEmpty && people.isEmpty) {
                 return Center(
-                  child: Text(
-                    _searchQuery.trim().isNotEmpty
-                        ? 'no_users_found'.tr
-                        : _filter == _ChatFilter.unread
-                        ? 'no_unread_chats'.tr
-                        : 'no_messages'.tr,
-                    style: TextStyle(color: palette.textSecondary),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: _controller.isSearchingUsers.value
+                        ? const FCircularProgress()
+                        : Text(
+                            showPeople
+                                ? 'No people or chats found'
+                                : _filter == _ChatFilter.unread
+                                ? 'no_unread_chats'.tr
+                                : 'No conversations yet',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: palette.textSecondary),
+                          ),
                   ),
                 );
               }
 
-              return ListView.separated(
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  4,
-                  16,
-                  MediaQuery.paddingOf(context).bottom + 20,
+              return RefreshIndicator(
+                onRefresh: _controller.refreshConversations,
+                child: ListView(
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    4,
+                    16,
+                    MediaQuery.paddingOf(context).bottom + 20,
+                  ),
+                  children: [
+                    if (showPeople) ...[
+                      _SectionLabel(
+                        label: 'People',
+                        loading: _controller.isSearchingUsers.value,
+                      ),
+                      ...people.map(
+                        (user) => _UserSearchTile(
+                          user: user,
+                          onTap: () => _startChat(user),
+                        ),
+                      ),
+                      if (conversations.isNotEmpty)
+                        const _SectionLabel(label: 'Conversations'),
+                    ],
+                    ...conversations.indexed.map((entry) {
+                      final conversation = entry.$2;
+                      return Column(
+                        children: [
+                          _ConversationTile(
+                            conversation: conversation,
+                            onTap: () => _openConversation(conversation),
+                            onLongPress: () => _showActions(conversation),
+                          ),
+                          if (entry.$1 != conversations.length - 1)
+                            Divider(
+                              height: 1,
+                              indent: 62,
+                              color: palette.divider,
+                            ),
+                        ],
+                      );
+                    }),
+                  ],
                 ),
-                itemCount: conversations.length,
-                separatorBuilder: (_, _) =>
-                    Divider(height: 1, indent: 62, color: palette.divider),
-                itemBuilder: (context, index) {
-                  final conversation = conversations[index];
-                  return _ConversationTile(
-                    conversation: conversation,
-                    onTap: () => _openConversation(conversation),
-                    onLongPress: () => _showActions(conversation),
-                  );
-                },
               );
             }),
           ),
@@ -223,6 +266,78 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
     _ChatFilter.individual => 'individual',
     _ChatFilter.organizations => 'organizations',
   };
+
+  Future<void> _startChat(PublicUserModel user) async {
+    try {
+      final conversation = await _controller.startConversation(user);
+      if (!mounted) return;
+      _openConversation(conversation);
+    } on Object {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _controller.errorMessage.value.isEmpty
+                ? 'Could not start this conversation.'
+                : _controller.errorMessage.value,
+          ),
+        ),
+      );
+    }
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel({required this.label, this.loading = false});
+
+  final String label;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(4, 12, 4, 5),
+    child: Row(
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w800)),
+        if (loading) ...[
+          const SizedBox(width: 8),
+          const SizedBox.square(dimension: 14, child: FCircularProgress()),
+        ],
+      ],
+    ),
+  );
+}
+
+class _UserSearchTile extends StatelessWidget {
+  const _UserSearchTile({required this.user, required this.onTap});
+
+  final PublicUserModel user;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return FTile(
+      onPress: onTap,
+      prefix: CircleAvatar(
+        radius: 23,
+        backgroundColor: palette.surfaceMuted,
+        backgroundImage: user.avatarUrl?.isNotEmpty == true
+            ? NetworkImage(user.avatarUrl!)
+            : null,
+        child: user.avatarUrl?.isNotEmpty == true
+            ? null
+            : Text(
+                user.displayName.trim().isEmpty
+                    ? '?'
+                    : user.displayName.characters.first.toUpperCase(),
+              ),
+      ),
+      title: Text(user.displayName),
+      subtitle: Text('@${user.username} · ${user.role.toLowerCase()}'),
+      suffix: const Icon(FLucideIcons.messageCircle),
+    );
+  }
 }
 
 class _ConversationTile extends StatelessWidget {
@@ -392,16 +507,37 @@ class _ConversationAvatar extends StatelessWidget {
         ),
         border: Border.all(color: context.palette.border),
       ),
-      child: Text(
-        initial,
-        style: TextStyle(
-          color: Colors.black.withValues(alpha: 0.72),
-          fontSize: size * 0.38,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
+      child: conversation.avatarUrl?.isNotEmpty == true
+          ? ClipOval(
+              child: Image.network(
+                conversation.avatarUrl!,
+                width: size,
+                height: size,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) =>
+                    _AvatarInitial(initial: initial, size: size),
+              ),
+            )
+          : _AvatarInitial(initial: initial, size: size),
     );
   }
+}
+
+class _AvatarInitial extends StatelessWidget {
+  const _AvatarInitial({required this.initial, required this.size});
+
+  final String initial;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => Text(
+    initial,
+    style: TextStyle(
+      color: Colors.black.withValues(alpha: 0.72),
+      fontSize: size * 0.38,
+      fontWeight: FontWeight.w800,
+    ),
+  );
 }
 
 class _ConversationActionsSheet extends StatelessWidget {
