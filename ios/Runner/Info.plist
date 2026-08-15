@@ -27,7 +27,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Jobodia needs camera access so you can take a headshot for your CV.</string>
+	<string>Jobodia uses the camera to scan user QR codes and take profile or CV photos.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Jobodia uses Face ID to confirm sensitive account actions.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

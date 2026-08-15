@@ -14,7 +14,6 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    final keyboardVisible = MediaQuery.viewInsetsOf(context).bottom > 0;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
@@ -33,9 +32,9 @@ class LoginScreen extends StatelessWidget {
                   return SingleChildScrollView(
                     keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.manual,
-                    physics: keyboardVisible
-                        ? const BouncingScrollPhysics()
-                        : const NeverScrollableScrollPhysics(),
+                    physics: const BouncingScrollPhysics(
+                      parent: AlwaysScrollableScrollPhysics(),
+                    ),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
                         minHeight: constraints.maxHeight,

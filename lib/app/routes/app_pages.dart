@@ -45,6 +45,8 @@ import 'package:jobodia_frontend/features/assessments/view/assessments_screen.da
 import 'package:jobodia_frontend/features/assessments/view/assessment_quiz_screen.dart';
 import 'package:jobodia_frontend/features/messaging/view/conversations_screen.dart';
 import 'package:jobodia_frontend/features/messaging/view/conversation_detail_screen.dart';
+import 'package:jobodia_frontend/features/messaging/view/public_user_profile_screen.dart';
+import 'package:jobodia_frontend/features/messaging/view/user_qr_screens.dart';
 import 'package:jobodia_frontend/features/company_reviews/view/company_reviews_screen.dart';
 import 'package:jobodia_frontend/features/career_goals/view/career_goals_screen.dart';
 import 'package:jobodia_frontend/features/market_trends/view/market_trends_screen.dart';
@@ -342,6 +344,27 @@ abstract final class AppPages {
       transition: Transition.cupertino,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.publicProfile,
+      page: () => const PublicUserProfileScreen(),
+      transition: Transition.cupertino,
+      transitionDuration: _defaultDuration,
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.myQr,
+      page: () => const MyQrScreen(),
+      transition: Transition.cupertino,
+      transitionDuration: _defaultDuration,
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.scanQr,
+      page: () => const UserQrScannerScreen(),
+      transition: Transition.cupertino,
+      transitionDuration: _defaultDuration,
       middlewares: [AuthMiddleware()],
     ),
     GetPage(

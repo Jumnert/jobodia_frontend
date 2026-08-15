@@ -36,6 +36,9 @@ abstract final class AppRoutes {
   static const flashcards = '/flashcards';
   static const conversations = '/conversations';
   static const conversationDetail = '/conversation-detail';
+  static const publicProfile = '/user-profile';
+  static const myQr = '/my-qr';
+  static const scanQr = '/scan-user-qr';
   static const companyReviews = '/company-reviews';
   static const careerGoals = '/career-goals';
   static const marketTrends = '/market-trends';

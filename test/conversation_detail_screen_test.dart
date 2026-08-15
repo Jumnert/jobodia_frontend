@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/theme/app_theme.dart';
 import 'package:jobodia_frontend/features/messaging/controller/messaging_controller.dart';
+import 'package:jobodia_frontend/features/messaging/model/messaging_models.dart';
 import 'package:jobodia_frontend/features/messaging/view/conversation_detail_screen.dart';
 import 'package:jobodia_frontend/theme/theme.dart' as forui_theme;
 
@@ -12,9 +13,18 @@ void main() {
     tester,
   ) async {
     Get.testMode = true;
-    final controller = Get.put(MessagingController());
-    final conversation = controller.conversations.first;
-    controller.openConversation(conversation.id);
+    Get.put(MessagingController(connectOnInit: false));
+    final conversation = ConversationModel(
+      id: 'conversation-1',
+      otherUser: const PublicUserModel(
+        userId: 'user-2',
+        username: 'alice',
+        displayName: 'Alice',
+        role: 'SEEKER',
+      ),
+      lastMessage: 'Hello',
+      lastMessageTime: DateTime.now(),
+    );
     addTearDown(Get.reset);
 
     await tester.pumpWidget(

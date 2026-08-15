@@ -13,6 +13,9 @@ class OAuthLoginResult {
     this.token,
     this.setupToken,
     this.role,
+    this.userId,
+    this.username,
+    this.avatarUrl,
   });
 
   final String status;
@@ -20,6 +23,9 @@ class OAuthLoginResult {
   final String? token;
   final String? setupToken;
   final String? role;
+  final String? userId;
+  final String? username;
+  final String? avatarUrl;
 
   bool get requiresRoleSelection => status == 'REQUIRES_ROLE_SELECTION';
 
@@ -30,6 +36,9 @@ class OAuthLoginResult {
       token: json['token'] as String?,
       setupToken: json['setupToken'] as String?,
       role: json['role'] as String?,
+      userId: json['userId'] as String?,
+      username: json['username'] as String? ?? json['name'] as String?,
+      avatarUrl: json['avatarUrl'] as String?,
     );
   }
 }
@@ -76,6 +85,8 @@ class AuthRepository {
         email: '${provider.name}@jobodia.uat',
         token: 'uat-${provider.name}-token',
         role: 'SEEKER',
+        userId: 'uat-${provider.name}-user',
+        username: provider.name,
       );
     }
     final authorizationUri = Uri.parse(
@@ -129,6 +140,8 @@ class AuthRepository {
         email: email,
         token: 'uat-oauth-token',
         role: role,
+        userId: 'uat-oauth-user',
+        username: email.split('@').first,
       );
     }
     final json = await _postJson('/api/v1/auth/oauth2/complete-signup', {
@@ -140,6 +153,9 @@ class AuthRepository {
       email: email,
       token: json['token'] as String?,
       role: json['role'] as String?,
+      userId: json['userId'] as String?,
+      username: json['username'] as String?,
+      avatarUrl: json['avatarUrl'] as String?,
     );
   }
 
@@ -168,6 +184,8 @@ class AuthRepository {
         token: 'uat-password-token',
         email: email,
         role: 'SEEKER',
+        userId: 'uat-password-user',
+        username: email.split('@').first,
       );
       return true;
     }
@@ -180,6 +198,9 @@ class AuthRepository {
       token: token,
       email: email,
       role: _readJwtClaim(token, 'role') ?? 'SEEKER',
+      userId: _readJwtClaim(token, 'userId') ?? email,
+      username: _readJwtClaim(token, 'username') ?? email.split('@').first,
+      avatarUrl: _readJwtClaim(token, 'avatarUrl'),
     );
     return true;
   }
@@ -318,9 +339,15 @@ class PasswordLoginResult {
     required this.token,
     required this.email,
     required this.role,
+    required this.userId,
+    required this.username,
+    this.avatarUrl,
   });
 
   final String token;
   final String email;
   final String role;
+  final String userId;
+  final String username;
+  final String? avatarUrl;
 }
