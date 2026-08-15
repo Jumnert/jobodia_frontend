@@ -7,7 +7,6 @@ import 'package:jobodia_frontend/app/localization/language_controller.dart';
 import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
-import 'package:jobodia_frontend/features/auth/view/widgets/social_login_section.dart';
 
 /// Login form UI. Validation and actions live in AuthController.
 class LoginForm extends GetView<AuthController> {
@@ -98,8 +97,6 @@ class LoginForm extends GetView<AuthController> {
             child: Text(controller.isLoading.value ? 'Please wait' : 'Log in'),
           ),
         ),
-        const SizedBox(height: 20),
-        const SocialLoginSection(title: 'Or continue with'),
         const SizedBox(height: 8),
         FButton(
           variant: FButtonVariant.ghost,

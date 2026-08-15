@@ -10,7 +10,14 @@ abstract final class AppConfig {
   );
 
   static bool get isProduction => environment == AppEnvironment.production;
-  static bool get useMockAuth => !isProduction;
+
+  /// Password authentication uses the backend in every app environment by
+  /// default so UAT accounts exercise the same signup/login path as production.
+  /// Mock auth remains available for isolated demos via --dart-define.
+  static const useMockAuth = bool.fromEnvironment(
+    'JOBODIA_USE_MOCK_AUTH',
+    defaultValue: false,
+  );
   static bool get enableFirebase => isProduction;
   static String get displayName => isProduction ? 'Jobodia' : 'Jobodia UAT';
 

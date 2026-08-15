@@ -58,19 +58,17 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('shows OAuth options on login and sign-up tabs', (tester) async {
+  testWidgets('uses password auth on login and sign-up tabs', (tester) async {
     await pumpLoginScreen(tester);
 
-    expect(find.text('Or continue with'), findsOneWidget);
-    expect(find.text('Google'), findsOneWidget);
-    expect(find.text('GitHub'), findsOneWidget);
+    expect(find.text('Google'), findsNothing);
+    expect(find.text('GitHub'), findsNothing);
 
     await tester.tap(find.text('Sign up').first);
     await tester.pumpAndSettle();
 
-    expect(find.text('Or sign up with'), findsOneWidget);
-    expect(find.text('Google'), findsOneWidget);
-    expect(find.text('GitHub'), findsOneWidget);
+    expect(find.text('Google'), findsNothing);
+    expect(find.text('GitHub'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
