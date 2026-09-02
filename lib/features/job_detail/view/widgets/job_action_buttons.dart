@@ -58,9 +58,9 @@ class JobActionButtons extends StatelessWidget {
                           end: Alignment.bottomCenter,
                           stops: [0, 0.65, 1],
                           colors: [
-                            AppColors.primary,
-                            AppColors.primary,
-                            Color(0xFF0D8585),
+                            AppColors.brandLight,
+                            AppColors.brandPrimary,
+                            AppColors.brandDark,
                           ],
                         ),
                   color: isApplied ? palette.surfaceMuted : null,
@@ -91,7 +91,7 @@ class JobActionButtons extends StatelessWidget {
                         : Text(
                             'apply_for_job'.tr,
                             style: TextStyle(
-                              color: palette.scaffold,
+                              color: Colors.white,
                               fontWeight: FontWeight.w800,
                             ),
                           ),

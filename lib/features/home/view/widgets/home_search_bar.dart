@@ -26,7 +26,7 @@ class HomeSearchBar extends StatefulWidget {
   final bool hasActiveFilters;
   final ValueChanged<String>? onSubmitted;
 
-  /// When non-null, shows a small teal chip with this text next to the filter
+  /// When non-null, shows a small brand-blue chip next to the filter
   /// icon (e.g. "$3k–$6k") to indicate a salary filter is active.
   final String? salaryRangeLabel;
 

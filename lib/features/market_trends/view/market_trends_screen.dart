@@ -294,7 +294,7 @@ class _DemandBarChart extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [AppColors.brandTeal, Color(0xFF00C4B4)],
+                  colors: [AppColors.brandPrimary, AppColors.brandLight],
                 ),
                 borderRadius: BorderRadius.circular(6),
               ),

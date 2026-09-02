@@ -125,7 +125,7 @@ class OnboardingController extends GetxController {
     }
     await _storage.write(hasSeenOnboardingKey, true);
     await _storage.remove(_pageIndexKey);
-    Get.offAllNamed(AppRoutes.login);
+    Get.offAllNamed(AppRoutes.languageSelection);
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'package:get/get.dart';
+import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 
@@ -143,7 +144,7 @@ class SignUpForm extends GetView<AuthController> {
               style: TextStyle(color: palette.textSecondary),
             ),
             GestureDetector(
-              onTap: () => controller.changeAuthTab(0),
+              onTap: () => Get.offNamed<void>(AppRoutes.login),
               child: Text(
                 'Log in',
                 style: TextStyle(

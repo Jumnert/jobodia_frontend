@@ -21,10 +21,26 @@ class ApiClient {
 
   final String baseUrl;
 
-  Future<dynamic> get(String path) => _send('GET', path);
+  Future<dynamic> get(String path, {bool requiresAuth = true}) =>
+      _send('GET', path, requiresAuth: requiresAuth);
 
   Future<dynamic> post(String path, [Map<String, dynamic>? body]) =>
       _send('POST', path, body: body);
+
+  Future<dynamic> put(
+    String path,
+    Map<String, dynamic> body, {
+    bool requiresAuth = true,
+  }) => _send('PUT', path, body: body, requiresAuth: requiresAuth);
+
+  Future<dynamic> patch(
+    String path,
+    Map<String, dynamic> body, {
+    bool requiresAuth = true,
+  }) => _send('PATCH', path, body: body, requiresAuth: requiresAuth);
+
+  Future<dynamic> delete(String path, {bool requiresAuth = true}) =>
+      _send('DELETE', path, requiresAuth: requiresAuth);
 
   Future<String> authToken() async {
     if (!Get.isRegistered<SecureStorageService>()) return '';
@@ -38,27 +54,33 @@ class ApiClient {
     String method,
     String path, {
     Map<String, dynamic>? body,
+    bool requiresAuth = true,
   }) async {
-    final token = await authToken();
-    if (token.isEmpty) throw const ApiException('Please sign in again.');
+    final token = requiresAuth ? await authToken() : '';
+    if (requiresAuth && token.isEmpty) {
+      throw const ApiException('Please sign in again.', statusCode: 401);
+    }
 
     late final http.Response response;
-    final uri = Uri.parse('$baseUrl$path');
+    final uri = Uri.parse('${baseUrl.replaceFirst(RegExp(r'/$'), '')}$path');
     final headers = {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
+      if (requiresAuth) 'Authorization': 'Bearer $token',
     };
     try {
-      response =
-          await (method == 'GET'
-                  ? http.get(uri, headers: headers)
-                  : http.post(
-                      uri,
-                      headers: headers,
-                      body: body == null ? null : jsonEncode(body),
-                    ))
-              .timeout(const Duration(seconds: 15));
+      response = await switch (method) {
+        'GET' => http.get(uri, headers: headers),
+        'POST' => http.post(
+          uri,
+          headers: headers,
+          body: body == null ? null : jsonEncode(body),
+        ),
+        'PUT' => http.put(uri, headers: headers, body: jsonEncode(body)),
+        'PATCH' => http.patch(uri, headers: headers, body: jsonEncode(body)),
+        'DELETE' => http.delete(uri, headers: headers),
+        _ => throw ArgumentError.value(method, 'method', 'Unsupported method'),
+      }.timeout(const Duration(seconds: 15));
     } on Exception {
       throw const ApiException(
         'Could not reach Jobodia. Check your connection and try again.',

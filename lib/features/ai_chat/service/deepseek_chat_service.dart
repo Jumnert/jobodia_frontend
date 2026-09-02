@@ -16,10 +16,10 @@ class DeepSeekChatService {
     String? proxyUrl,
     String? modelName,
   }) : _client = client ?? http.Client(),
-       _resolvedApiKey = apiKey ?? '',
+       _resolvedApiKey = apiKey ?? AppConfig.localDirectAiKey,
        _resolvedProxyUrl =
            proxyUrl ??
-           ((apiKey?.isNotEmpty ?? false)
+           ((apiKey?.isNotEmpty ?? false) || AppConfig.directAiSelected
                ? ''
                : (_proxyUrl.isNotEmpty
                      ? _proxyUrl

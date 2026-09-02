@@ -6,6 +6,7 @@ import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/preferences/controller/preferences_controller.dart';
+import 'package:lottie/lottie.dart';
 
 class PreferencesWizardScreen extends GetView<PreferencesController> {
   const PreferencesWizardScreen({super.key});
@@ -46,6 +47,8 @@ class _WizardBody extends GetView<PreferencesController> {
 
   @override
   Widget build(BuildContext context) {
+    if (step == 4) return const _PersonalizationProcessing();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -163,7 +166,6 @@ class _InterestsStep extends GetView<PreferencesController> {
   @override
   Widget build(BuildContext context) {
     return _StepLayout(
-      icon: FLucideIcons.sparkles,
       title: 'interests_title'.tr,
       subtitle: 'interests_subtitle'.tr,
       child: Wrap(
@@ -191,7 +193,6 @@ class _RoleStep extends GetView<PreferencesController> {
   Widget build(BuildContext context) {
     final theme = FTheme.of(context);
     return _StepLayout(
-      icon: FLucideIcons.searchCheck,
       title: 'desired_role_title'.tr,
       subtitle: 'desired_role_subtitle'.tr,
       child: Column(
@@ -205,13 +206,6 @@ class _RoleStep extends GetView<PreferencesController> {
             label: Text('role_or_job_title'.tr),
             hint: 'role_hint'.tr,
             textInputAction: TextInputAction.done,
-            prefixBuilder: (context, style, variants) =>
-                FTextField.prefixIconBuilder(
-                  context,
-                  style,
-                  variants,
-                  const Icon(FLucideIcons.briefcaseBusiness),
-                ),
           ),
           const SizedBox(height: 22),
           Text(
@@ -259,7 +253,6 @@ class _LevelStep extends GetView<PreferencesController> {
   @override
   Widget build(BuildContext context) {
     return _StepLayout(
-      icon: FLucideIcons.chartNoAxesColumnIncreasing,
       title: 'experience_title'.tr,
       subtitle: 'experience_subtitle'.tr,
       child: Obx(
@@ -267,7 +260,6 @@ class _LevelStep extends GetView<PreferencesController> {
           children: [
             for (final level in PreferencesController.levels)
               FTile(
-                prefix: const Icon(FLucideIcons.badgeCheck),
                 title: Text(_preferenceLabel(level)),
                 subtitle: Text(_details[level]!.tr),
                 suffix: Icon(
@@ -297,7 +289,6 @@ class _LocationStep extends GetView<PreferencesController> {
   @override
   Widget build(BuildContext context) {
     return _StepLayout(
-      icon: FLucideIcons.mapPinned,
       title: 'location_title'.tr,
       subtitle: 'location_subtitle'.tr,
       child: Obx(
@@ -305,13 +296,6 @@ class _LocationStep extends GetView<PreferencesController> {
           children: [
             for (final location in PreferencesController.locations)
               FTile(
-                prefix: Icon(
-                  location == 'Remote'
-                      ? FLucideIcons.houseWifi
-                      : location == 'Any'
-                      ? FLucideIcons.globe2
-                      : FLucideIcons.mapPin,
-                ),
                 title: Text(_preferenceLabel(location)),
                 subtitle: Text(_details[location]!.tr),
                 suffix: Icon(
@@ -330,13 +314,11 @@ class _LocationStep extends GetView<PreferencesController> {
 
 class _StepLayout extends StatelessWidget {
   const _StepLayout({
-    required this.icon,
     required this.title,
     required this.subtitle,
     required this.child,
   });
 
-  final IconData icon;
   final String title;
   final String subtitle;
   final Widget child;
@@ -350,17 +332,6 @@ class _StepLayout extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 52,
-            height: 52,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: theme.colors.primary.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, size: 24, color: theme.colors.primary),
-          ),
-          const SizedBox(height: 20),
           Text(
             title.replaceAll('\n', ' '),
             style: theme.typography.display.lg.copyWith(
@@ -403,8 +374,140 @@ class _ChoiceButton extends StatelessWidget {
         unawaited(HapticFeedback.selectionClick());
         onPress();
       },
-      prefix: selected ? const Icon(FLucideIcons.check, size: 16) : null,
       child: Text(label),
+    );
+  }
+}
+
+class _PersonalizationProcessing extends StatefulWidget {
+  const _PersonalizationProcessing();
+
+  @override
+  State<_PersonalizationProcessing> createState() =>
+      _PersonalizationProcessingState();
+}
+
+class _PersonalizationProcessingState
+    extends State<_PersonalizationProcessing> {
+  static const _stages = [
+    ('personalizing_interests', 24),
+    ('personalizing_role', 51),
+    ('personalizing_location', 78),
+    ('personalizing_feed', 96),
+    ('personalizing_success', 100),
+  ];
+
+  int _stage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_runSequence());
+  }
+
+  Future<void> _runSequence() async {
+    await Future<void>.delayed(const Duration(milliseconds: 700));
+    for (var index = 1; index < _stages.length; index++) {
+      if (!mounted) return;
+      await HapticFeedback.selectionClick();
+      setState(() => _stage = index);
+      await Future<void>.delayed(
+        Duration(milliseconds: index == _stages.length - 1 ? 1050 : 820),
+      );
+    }
+
+    if (!mounted) return;
+    await HapticFeedback.vibrate();
+    await Future<void>.delayed(const Duration(milliseconds: 650));
+    if (!mounted) return;
+    Get.find<PreferencesController>().finishPersonalization();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = FTheme.of(context);
+    final palette = context.palette;
+    final current = _stages[_stage];
+    final complete = _stage == _stages.length - 1;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 28),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox.square(
+            dimension: 172,
+            child: Lottie.asset(
+              'assets/animations/nav_icons/Ai voice recognition Cricle.json',
+              repeat: !complete,
+              animate: true,
+              fit: BoxFit.contain,
+              frameRate: const FrameRate(60),
+              renderCache: RenderCache.drawingCommands,
+            ),
+          ),
+          const SizedBox(height: 34),
+          Text(
+            complete ? 'personalizing_success'.tr : 'personalizing_title'.tr,
+            textAlign: TextAlign.center,
+            style: theme.typography.display.lg.copyWith(
+              color: palette.textPrimary,
+              fontWeight: FontWeight.w800,
+              height: 1.12,
+            ),
+          ),
+          const SizedBox(height: 14),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 360),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.14),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              ),
+            ),
+            child: Column(
+              key: ValueKey(_stage),
+              children: [
+                Text(
+                  current.$1.tr,
+                  textAlign: TextAlign.center,
+                  style: theme.typography.body.sm.copyWith(
+                    color: palette.textSecondary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${current.$2}%',
+                  style: theme.typography.body.lg.copyWith(
+                    color: complete
+                        ? AppColors.success
+                        : AppColors.brandPrimary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+          AnimatedOpacity(
+            opacity: complete ? 1 : 0,
+            duration: const Duration(milliseconds: 300),
+            child: Text(
+              'personalizing_redirect'.tr,
+              style: theme.typography.body.xs.copyWith(
+                color: palette.textTertiary,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

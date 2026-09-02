@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jobodia_frontend/core/constants/app_colors.dart';
 
 /// Shows an adaptive dialog with actions.
 /// This is a replacement for FDialog.show and AdaptiveAlertDialog.
@@ -133,7 +134,7 @@ class _AdaptiveDialogContent extends StatelessWidget {
             style: TextStyle(
               color: switch (action.style) {
                 DialogActionStyle.destructive => Colors.red,
-                DialogActionStyle.primary => const Color(0xFF00856F),
+                DialogActionStyle.primary => AppColors.brandPrimary,
                 DialogActionStyle.cancel => fg.withValues(alpha: 0.6),
                 DialogActionStyle.defaultStyle => fg,
               },
@@ -255,7 +256,7 @@ class _InputDialogContentState extends State<_InputDialogContent> {
             style: TextStyle(
               color: switch (action.style) {
                 DialogActionStyle.destructive => Colors.red,
-                DialogActionStyle.primary => const Color(0xFF00856F),
+                DialogActionStyle.primary => AppColors.brandPrimary,
                 DialogActionStyle.cancel => fg.withValues(alpha: 0.6),
                 DialogActionStyle.defaultStyle => fg,
               },

@@ -7,7 +7,7 @@ import 'package:jobodia_frontend/features/cv_builder/model/cv_data.dart';
 /// Accent color per template index, shared between the on-screen preview and
 /// the exported PDF so they stay visually matched.
 const _accents = <PdfColor>[
-  PdfColor.fromInt(0xFF7CCF00), // Classic — primary green
+  PdfColor.fromInt(0xFF0A66C2), // Classic — Jobodia blue
   PdfColor.fromInt(0xFFF54900), // Editorial — chart orange
   PdfColor.fromInt(0xFF9F2D00), // Impact — deep chart orange
 ];

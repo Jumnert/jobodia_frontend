@@ -79,7 +79,6 @@ class PreferencesController extends GetxController {
   }
 
   void complete() {
-    currentStep.value = 0;
     _storage.write(_prefsKey, {
       'interests': selectedInterests.toList(growable: false),
       'desiredRole': desiredRole.value,
@@ -97,6 +96,11 @@ class PreferencesController extends GetxController {
       if (loc.isNotEmpty && loc != 'Any') home.selectLocation(loc);
     }
 
+    currentStep.value = 4;
+  }
+
+  void finishPersonalization() {
+    currentStep.value = 0;
     Get.offAllNamed(AppRoutes.home);
   }
 

@@ -39,6 +39,7 @@ dependencies:
   get_storage: ^2.1.1
   flutter_secure_storage: ^10.3.1
   share_plus: 13.1.0
+  camera: ^0.12.0+2
   image_picker: 1.2.2
   permission_handler: ^12.0.3
   device_info_plus: ^13.2.0
@@ -52,6 +53,7 @@ dependencies:
   read_pdf_text: ^0.3.1
   archive: ^4.0.9
   lottie: ^3.5.1
+  liquid_glass_widgets: ^1.1.0
   fl_chart: ^1.2.0
   local_auth: ^3.0.2
   flutter_web_auth_2: ^5.0.3
@@ -99,6 +101,7 @@ flutter:
     - assets/images/profile/
     - assets/images/pricing/
     - assets/images/empty_states/
+    - assets/images/settings/
     - assets/data/
     - assets/animations/nav_icons/
 

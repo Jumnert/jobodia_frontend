@@ -39,91 +39,107 @@ class HomeScreen extends GetView<AuthController> {
         children: [
           const Positioned.fill(child: _ThemeBackdrop()),
           Positioned.fill(
-            child: Obx(() {
-              if (homeController.hasError.value) {
-                return ErrorState(
-                  message: 'failed_load_jobs'.tr,
-                  subtitle: 'check_connection'.tr,
-                  onRetry: homeController.retryLoading,
-                );
-              }
-              if (homeController.isLoading.value) {
-                return ListView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: 3,
-                  itemBuilder: (_, _) => const SkeletonJobCard(),
-                );
-              }
-
-              final page = homeController.visiblePage;
-              final jobs = page.jobs;
-
-              final pagedJobs = jobs;
-
-              return RefreshIndicator(
-                color: AppColors.brandPrimary,
-                backgroundColor: palette.surface,
-                onRefresh: () async {
-                  await Future<void>.delayed(const Duration(milliseconds: 600));
-                  homeController.selectTab(homeController.selectedTab.value);
-                },
-                child: PaginatedListView(
-                  controller: homeController.scrollController,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: EdgeInsets.fromLTRB(
-                    20,
-                    MediaQuery.paddingOf(context).top + 14 + 44 + 14,
-                    20,
-                    92,
-                  ),
-                  hasMore: page.hasMore,
-                  isLoadingMore: homeController.isLoadingMore.value,
-                  onLoadMore: homeController.loadMore,
-                  itemCount: pagedJobs.isEmpty ? 2 : pagedJobs.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: _JobListingHeader(
-                          jobCount: homeController.filteredJobs.length,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Obx(() {
+                    if (homeController.hasError.value) {
+                      return ErrorState(
+                        message: 'failed_load_jobs'.tr,
+                        subtitle: 'check_connection'.tr,
+                        onRetry: homeController.retryLoading,
+                      );
+                    }
+                    if (homeController.isLoading.value) {
+                      return ListView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: EdgeInsets.fromLTRB(
+                          20,
+                          MediaQuery.paddingOf(context).top + 72,
+                          20,
+                          92,
                         ),
+                        itemCount: 3,
+                        itemBuilder: (_, _) => const SkeletonJobCard(),
                       );
                     }
 
-                    if (pagedJobs.isEmpty) {
-                      return _EmptyJobListing(
-                        hasSearch: homeController.searchQuery.value
-                            .trim()
-                            .isNotEmpty,
-                        hasFilters: homeController.hasActiveFilters,
-                        onReset: () {
-                          homeController.clearSearch();
-                          homeController.clearFilters();
-                          homeController.selectTab(0);
+                    final page = homeController.visiblePage;
+                    final jobs = page.jobs;
+
+                    final pagedJobs = jobs;
+
+                    return RefreshIndicator(
+                      color: AppColors.brandPrimary,
+                      backgroundColor: palette.surface,
+                      onRefresh: () async {
+                        await Future<void>.delayed(
+                          const Duration(milliseconds: 600),
+                        );
+                        homeController.selectTab(
+                          homeController.selectedTab.value,
+                        );
+                      },
+                      child: PaginatedListView(
+                        controller: homeController.scrollController,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: EdgeInsets.fromLTRB(
+                          20,
+                          MediaQuery.paddingOf(context).top + 72,
+                          20,
+                          92,
+                        ),
+                        hasMore: page.hasMore,
+                        isLoadingMore: homeController.isLoadingMore.value,
+                        onLoadMore: homeController.loadMore,
+                        itemCount: pagedJobs.isEmpty ? 2 : pagedJobs.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index == 0) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: _JobListingHeader(
+                                jobCount: homeController.filteredJobs.length,
+                              ),
+                            );
+                          }
+
+                          if (pagedJobs.isEmpty) {
+                            return _EmptyJobListing(
+                              hasSearch: homeController.searchQuery.value
+                                  .trim()
+                                  .isNotEmpty,
+                              hasFilters: homeController.hasActiveFilters,
+                              onReset: () {
+                                homeController.clearSearch();
+                                homeController.clearFilters();
+                                homeController.selectTab(0);
+                              },
+                            );
+                          }
+
+                          final jobIndex = index - 1;
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: _JobFeedContextMenu(
+                              job: pagedJobs[jobIndex],
+                              colorIndex: jobIndex,
+                            ),
+                          );
                         },
-                      );
-                    }
-
-                    final jobIndex = index - 1;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: _JobFeedContextMenu(
-                        job: pagedJobs[jobIndex],
-                        colorIndex: jobIndex,
                       ),
                     );
-                  },
+                  }),
                 ),
-              );
-            }),
-          ),
-          Positioned(
-            top: MediaQuery.paddingOf(context).top + 14,
-            left: 20,
-            right: 20,
-            child: HomeTopBar(
-              name: user?.name ?? 'User',
-              avatarUrl: user?.avatarUrl,
+                Positioned(
+                  top: MediaQuery.paddingOf(context).top + 14,
+                  left: 20,
+                  right: 20,
+                  child: HomeTopBar(
+                    name: user?.name ?? 'User',
+                    avatarUrl: user?.avatarUrl,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

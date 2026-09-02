@@ -8,6 +8,7 @@ import 'package:jobodia_frontend/features/cv_builder/controller/cv_builder_contr
 import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
 import 'package:jobodia_frontend/features/job_detail/controller/job_detail_controller.dart';
 import 'package:jobodia_frontend/features/job_detail/controller/notes_controller.dart';
+import 'package:jobodia_frontend/features/job_detail/view/widgets/animated_match_badge.dart';
 import 'package:jobodia_frontend/features/job_detail/view/widgets/company_logo.dart';
 import 'package:jobodia_frontend/features/job_detail/view/widgets/dashed_divider.dart';
 import 'package:jobodia_frontend/features/job_detail/view/widgets/job_action_buttons.dart';
@@ -188,7 +189,7 @@ class _SalaryRangeBar extends StatelessWidget {
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
-                // Teal fill segment
+                // Brand-blue fill segment
                 Positioned(
                   left: width * startFill,
                   width: (width * (endFill - startFill)).clamp(6.0, width),
@@ -227,14 +228,13 @@ class _MatchBadgeTile extends StatelessWidget {
 
   final JobDetailController controller;
 
-  static const _matchAccent = AppColors.brandPrimary;
-
   @override
   Widget build(BuildContext context) {
     final pct = controller.matchPercent;
     if (pct == 0) return const SizedBox.shrink();
 
-    return GestureDetector(
+    return AnimatedMatchBadge(
+      text: '$pct% match',
       onTap: () {
         showModalBottomSheet<void>(
           context: context,
@@ -248,35 +248,6 @@ class _MatchBadgeTile extends StatelessWidget {
           ),
         );
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: _matchAccent.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: _matchAccent.withValues(alpha: 0.40)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(FLucideIcons.sparkles, size: 14, color: _matchAccent),
-            const SizedBox(width: 6),
-            Text(
-              '$pct% match',
-              style: const TextStyle(
-                color: _matchAccent,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(width: 6),
-            Icon(
-              FLucideIcons.info,
-              size: 14,
-              color: _matchAccent.withValues(alpha: 0.70),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -156,11 +156,11 @@ class _ThemePreview extends StatelessWidget {
     final midnight = preset == AppThemePreset.midnight;
     final background = midnight
         ? const Color(0xFF080D1B)
-        : const Color(0xFFF5FAF8);
+        : const Color(0xFFF3F8FC);
     final surface = midnight ? const Color(0xFF172554) : Colors.white;
     final muted = midnight
         ? Colors.white.withValues(alpha: 0.42)
-        : const Color(0xFFCBD8D3);
+        : const Color(0xFFC7DDF0);
 
     return Container(
       height: 84,

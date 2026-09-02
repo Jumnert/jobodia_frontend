@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/gradient_header_painter.dart';
+import 'package:jobodia_frontend/core/widgets/safe_content_padding.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 
 /// Displays the reset password form backed by AuthController.
@@ -51,14 +52,9 @@ class ResetPasswordScreen extends GetView<AuthController> {
                               top: Radius.circular(28),
                             ),
                           ),
-                          child: Padding(
-                            padding: EdgeInsets.fromLTRB(
-                              18,
-                              18,
-                              18,
-                              MediaQuery.paddingOf(context).bottom + 24,
-                            ),
-                            child: const _ResetPasswordForm(),
+                          child: const SafeContentPadding(
+                            safeTop: false,
+                            child: _ResetPasswordForm(),
                           ),
                         ),
                       ],
@@ -89,43 +85,40 @@ class _ResetPasswordHeader extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           const CustomPaint(painter: GradientHeaderPainter()),
-          SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(25, 13, 25, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FButton.icon(
-                    variant: FButtonVariant.ghost,
-                    onPress: onBack,
-                    child: const Icon(
-                      FLucideIcons.arrowLeft,
-                      color: Colors.white,
-                    ),
+          SafeContentPadding(
+            safeBottom: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FButton.icon(
+                  variant: FButtonVariant.ghost,
+                  onPress: onBack,
+                  child: const Icon(
+                    FLucideIcons.arrowLeft,
+                    color: Colors.white,
                   ),
-                  const Spacer(),
-                  const Text(
-                    'Reset Your Password',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 27,
-                      height: 1.1,
-                      fontWeight: FontWeight.w700,
-                    ),
+                ),
+                const Spacer(),
+                const Text(
+                  'Reset Your Password',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 27,
+                    height: 1.1,
+                    fontWeight: FontWeight.w700,
                   ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Create a new password to secure your account.',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      height: 1.35,
-                    ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Create a new password to secure your account.',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    height: 1.35,
                   ),
-                  const SizedBox(height: 18),
-                ],
-              ),
+                ),
+                const SizedBox(height: 18),
+              ],
             ),
           ),
         ],

@@ -6,11 +6,21 @@ import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 import 'package:jobodia_frontend/features/role/controller/role_controller.dart';
+import 'package:jobodia_frontend/services/local_profile_photo_store.dart';
 import 'package:lottie/lottie.dart';
 
 /// Celebrates the user's role choice before collecting job preferences.
 class RoleWelcomeScreen extends StatefulWidget {
-  const RoleWelcomeScreen({super.key});
+  const RoleWelcomeScreen({
+    this.previewMode = false,
+    this.photoBytes,
+    super.key,
+  });
+
+  /// Returns to the previous screen after the celebration when opened from
+  /// Settings instead of continuing through onboarding.
+  final bool previewMode;
+  final Uint8List? photoBytes;
 
   @override
   State<RoleWelcomeScreen> createState() => _RoleWelcomeScreenState();
@@ -18,6 +28,8 @@ class RoleWelcomeScreen extends StatefulWidget {
 
 class _RoleWelcomeScreenState extends State<RoleWelcomeScreen>
     with SingleTickerProviderStateMixin {
+  late final Uint8List? _photoBytes;
+
   late final AnimationController _entranceController = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 850),
@@ -32,6 +44,12 @@ class _RoleWelcomeScreenState extends State<RoleWelcomeScreen>
       .animate(
         CurvedAnimation(parent: _entranceController, curve: Curves.easeOutBack),
       );
+
+  @override
+  void initState() {
+    super.initState();
+    _photoBytes = widget.photoBytes ?? LocalProfilePhotoStore().readPhoto();
+  }
 
   @override
   void dispose() {
@@ -182,7 +200,17 @@ class _RoleWelcomeScreenState extends State<RoleWelcomeScreen>
                                     ),
                                   ),
                                 ),
-                                child: avatarUrl == null || avatarUrl.isEmpty
+                                child: _photoBytes != null
+                                    ? ClipOval(
+                                        child: Image.memory(
+                                          _photoBytes,
+                                          width: 106,
+                                          height: 106,
+                                          fit: BoxFit.cover,
+                                          filterQuality: FilterQuality.high,
+                                        ),
+                                      )
+                                    : avatarUrl == null || avatarUrl.isEmpty
                                     ? FAvatar.raw(
                                         size: 106,
                                         child: Text(
@@ -263,7 +291,11 @@ class _RoleWelcomeScreenState extends State<RoleWelcomeScreen>
                     FButton(
                       onPress: () {
                         HapticFeedback.lightImpact();
-                        Get.offNamed<void>(AppRoutes.preferences);
+                        if (widget.previewMode) {
+                          Get.back<void>();
+                        } else {
+                          Get.offNamed<void>(AppRoutes.preferences);
+                        }
                       },
                       child: Text('personalize'.tr),
                     ),

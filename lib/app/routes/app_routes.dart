@@ -2,7 +2,10 @@
 abstract final class AppRoutes {
   static const unknown = '/unknown';
   static const onboarding = '/onboarding';
+  static const languageSelection = '/language-selection';
   static const login = '/login';
+  static const register = '/register';
+  static const profilePhotoSetup = '/profile-photo-setup';
   static const home = '/home';
   static const cvBuilder = '/cv-builder';
   static const cvPreview = '/cv-preview';

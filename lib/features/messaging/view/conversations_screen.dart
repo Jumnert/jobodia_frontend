@@ -491,7 +491,7 @@ class _ConversationAvatar extends StatelessWidget {
         ? '?'
         : conversation.recruiterName.trim().characters.first.toUpperCase();
     final colors = conversation.isOrganization
-        ? const [Color(0xFFE5F7D6), Color(0xFFBEEA98)]
+        ? const [Color(0xFFE8F3FC), Color(0xFFB9DCF7)]
         : const [Color(0xFFE8EEF6), Color(0xFFD5DFEC)];
 
     return Container(

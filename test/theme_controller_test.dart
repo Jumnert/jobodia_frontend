@@ -31,10 +31,10 @@ void main() {
   }
 
   group('ThemeController', () {
-    test('initial state — dark mode by default', () {
+    test('initial state — light mode by default', () {
       final c = makeController();
-      expect(c.isDarkMode.value, isTrue);
-      expect(c.themeMode, ThemeMode.dark);
+      expect(c.isDarkMode.value, isFalse);
+      expect(c.themeMode, ThemeMode.light);
     });
 
     test('toggleTheme switches to dark mode', () {

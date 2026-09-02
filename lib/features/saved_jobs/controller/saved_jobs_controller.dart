@@ -1,72 +1,67 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:jobodia_frontend/core/utils/app_logger.dart';
 import 'package:jobodia_frontend/features/home/model/job_feed_model.dart';
+import 'package:jobodia_frontend/services/api_client.dart';
 
-/// Tracks which jobs the seeker has saved (favorited).
-///
-/// Persists a plain JSON list of job ids via [GetStorage] so favorites survive
-/// app restarts. Keeping the stored shape to ids only means a real API can
-/// replace this storage layer later without any UI change.
+/// Saved jobs are account data held by the backend. The set below is only the
+/// current screen state; it is refreshed from the API on every app launch.
 class SavedJobsController extends GetxController {
-  SavedJobsController({GetStorage? storage})
-    : _storage = storage ?? GetStorage();
+  SavedJobsController({ApiClient? apiClient, GetStorage? storage})
+    : _api = apiClient ?? ApiClient();
 
-  static const savedJobIdsKey = 'savedJobIds';
-
-  final GetStorage _storage;
-
-  /// Reactive set of saved job ids the UI observes to keep hearts in sync.
+  final ApiClient _api;
   final RxSet<String> savedIds = <String>{}.obs;
+  final RxBool isLoading = false.obs;
 
-  /// Cached reversed list, invalidated whenever [savedIds] changes.
   List<String>? _cachedOrderedIds;
 
   @override
   void onInit() {
     super.onInit();
-    savedIds.addAll(_readStoredIds());
     ever(savedIds, (_) => _cachedOrderedIds = null);
+    unawaited(load());
   }
 
-  /// Saved ids in most-recently-saved-first order.
-  ///
-  /// Result is cached and only rebuilt when [savedIds] changes.
   List<String> get orderedSavedIds =>
       _cachedOrderedIds ??= savedIds.toList().reversed.toList();
 
   bool isSaved(String id) => savedIds.contains(id);
 
-  void toggleSave(JobFeedModel job) {
+  Future<void> load() async {
+    isLoading.value = true;
+    try {
+      final payload = await _api.get('/api/v1/saved-jobs');
+      if (payload is! Map || payload['content'] is! List) return;
+      savedIds.assignAll(
+        (payload['content'] as List)
+            .whereType<Map>()
+            .map((item) => item['jobId']?.toString())
+            .whereType<String>(),
+      );
+    } on ApiException catch (error) {
+      // Browsing jobs is allowed without sign-in. In that state there are no
+      // account favourites to display.
+      if (error.statusCode != 401) rethrow;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> toggleSave(JobFeedModel job) async {
     if (savedIds.contains(job.id)) {
+      await _api.delete('/api/v1/saved-jobs/${job.id}');
       savedIds.remove(job.id);
     } else {
+      await _api.post('/api/v1/saved-jobs/${job.id}');
       savedIds.add(job.id);
     }
-    _cachedOrderedIds = null;
-    _persist();
   }
 
-  void remove(String id) {
-    if (savedIds.remove(id)) {
-      _cachedOrderedIds = null;
-      _persist();
-    }
-  }
-
-  void _persist() {
-    _storage.write(savedJobIdsKey, savedIds.toList());
-  }
-
-  List<String> _readStoredIds() {
-    try {
-      final raw = _storage.read<dynamic>(savedJobIdsKey);
-      if (raw is List) {
-        return raw.whereType<String>().toList();
-      }
-    } on Object catch (e, st) {
-      AppLogger.error('Failed to load saved job IDs from storage', e, st);
-    }
-    return <String>[];
+  Future<void> remove(String id) async {
+    if (!savedIds.contains(id)) return;
+    await _api.delete('/api/v1/saved-jobs/$id');
+    savedIds.remove(id);
   }
 }

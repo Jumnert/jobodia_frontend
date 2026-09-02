@@ -5,7 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
+import 'package:jobodia_frontend/core/widgets/safe_content_padding.dart';
 import 'package:jobodia_frontend/features/onboarding/controllers/onboarding_controller.dart';
+import 'package:jobodia_frontend/features/onboarding/widgets/onboarding_button.dart';
 import 'package:jobodia_frontend/features/onboarding/widgets/onboarding_visuals.dart';
 import 'package:jobodia_frontend/theme/theme.dart';
 
@@ -43,11 +45,12 @@ class OnboardingView extends GetView<OnboardingController> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: (isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
           .copyWith(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: _OnboardingColors.background(context),
-        systemNavigationBarIconBrightness:
-            isDark ? Brightness.light : Brightness.dark,
-      ),
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: _OnboardingColors.background(context),
+            systemNavigationBarIconBrightness: isDark
+                ? Brightness.light
+                : Brightness.dark,
+          ),
       child: FTheme(
         data: isDark ? darkTheme : lightTheme,
         child: const _OnboardingScaffold(),
@@ -68,7 +71,6 @@ abstract final class _OnboardingColors {
 
   static Color muted(BuildContext context) =>
       _isDark(context) ? const Color(0xFFB9C3B6) : const Color(0xFF62666B);
-
 }
 
 class _OnboardingScaffold extends GetView<OnboardingController> {
@@ -80,7 +82,10 @@ class _OnboardingScaffold extends GetView<OnboardingController> {
       backgroundColor: _OnboardingColors.background(context),
       body: Column(
         children: [
-          const SafeArea(bottom: false, child: _OnboardingHeader()),
+          const SafeContentPadding(
+            safeBottom: false,
+            child: _OnboardingHeader(),
+          ),
           Expanded(
             child: PageView.builder(
               controller: controller.pageController,
@@ -90,15 +95,12 @@ class _OnboardingScaffold extends GetView<OnboardingController> {
                   _OnboardingPage(data: OnboardingView._pages[index]),
             ),
           ),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(42, 12, 42, 8),
-              child: Obx(
-                () => _PrimaryAction(
-                  isLastPage: controller.isLastPage,
-                  onPress: controller.goNext,
-                ),
+          SafeContentPadding(
+            safeTop: false,
+            child: Obx(
+              () => OnboardingButton(
+                isLastPage: controller.isLastPage,
+                onPressed: controller.goNext,
               ),
             ),
           ),
@@ -117,32 +119,29 @@ class _OnboardingHeader extends GetView<OnboardingController> {
       final currentPage = controller.currentPage.value;
       final progress = controller.autoProgress.value.clamp(0.0, 1.0);
 
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(28, 18, 28, 8),
-        child: Semantics(
-          label:
-              'Onboarding step ${currentPage + 1} of '
-              '${OnboardingController.totalPages}',
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(99),
-            child: SizedBox(
-              height: 5,
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: ColoredBox(
-                      color: AppColors.brandTeal.withValues(
-                        alpha: context.isDark ? 0.28 : 0.16,
-                      ),
+      return Semantics(
+        label:
+            'Onboarding step ${currentPage + 1} of '
+            '${OnboardingController.totalPages}',
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(99),
+          child: SizedBox(
+            height: 5,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: ColoredBox(
+                    color: AppColors.brandTeal.withValues(
+                      alpha: context.isDark ? 0.28 : 0.16,
                     ),
                   ),
-                  FractionallySizedBox(
-                    widthFactor: progress,
-                    alignment: Alignment.centerLeft,
-                    child: const ColoredBox(color: AppColors.brandTeal),
-                  ),
-                ],
-              ),
+                ),
+                FractionallySizedBox(
+                  widthFactor: progress,
+                  alignment: Alignment.centerLeft,
+                  child: const ColoredBox(color: AppColors.brandTeal),
+                ),
+              ],
             ),
           ),
         ),
@@ -165,8 +164,9 @@ class _OnboardingPage extends StatelessWidget {
             ? math.min(225.0, constraints.maxHeight * 0.45)
             : math.min(330.0, constraints.maxHeight * 0.52);
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 22),
+        return SafeContentPadding(
+          safeTop: false,
+          safeBottom: false,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -207,114 +207,6 @@ class _OnboardingPage extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _PrimaryAction extends StatelessWidget {
-  const _PrimaryAction({required this.isLastPage, required this.onPress});
-
-  final bool isLastPage;
-  final VoidCallback onPress;
-
-  @override
-  Widget build(BuildContext context) {
-    final label = isLastPage ? 'Get Started' : 'Next';
-    final colorScheme = Theme.of(context).colorScheme;
-    final primary = colorScheme.primary;
-    final highlightColor = Color.lerp(primary, Colors.white, 0.18)!;
-    final pressedBaseColor = Color.lerp(primary, Colors.black, 0.28)!;
-
-    return SizedBox(
-      width: double.infinity,
-      height: 58,
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(18),
-        child: Ink(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [highlightColor, primary, pressedBaseColor],
-              stops: const [0, 0.64, 1],
-            ),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.30)),
-            boxShadow: [
-              BoxShadow(
-                color: pressedBaseColor,
-                blurRadius: 0,
-                offset: const Offset(0, 3),
-              ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.16),
-                blurRadius: 5,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                top: 2,
-                left: 3,
-                right: 3,
-                height: 10,
-                child: IgnorePointer(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(14),
-                      ),
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.white.withValues(alpha: 0.18),
-                          Colors.white.withValues(alpha: 0),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              InkWell(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  onPress();
-                },
-                borderRadius: BorderRadius.circular(18),
-                splashColor: Colors.white.withValues(alpha: 0.16),
-                highlightColor: Colors.black.withValues(alpha: 0.12),
-                child: Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 180),
-                        child: Text(
-                          label,
-                          key: ValueKey(label),
-                          style: TextStyle(
-                            color: colorScheme.onPrimary,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Icon(
-                        FLucideIcons.arrowRight,
-                        size: 18,
-                        color: colorScheme.onPrimary,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

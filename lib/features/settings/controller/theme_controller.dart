@@ -23,7 +23,7 @@ class ThemeController extends GetxController {
   final GetStorage _storage;
 
   /// Reactive flag the UI can observe to keep switches in sync.
-  final RxBool isDarkMode = true.obs;
+  final RxBool isDarkMode = false.obs;
   final Rx<AppThemePreset> preset = AppThemePreset.defaultTheme.obs;
   final RxInt profileIconIndex = 0.obs;
 
@@ -82,10 +82,10 @@ class ThemeController extends GetxController {
 
   bool _readStoredMode() {
     try {
-      // Default to dark mode when no preference has been saved yet.
-      return _storage.read<bool>(themeKey) ?? true;
+      // Default to light mode when no preference has been saved yet.
+      return _storage.read<bool>(themeKey) ?? false;
     } on Exception {
-      return true;
+      return false;
     }
   }
 

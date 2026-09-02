@@ -9,6 +9,7 @@ import 'package:jobodia_frontend/core/utils/app_logger.dart';
 import 'package:jobodia_frontend/core/utils/input_sanitizer.dart';
 import 'package:jobodia_frontend/features/profile/model/profile_model.dart';
 import 'package:jobodia_frontend/services/secure_storage_service.dart';
+import 'package:jobodia_frontend/services/local_profile_photo_store.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ProfileController extends GetxController {
@@ -115,23 +116,33 @@ class ProfileController extends GetxController {
   /// unencrypted. Falls back to the mock profile when nothing is stored.
   Future<void> loadProfile() async {
     try {
+      var loadedProfile = _mockProfile;
       final raw = await SecureStorageService.to.readSecure(_profileKey);
       if (raw != null) {
-        profileRx.value = ProfileModel.fromJson(
+        loadedProfile = ProfileModel.fromJson(
           Map<String, dynamic>.from(jsonDecode(raw) as Map),
         );
-        return;
+      } else {
+        final legacy = _storage.read<Map>(_profileKey);
+        if (legacy != null) {
+          final model = ProfileModel.fromJson(
+            Map<String, dynamic>.from(legacy),
+          );
+          loadedProfile = model;
+          await SecureStorageService.to.writeSecure(
+            _profileKey,
+            jsonEncode(model.toJson()),
+          );
+          _storage.remove(_profileKey);
+        }
       }
-      final legacy = _storage.read<Map>(_profileKey);
-      if (legacy != null) {
-        final model = ProfileModel.fromJson(Map<String, dynamic>.from(legacy));
-        profileRx.value = model;
-        await SecureStorageService.to.writeSecure(
-          _profileKey,
-          jsonEncode(model.toJson()),
-        );
-        _storage.remove(_profileKey);
-      }
+
+      final onboardingPhoto = LocalProfilePhotoStore(
+        storage: _storage,
+      ).readPhoto();
+      profileRx.value = onboardingPhoto == null
+          ? loadedProfile
+          : loadedProfile.copyWith(avatarBytes: onboardingPhoto);
     } on Object catch (e, st) {
       AppLogger.error('Failed to load profile from secure storage', e, st);
     }

@@ -7,8 +7,8 @@ final FColors lightColors = FColors(
   barrier: const Color(0x33000000),
   background: const Color(0xFFFFFFFF),
   foreground: const Color(0xFF0A0A0A),
-  primary: const Color(0xFF7CCF00),
-  primaryForeground: const Color(0xFFFFF7ED),
+  primary: const Color(0xFF0A66C2),
+  primaryForeground: const Color(0xFFFFFFFF),
   secondary: const Color(0xFFF4F4F5),
   secondaryForeground: const Color(0xFF18181B),
   muted: const Color(0xFFF5F5F5),
@@ -28,8 +28,8 @@ final FColors darkColors = FColors(
   barrier: const Color(0x7A000000),
   background: const Color(0xFF0A0A0A),
   foreground: const Color(0xFFFAFAFA),
-  primary: const Color(0xFF7CCF00),
-  primaryForeground: const Color(0xFFFFF7ED),
+  primary: const Color(0xFF0A66C2),
+  primaryForeground: const Color(0xFFFFFFFF),
   secondary: const Color(0xFF27272A),
   secondaryForeground: const Color(0xFFFAFAFA),
   muted: const Color(0xFF262626),
@@ -51,10 +51,10 @@ extension FColorsExtensions on FColors {
 /// Jobodia-specific color tokens.
 class JobodiaColors extends ThemeExtension<JobodiaColors> {
   const JobodiaColors({
-    this.accent = const Color(0xFF7CCF00),
-    this.accentDark = const Color(0xFF4F8500),
-    this.purple = const Color(0xFFF54900),
-    this.purpleDark = const Color(0xFFCA3500),
+    this.accent = const Color(0xFF0A66C2),
+    this.accentDark = const Color(0xFF004182),
+    this.purple = const Color(0xFF378FE9),
+    this.purpleDark = const Color(0xFF0A66C2),
   });
 
   final Color accent;

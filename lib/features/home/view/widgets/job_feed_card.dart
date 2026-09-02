@@ -25,7 +25,7 @@ class JobFeedCard extends StatelessWidget {
     Color(0xFFE2DFFF), // Soft purple (Google-like in screenshot)
     Color(0xFFFFD4D4), // Soft pink (Airbnb-like in screenshot)
     Color(0xFFD4E5FF), // Soft blue
-    Color(0xFFD4F1E0), // Soft green
+    Color(0xFFE1EFFF), // Soft blue
   ];
 
   @override

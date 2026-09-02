@@ -55,8 +55,8 @@ class RoleSelectionScreen extends StatelessWidget {
                         label: 'Role selection illustration',
                         child: RepaintBoundary(
                           child: Image.asset(
-                            'assets/images/onboarding/role_selection_hero.png',
-                            height: compact ? 154 : 184,
+                            'assets/images/onboarding/role_selection_hero_blue.png',
+                            height: compact ? 172 : 208,
                             fit: BoxFit.contain,
                             cacheHeight: 552,
                             filterQuality: FilterQuality.medium,
@@ -174,10 +174,10 @@ class _RoleCard extends StatelessWidget {
     final theme = FTheme.of(context);
     final colors = theme.colors;
     final isKhmer = Localizations.localeOf(context).languageCode == 'km';
-    final accent = AppColors.brandTeal;
-    final deepAccent = Color.lerp(accent, Colors.black, 0.8)!;
-    final midAccent = Color.lerp(accent, Colors.black, 0.42)!;
-    final lightAccent = Color.lerp(accent, Colors.white, 0.18)!;
+    const selectedStart = AppColors.brandDark;
+    const selectedCore = AppColors.brandPrimary;
+    const selectedMiddle = Color(0xFF5EA7F2);
+    const selectedEnd = Color(0xFFF7FBFF);
     const transitionDuration = Duration(milliseconds: 280);
     const transitionCurve = Curves.easeOutCubic;
     return GestureDetector(
@@ -191,9 +191,9 @@ class _RoleCard extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: selected
-                ? [deepAccent, deepAccent, midAccent, lightAccent]
+                ? [selectedStart, selectedCore, selectedMiddle, selectedEnd]
                 : [colors.card, colors.card, colors.card, colors.card],
-            stops: const [0, 0.42, 0.74, 1],
+            stops: const [0, 0.36, 0.72, 1],
           ),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
@@ -205,7 +205,7 @@ class _RoleCard extends StatelessWidget {
           boxShadow: selected
               ? [
                   BoxShadow(
-                    color: accent.withValues(alpha: 0.3),
+                    color: AppColors.brandPrimary.withValues(alpha: 0.22),
                     blurRadius: 28,
                     spreadRadius: -8,
                     offset: const Offset(0, 12),
@@ -229,8 +229,8 @@ class _RoleCard extends StatelessWidget {
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        midAccent.withValues(alpha: 0.78),
-                        midAccent.withValues(alpha: 0),
+                        Colors.white.withValues(alpha: 0.46),
+                        Colors.white.withValues(alpha: 0),
                       ],
                     ),
                   ),
@@ -244,7 +244,7 @@ class _RoleCard extends StatelessWidget {
                 opacity: selected ? 1 : 0,
                 child: IgnorePointer(
                   child: CustomPaint(
-                    painter: const _RoleCardNoise(color: AppColors.brandTeal),
+                    painter: const _RoleCardNoise(color: Colors.white),
                   ),
                 ),
               ),
@@ -295,7 +295,11 @@ class _RoleCard extends StatelessWidget {
                             color: selected ? Colors.white : colors.foreground,
                             height: isKhmer ? 1 : 1.15,
                           ),
-                          child: Text(role.headlineKey.tr),
+                          child: Text(
+                            role.headlineKey.tr,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         AnimatedDefaultTextStyle(
@@ -303,11 +307,15 @@ class _RoleCard extends StatelessWidget {
                           curve: transitionCurve,
                           style: theme.typography.body.xs.copyWith(
                             color: selected
-                                ? Color.lerp(Colors.white, lightAccent, 0.38)!
+                                ? Colors.white.withValues(alpha: 0.78)
                                 : colors.mutedForeground,
                             height: isKhmer ? 1.12 : 1.18,
                           ),
-                          child: Text(role.descriptionKey.tr),
+                          child: Text(
+                            role.descriptionKey.tr,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
                     ),
@@ -326,7 +334,7 @@ class _RoleCard extends StatelessWidget {
                             FLucideIcons.circleCheck,
                             key: ValueKey('selected'),
                             size: 20,
-                            color: Colors.white,
+                            color: selectedStart,
                           )
                         : const SizedBox(
                             key: ValueKey('unselected'),

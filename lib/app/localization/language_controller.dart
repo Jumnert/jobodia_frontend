@@ -34,12 +34,14 @@ class LanguageController extends GetxController {
 
   AppLanguage get current => language.value;
 
-  void selectLanguage(AppLanguage value) {
-    _storage.write(storageKey, value.storageValue);
+  Future<void> selectLanguage(AppLanguage value) async {
+    await _storage.write(storageKey, value.storageValue);
     if (language.value != value) {
       language.value = value;
     }
-    Get.updateLocale(value.locale);
+    if (Get.locale?.languageCode != value.storageValue) {
+      Get.updateLocale(value.locale);
+    }
   }
 
   static AppLanguage readStoredLanguage([GetStorage? storage]) {

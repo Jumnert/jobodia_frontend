@@ -107,4 +107,64 @@ class JobFeedModel {
     distance: json['distance'] as String,
     requirementsText: json['requirementsText'] as String? ?? '',
   );
+
+  /// Converts the Spring `JobResponseDto` into the presentation model used by
+  /// the existing Flutter screens. IDs intentionally remain strings in the UI
+  /// but retain the backend numeric value for API operations.
+  factory JobFeedModel.fromApiJson(Map<String, dynamic> json) {
+    final employer = json['employer'] is Map
+        ? Map<String, dynamic>.from(json['employer'] as Map)
+        : const <String, dynamic>{};
+    final skills =
+        (json['skillsId'] as List?)
+            ?.map((id) => 'Skill #$id')
+            .toList(growable: false) ??
+        const <String>[];
+    final min = json['minSalary'];
+    final max = json['maxSalary'];
+    final jobSite = json['jobSite']?.toString() ?? '';
+    final requirements =
+        (json['requirements'] as List?)
+            ?.map((item) => item.toString())
+            .join('\n') ??
+        '';
+
+    return JobFeedModel(
+      id: json['id'].toString(),
+      company: employer['companyName']?.toString() ?? 'Jobodia employer',
+      companyTag: jobSite == 'REMOTE' ? 'Remote' : 'New',
+      matchPercent: 0,
+      title: json['title']?.toString() ?? 'Untitled role',
+      level: _displayEnum(json['jobLevel']?.toString() ?? ''),
+      location:
+          employer['location']?.toString() ??
+          (jobSite == 'REMOTE' ? 'Remote' : 'On-site'),
+      timeAgo: 'Recently posted',
+      description: json['description']?.toString() ?? '',
+      tags: skills,
+      salary: _formatSalary(min, max),
+      distance: jobSite == 'REMOTE'
+          ? 'Fully remote'
+          : 'Location provided by employer',
+      requirementsText: requirements,
+    );
+  }
+
+  static String _displayEnum(String value) => value
+      .split('_')
+      .where((part) => part.isNotEmpty)
+      .map((part) => '${part[0]}${part.substring(1).toLowerCase()}')
+      .join(' ');
+
+  static String _formatSalary(Object? min, Object? max) {
+    final lower = num.tryParse(min?.toString() ?? '');
+    final upper = num.tryParse(max?.toString() ?? '');
+    if (lower == null && upper == null) return 'Salary not specified';
+    String format(num value) => value == value.roundToDouble()
+        ? value.toInt().toString()
+        : value.toStringAsFixed(2);
+    if (lower == null) return '\$${format(upper!)}';
+    if (upper == null) return '\$${format(lower)}';
+    return '\$${format(lower)} - \$${format(upper)}';
+  }
 }

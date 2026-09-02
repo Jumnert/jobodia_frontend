@@ -9,6 +9,7 @@ import 'package:jobodia_frontend/features/auth/repository/auth_repository.dart';
 import 'package:jobodia_frontend/features/role/controller/role_controller.dart';
 import 'package:jobodia_frontend/services/secure_storage_service.dart';
 import 'package:jobodia_frontend/services/push_notification_service.dart';
+import 'package:jobodia_frontend/services/local_profile_photo_store.dart';
 
 /// GetX Controller used as the ViewModel for authentication screens.
 import 'package:jobodia_frontend/features/auth/controller/form_validation_mixin.dart';
@@ -71,7 +72,7 @@ class AuthController extends GetxController with FormValidationMixin {
       }
 
       await _finishOAuthLogin(result);
-      Get.offAllNamed<void>(AppRoutes.home);
+      _continueAfterAuthentication();
     } on AuthRepositoryException catch (error) {
       _showErrorSnackBar('Login failed', error.message);
     } on Object {
@@ -201,11 +202,7 @@ class AuthController extends GetxController with FormValidationMixin {
         _showErrorSnackBar('Login failed', 'Invalid email or password.');
         return;
       }
-      // First-time users pick a role (Job Seeker / Employer) before entering.
-      final hasRole = Get.isRegistered<RoleController>()
-          ? Get.find<RoleController>().hasRole
-          : false;
-      Get.offAllNamed(hasRole ? AppRoutes.home : AppRoutes.selectRole);
+      _continueAfterAuthentication();
     } on AuthRepositoryException catch (error) {
       _showErrorSnackBar('Login failed', error.message);
     } on Object {
@@ -280,7 +277,7 @@ class AuthController extends GetxController with FormValidationMixin {
 
       registeredEmail.value = email;
       if (!await _authenticateWithPassword(email, password)) {
-        selectedAuthTab.value = 0;
+        Get.offNamed<void>(AppRoutes.login);
         _showErrorSnackBar(
           'Account created',
           'Your account was saved. Please log in with your new credentials.',
@@ -288,10 +285,7 @@ class AuthController extends GetxController with FormValidationMixin {
         return;
       }
 
-      final hasRole = Get.isRegistered<RoleController>()
-          ? Get.find<RoleController>().hasRole
-          : false;
-      Get.offAllNamed(hasRole ? AppRoutes.home : AppRoutes.selectRole);
+      _continueAfterAuthentication();
     } on AuthRepositoryException catch (error) {
       _showErrorSnackBar('Sign up failed', error.message);
     } finally {
@@ -568,7 +562,19 @@ class AuthController extends GetxController with FormValidationMixin {
       role: 'Candidate',
       avatarUrl: null,
     );
-    Get.offAllNamed(AppRoutes.selectRole);
+    _continueAfterAuthentication();
+  }
+
+  void _continueAfterAuthentication() {
+    final photoSetupComplete = LocalProfilePhotoStore().hasCompletedSetup;
+    if (!photoSetupComplete) {
+      Get.offAllNamed<void>(AppRoutes.profilePhotoSetup);
+      return;
+    }
+    final hasRole = Get.isRegistered<RoleController>()
+        ? Get.find<RoleController>().hasRole
+        : false;
+    Get.offAllNamed<void>(hasRole ? AppRoutes.home : AppRoutes.selectRole);
   }
 
   void _showErrorSnackBar(String title, String message) {

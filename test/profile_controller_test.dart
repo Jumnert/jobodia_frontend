@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:jobodia_frontend/features/profile/controller/profile_controller.dart';
 import 'package:jobodia_frontend/services/secure_storage_service.dart';
+import 'package:jobodia_frontend/services/local_profile_photo_store.dart';
 
 /// Mock path_provider so GetStorage can initialize in tests.
 Future<void> _setupPathProviderMock() async {
@@ -156,6 +157,18 @@ void main() {
   });
 
   group('persistence', () {
+    test('uses the locally captured onboarding selfie as avatar', () async {
+      final bytes = Uint8List.fromList([9, 8, 7, 6]);
+      await LocalProfilePhotoStore(storage: storage).savePhoto(bytes);
+
+      final ctrl2 = ProfileController(storage: storage);
+      ctrl2.onInit();
+      await ctrl2.ready;
+
+      expect(ctrl2.profile.avatarBytes, bytes);
+      ctrl2.dispose();
+    });
+
     test('loading from stored profile works', () async {
       // Seed secure storage (the source of truth).
       final updated = ctrl.profile.copyWith(name: 'Stored User');

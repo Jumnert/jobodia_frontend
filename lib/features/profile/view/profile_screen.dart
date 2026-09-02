@@ -39,6 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final topInset = MediaQuery.paddingOf(context).top;
+    final contentTop = topInset + (widget.embedded ? 30 : 76);
 
     return Scaffold(
       backgroundColor: palette.scaffold,
@@ -50,7 +51,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 controller: _scrollController,
                 padding: EdgeInsets.fromLTRB(
                   12,
-                  topInset + 12,
+                  contentTop,
                   12,
                   MediaQuery.paddingOf(context).bottom + 28,
                 ),
@@ -97,9 +98,9 @@ class _ProfilePresentation extends StatelessWidget {
   final bool isAboutExpanded;
   final VoidCallback onToggleAbout;
 
-  static const _coverHeight = 210.0;
+  static const _coverHeight = 184.0;
   static const _avatarSize = 112.0;
-  static const _coverTop = 18.0;
+  static const _coverTop = 0.0;
 
   @override
   Widget build(BuildContext context) {
@@ -241,26 +242,29 @@ class _ProfileAvatar extends StatelessWidget {
           border: Border.all(color: palette.surface, width: 5),
         ),
         clipBehavior: Clip.antiAlias,
-        child: profile.hasAvatarBytes
-            ? Image.memory(
-                profile.avatarBytes!,
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.high,
-              )
-            : SafeImageLoader(
-                url: profile.avatarImageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Center(
-                  child: Text(
-                    initial,
-                    style: TextStyle(
-                      color: palette.textPrimary,
-                      fontSize: 36,
-                      fontWeight: FontWeight.w800,
+        child: Transform.scale(
+          scale: 1.14,
+          child: profile.hasAvatarBytes
+              ? Image.memory(
+                  profile.avatarBytes!,
+                  fit: BoxFit.cover,
+                  filterQuality: FilterQuality.high,
+                )
+              : SafeImageLoader(
+                  url: profile.avatarImageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => Center(
+                    child: Text(
+                      initial,
+                      style: TextStyle(
+                        color: palette.textPrimary,
+                        fontSize: 36,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ),
-              ),
+        ),
       ),
     );
   }

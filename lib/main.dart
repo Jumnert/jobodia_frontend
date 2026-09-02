@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:jobodia_frontend/app/bindings/initial_binding.dart';
 import 'package:jobodia_frontend/app/localization/app_translations.dart';
 import 'package:jobodia_frontend/app/localization/language_controller.dart';
@@ -12,16 +13,18 @@ import 'package:jobodia_frontend/app/routes/app_routes.dart';
 import 'package:jobodia_frontend/app/theme/app_theme.dart';
 import 'package:jobodia_frontend/core/widgets/seasonal_atmosphere.dart';
 import 'package:jobodia_frontend/core/config/app_environment.dart';
+import 'package:jobodia_frontend/core/config/launch_profile.dart';
 import 'package:jobodia_frontend/features/onboarding/controllers/onboarding_controller.dart';
 import 'package:jobodia_frontend/features/settings/controller/theme_controller.dart';
 import 'package:jobodia_frontend/features/splash/view/splash_screen.dart';
 import 'package:jobodia_frontend/firebase_options.dart';
 import 'package:jobodia_frontend/theme/theme.dart' as forui_theme;
 
-Future<void> main() => bootstrap(AppEnvironment.uat);
+Future<void> main() => bootstrap(LaunchProfile.active);
 
 Future<void> bootstrap(AppEnvironment environment) async {
   WidgetsFlutterBinding.ensureInitialized();
+  await LiquidGlassWidgets.initialize();
   AppConfig.configure(environment);
   final supportsFirebase =
       AppConfig.enableFirebase &&
@@ -34,7 +37,23 @@ Future<void> bootstrap(AppEnvironment environment) async {
     );
   }
   await GetStorage.init();
-  runApp(const JobodiaApp());
+  runApp(
+    LiquidGlassWidgets.wrap(
+      brightnessResolver: Theme.maybeBrightnessOf,
+      adaptiveQuality: true,
+      theme: const GlassThemeData(
+        light: GlassThemeVariant(
+          settings: GlassThemeSettings(thickness: 20, blur: 3),
+          quality: GlassQuality.standard,
+        ),
+        dark: GlassThemeVariant(
+          settings: GlassThemeSettings(thickness: 20, blur: 3),
+          quality: GlassQuality.standard,
+        ),
+      ),
+      child: const JobodiaApp(),
+    ),
+  );
 }
 
 /// App entry widget. GetMaterialApp enables GetX navigation and bindings.
@@ -111,10 +130,11 @@ class JobodiaApp extends StatelessWidget {
   ThemeMode _resolveThemeMode() {
     try {
       final isDark = GetStorage().read<bool>(ThemeController.themeKey);
-      // Default to dark mode when no preference has been saved yet.
-      return isDark == false ? ThemeMode.light : ThemeMode.dark;
+      // New installs start in the bright Jobodia theme. A saved user choice
+      // still takes precedence on later launches.
+      return isDark == true ? ThemeMode.dark : ThemeMode.light;
     } on Exception {
-      return ThemeMode.dark;
+      return ThemeMode.light;
     }
   }
 
@@ -123,7 +143,14 @@ class JobodiaApp extends StatelessWidget {
       final hasSeenOnboarding = GetStorage().read<bool>(
         OnboardingController.hasSeenOnboardingKey,
       );
-      return hasSeenOnboarding == true ? AppRoutes.login : AppRoutes.onboarding;
+      if (hasSeenOnboarding != true) return AppRoutes.onboarding;
+
+      final hasSelectedLanguage = GetStorage().hasData(
+        LanguageController.storageKey,
+      );
+      return hasSelectedLanguage
+          ? AppRoutes.login
+          : AppRoutes.languageSelection;
     } on Exception {
       return AppRoutes.onboarding;
     }

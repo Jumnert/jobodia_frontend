@@ -18,9 +18,7 @@ FStyle _style({
       touch: touch,
     ),
     focusedOutlineStyle: FFocusedOutlineStyle(
-      color: colors.brightness == Brightness.dark
-          ? const Color(0xFF737373)
-          : const Color(0xFFA1A1A1),
+      color: colors.primary,
       borderRadius: borderRadius.md,
     ),
     sizes: FSizes.inherit(touch: touch),

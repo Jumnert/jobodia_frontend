@@ -270,7 +270,7 @@ class JobPostController extends GetxController {
     hasSavedDraft.value = false;
     this.publishedJobs.insert(0, value);
     if (Get.isRegistered<HomeController>()) {
-      Get.find<HomeController>().addLocallyPublishedJob(publishedRecord);
+      Get.find<HomeController>().loadJobs(reset: true);
     }
     currentView.value = JobPostView.success;
   }

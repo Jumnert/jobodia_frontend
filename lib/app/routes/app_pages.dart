@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/animation.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/app/middleware/auth_middleware.dart';
@@ -9,6 +11,7 @@ import 'package:jobodia_frontend/features/about/view/screens/privacy_policy_scre
 import 'package:jobodia_frontend/features/applications/view/applications_screen.dart';
 import 'package:jobodia_frontend/features/company/view/company_profile_screen.dart';
 import 'package:jobodia_frontend/features/auth/view/login_screen.dart';
+import 'package:jobodia_frontend/features/auth/view/register_screen.dart';
 import 'package:jobodia_frontend/features/role/view/role_selection_screen.dart';
 import 'package:jobodia_frontend/features/role/view/role_welcome_screen.dart';
 import 'package:jobodia_frontend/features/preferences/controller/preferences_controller.dart';
@@ -23,9 +26,12 @@ import 'package:jobodia_frontend/features/home/view/main_shell_screen.dart';
 import 'package:jobodia_frontend/features/job_detail/controller/job_detail_controller.dart';
 import 'package:jobodia_frontend/features/job_detail/view/job_detail_screen.dart';
 import 'package:jobodia_frontend/features/onboarding/controllers/onboarding_controller.dart';
+import 'package:jobodia_frontend/features/onboarding/views/language_selection_screen.dart';
 import 'package:jobodia_frontend/features/onboarding/views/onboarding_view.dart';
 import 'package:jobodia_frontend/features/pricing/view/pricing_screen.dart';
 import 'package:jobodia_frontend/features/profile/controller/profile_controller.dart';
+import 'package:jobodia_frontend/features/profile_setup/controller/profile_photo_setup_controller.dart';
+import 'package:jobodia_frontend/features/profile_setup/view/profile_photo_setup_screen.dart';
 import 'package:jobodia_frontend/features/profile/view/edit_profile_screen.dart';
 import 'package:jobodia_frontend/features/profile/view/profile_screen.dart';
 import 'package:jobodia_frontend/features/profile/view/statistics_screen.dart';
@@ -65,7 +71,27 @@ abstract final class AppPages {
         () => Get.lazyPut<OnboardingController>(OnboardingController.new),
       ),
     ),
+    GetPage(
+      name: AppRoutes.languageSelection,
+      page: () => const LanguageSelectionScreen(),
+      transition: Transition.fadeIn,
+      transitionDuration: _defaultDuration,
+      curve: _defaultCurve,
+    ),
     GetPage(name: AppRoutes.login, page: () => const LoginScreen()),
+    GetPage(name: AppRoutes.register, page: () => const RegisterScreen()),
+    GetPage(
+      name: AppRoutes.profilePhotoSetup,
+      page: () => const ProfilePhotoSetupScreen(),
+      binding: BindingsBuilder(
+        () => Get.lazyPut<ProfilePhotoSetupController>(
+          ProfilePhotoSetupController.new,
+        ),
+      ),
+      transition: Transition.fadeIn,
+      transitionDuration: _defaultDuration,
+      curve: _defaultCurve,
+    ),
     GetPage(
       name: AppRoutes.otpVerification,
       page: () => const OtpVerificationScreen(),
@@ -256,7 +282,15 @@ abstract final class AppPages {
     ),
     GetPage(
       name: AppRoutes.roleWelcome,
-      page: () => const RoleWelcomeScreen(),
+      page: () {
+        final arguments = Get.arguments;
+        return RoleWelcomeScreen(
+          previewMode: arguments is Map && arguments['previewMode'] == true,
+          photoBytes: arguments is Map
+              ? arguments['photoBytes'] as Uint8List?
+              : null,
+        );
+      },
       transition: Transition.fadeIn,
       transitionDuration: _defaultDuration,
       curve: _defaultCurve,

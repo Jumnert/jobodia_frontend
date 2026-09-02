@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/core/widgets/gradient_header_painter.dart';
+import 'package:jobodia_frontend/core/widgets/safe_content_padding.dart';
 import 'package:jobodia_frontend/features/auth/controller/auth_controller.dart';
 
 /// OTP verification screen shown after Register succeeds.
@@ -44,14 +45,9 @@ class OtpVerificationScreen extends GetView<AuthController> {
                               top: Radius.circular(28),
                             ),
                           ),
-                          child: Padding(
-                            padding: EdgeInsets.fromLTRB(
-                              14,
-                              26,
-                              14,
-                              MediaQuery.paddingOf(context).bottom + 28,
-                            ),
-                            child: const _OtpContent(),
+                          child: const SafeContentPadding(
+                            safeTop: false,
+                            child: _OtpContent(),
                           ),
                         ),
                       ],
@@ -81,36 +77,33 @@ class _OtpHeader extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           const CustomPaint(painter: GradientHeaderPainter()),
-          SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(25, 13, 25, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FButton.icon(
-                    variant: FButtonVariant.ghost,
-                    onPress: controller.goBackToLogin,
-                    child: const Icon(
-                      FLucideIcons.arrowLeft,
-                      color: Colors.white,
-                    ),
+          SafeContentPadding(
+            safeBottom: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FButton.icon(
+                  variant: FButtonVariant.ghost,
+                  onPress: controller.goBackToLogin,
+                  child: const Icon(
+                    FLucideIcons.arrowLeft,
+                    color: Colors.white,
                   ),
-                  const Spacer(),
-                  Text(
-                    'Verify Your Email',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
+                ),
+                const Spacer(),
+                Text(
+                  'Verify Your Email',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
                   ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Enter the 6-digit code sent to your email',
-                    style: TextStyle(color: Colors.white, fontSize: 13),
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Enter the 6-digit code sent to your email',
+                  style: TextStyle(color: Colors.white, fontSize: 13),
+                ),
+              ],
             ),
           ),
         ],

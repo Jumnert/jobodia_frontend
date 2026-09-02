@@ -65,13 +65,13 @@ class SelectedPlanCard extends StatelessWidget {
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF00856F).withValues(alpha: 0.18),
+                    color: AppColors.brandPrimary.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: const Text(
                     'Current plan',
                     style: TextStyle(
-                      color: Color(0xFF00D4AA),
+                      color: AppColors.brandLight,
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
                     ),

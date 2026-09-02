@@ -16,7 +16,7 @@ extension AppThemePresetX on AppThemePreset {
   };
 
   String get description => switch (this) {
-    AppThemePreset.defaultTheme => 'Fresh green',
+    AppThemePreset.defaultTheme => 'Professional blue',
     AppThemePreset.golden => 'Warm and polished',
     AppThemePreset.midnight => 'Deep blue and focused',
     AppThemePreset.rose => 'Soft, warm and expressive',
@@ -25,7 +25,7 @@ extension AppThemePresetX on AppThemePreset {
   };
 
   Color get accent => switch (this) {
-    AppThemePreset.defaultTheme => AppColors.brandTeal,
+    AppThemePreset.defaultTheme => AppColors.brandPrimary,
     AppThemePreset.golden => const Color(0xFFC38A16),
     AppThemePreset.midnight => const Color(0xFF4D7CFE),
     AppThemePreset.rose => const Color(0xFFD65A82),
@@ -85,9 +85,7 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(
             color: preset == AppThemePreset.defaultTheme
-                ? (brightness == Brightness.dark
-                      ? const Color(0xFF737373)
-                      : const Color(0xFFA1A1A1))
+                ? AppColors.brandPrimary
                 : preset.accent,
             width: 1.5,
           ),
@@ -155,7 +153,7 @@ abstract final class AppTheme {
       primary: AppColors.brandPrimary,
       onPrimary: AppColors.primaryForeground,
       primaryContainer: AppColors.brandPrimary,
-      onPrimaryContainer: const Color(0xFF0A0A0A),
+      onPrimaryContainer: Colors.white,
       secondary: secondary,
       onSecondary: isDark ? const Color(0xFFFAFAFA) : const Color(0xFF18181B),
       secondaryContainer: muted,

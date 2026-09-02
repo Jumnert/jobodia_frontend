@@ -53,6 +53,7 @@ void main() {
 
       verify(
         mockStorage.write('jobPreferences', {
+          'interests': <String>[],
           'desiredRole': 'Developer',
           'experienceLevel': 'Senior',
           'preferredLocation': 'Remote',
@@ -98,11 +99,11 @@ void main() {
       expect(c.currentStep.value, 2);
     });
 
-    test('goNext does not advance past step 2', () {
+    test('goNext does not advance past the final choice step', () {
       final c = makeController();
-      c.currentStep.value = 2;
+      c.currentStep.value = 3;
       c.goNext();
-      expect(c.currentStep.value, 2);
+      expect(c.currentStep.value, 3);
     });
 
     test('goBack decrements currentStep', () {
@@ -118,11 +119,11 @@ void main() {
       expect(c.currentStep.value, 0);
     });
 
-    test('complete() resets currentStep to 0', () {
+    test('complete() opens the processing step', () {
       final c = makeController();
-      c.currentStep.value = 2;
+      c.currentStep.value = 3;
       c.complete();
-      expect(c.currentStep.value, 0);
+      expect(c.currentStep.value, 4);
     });
   });
 }

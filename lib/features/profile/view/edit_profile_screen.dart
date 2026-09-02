@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
@@ -40,6 +43,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late final String _origRole;
   late final String _origAbout;
   late final List<String> _origSkills;
+  final ScrollController _scrollController = ScrollController(
+    keepScrollOffset: false,
+  );
+  final ValueNotifier<double> _headerCollapseProgress = ValueNotifier(0);
 
   @override
   void initState() {
@@ -58,6 +65,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _origRole = p.role;
     _origAbout = p.about;
     _origSkills = List<String>.from(p.skills);
+    _scrollController.addListener(_updateHeaderCollapse);
+  }
+
+  void _updateHeaderCollapse() {
+    final next = (_scrollController.offset / 56).clamp(0.0, 1.0);
+    if ((next - _headerCollapseProgress.value).abs() < 0.002) return;
+    _headerCollapseProgress.value = next;
   }
 
   bool get _isDirty =>
@@ -69,6 +83,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
+    _headerCollapseProgress.dispose();
     _name.dispose();
     _role.dispose();
     _about.dispose();
@@ -210,6 +226,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final safeArea = MediaQuery.paddingOf(context);
+    final header = _CollapsingEditProfileHeader(
+      progress: _headerCollapseProgress,
+      onBack: () => Navigator.of(context).maybePop(),
+      onSave: _save,
+    );
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
@@ -230,175 +255,238 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('Edit Profile')),
-        body: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(
-            20,
-            20,
-            20,
-            MediaQuery.paddingOf(context).bottom + 32,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // --- Avatar + Cover image pickers ---
-              Obx(() {
-                final p = _ctrl.profile;
-                return Row(
-                  children: [
-                    // Avatar
-                    GestureDetector(
-                      onTap: _showAvatarPhotoDialog,
-                      child: Stack(
-                        children: [
-                          CircleAvatar(
-                            radius: 38,
-                            backgroundColor: AppColors.background,
-                            backgroundImage: p.hasAvatarBytes
-                                ? MemoryImage(p.avatarBytes!)
-                                : (p.avatarImageUrl.isNotEmpty
-                                          ? NetworkImage(p.avatarImageUrl)
-                                          : null)
-                                      as ImageProvider?,
-                            child:
-                                (p.avatarImageUrl.isEmpty && !p.hasAvatarBytes)
-                                ? const Icon(
-                                    FLucideIcons.user,
-                                    size: 32,
-                                    color: AppColors.textSecondary,
-                                  )
-                                : null,
-                          ),
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: Container(
-                              width: 26,
-                              height: 26,
-                              decoration: BoxDecoration(
-                                color: AppColors.primary,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 2,
-                                ),
-                              ),
-                              child: const Icon(
-                                FLucideIcons.camera,
-                                size: 13,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
+        backgroundColor: palette.scaffold,
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.brandPrimary.withValues(
+                        alpha: isDark ? 0.26 : 0.2,
                       ),
+                      AppColors.brandPrimary.withValues(
+                        alpha: isDark ? 0.08 : 0.055,
+                      ),
+                      palette.scaffold,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            ValueListenableBuilder<double>(
+              valueListenable: _headerCollapseProgress,
+              builder: (context, progress, _) {
+                final eased = Curves.easeOutCubic.transform(progress);
+                return Positioned(
+                  top: safeArea.top + 150 - (76 * eased),
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(26),
                     ),
-                    const SizedBox(width: 16),
-                    // Cover
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: _ctrl.pickCover,
-                        child: Container(
-                          height: 76,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            color: AppColors.background,
-                            image: p.hasCoverBytes
-                                ? DecorationImage(
-                                    image: MemoryImage(p.coverBytes!),
-                                    fit: BoxFit.cover,
-                                  )
-                                : (p.coverImageUrl.isNotEmpty
-                                      ? DecorationImage(
-                                          image: NetworkImage(p.coverImageUrl),
-                                          fit: BoxFit.cover,
-                                        )
-                                      : null),
-                          ),
-                          child: Center(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 5,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.45),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
+                    child: ColoredBox(
+                      color: palette.surface,
+                      child: SingleChildScrollView(
+                        controller: _scrollController,
+                        physics: const BouncingScrollPhysics(
+                          parent: AlwaysScrollableScrollPhysics(),
+                        ),
+                        padding: EdgeInsets.fromLTRB(
+                          20,
+                          24,
+                          20,
+                          safeArea.bottom + 32,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // --- Avatar + Cover image pickers ---
+                            Obx(() {
+                              final p = _ctrl.profile;
+                              return Row(
                                 children: [
-                                  Icon(
-                                    FLucideIcons.camera,
-                                    size: 14,
-                                    color: Colors.white,
+                                  // Avatar
+                                  GestureDetector(
+                                    onTap: _showAvatarPhotoDialog,
+                                    child: Stack(
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 38,
+                                          backgroundColor: AppColors.background,
+                                          backgroundImage: p.hasAvatarBytes
+                                              ? MemoryImage(p.avatarBytes!)
+                                              : (p.avatarImageUrl.isNotEmpty
+                                                        ? NetworkImage(
+                                                            p.avatarImageUrl,
+                                                          )
+                                                        : null)
+                                                    as ImageProvider?,
+                                          child:
+                                              (p.avatarImageUrl.isEmpty &&
+                                                  !p.hasAvatarBytes)
+                                              ? const Icon(
+                                                  FLucideIcons.user,
+                                                  size: 32,
+                                                  color:
+                                                      AppColors.textSecondary,
+                                                )
+                                              : null,
+                                        ),
+                                        Positioned(
+                                          bottom: 0,
+                                          right: 0,
+                                          child: Container(
+                                            width: 26,
+                                            height: 26,
+                                            decoration: BoxDecoration(
+                                              color: AppColors.primary,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: Colors.white,
+                                                width: 2,
+                                              ),
+                                            ),
+                                            child: const Icon(
+                                              FLucideIcons.camera,
+                                              size: 13,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    'Change cover',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
+                                  const SizedBox(width: 16),
+                                  // Cover
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: _ctrl.pickCover,
+                                      child: Container(
+                                        height: 76,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          color: AppColors.background,
+                                          image: p.hasCoverBytes
+                                              ? DecorationImage(
+                                                  image: MemoryImage(
+                                                    p.coverBytes!,
+                                                  ),
+                                                  fit: BoxFit.cover,
+                                                )
+                                              : (p.coverImageUrl.isNotEmpty
+                                                    ? DecorationImage(
+                                                        image: NetworkImage(
+                                                          p.coverImageUrl,
+                                                        ),
+                                                        fit: BoxFit.cover,
+                                                      )
+                                                    : null),
+                                        ),
+                                        child: Center(
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 5,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.black.withValues(
+                                                alpha: 0.45,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: const Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  FLucideIcons.camera,
+                                                  size: 14,
+                                                  color: Colors.white,
+                                                ),
+                                                SizedBox(width: 5),
+                                                Text(
+                                                  'Change cover',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
-                              ),
+                              );
+                            }),
+                            const SizedBox(height: 20),
+                            BasicInfoSection(
+                              nameCtrl: _name,
+                              roleCtrl: _role,
+                              aboutCtrl: _about,
                             ),
-                          ),
+                            const SizedBox(height: 24),
+                            SectionLabel('Experience'),
+                            const SizedBox(height: 12),
+                            ...List.generate(_expControllers.length, (i) {
+                              return _ExperienceCard(
+                                index: i,
+                                controllers: _expControllers[i],
+                                onRemove: () => _removeExperience(i),
+                              );
+                            }),
+                            const SizedBox(height: 8),
+                            OutlinedButton.icon(
+                              onPressed: _addExperience,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.primary,
+                                side: const BorderSide(
+                                  color: AppColors.primary,
+                                ),
+                                shape: const StadiumBorder(),
+                                minimumSize: const Size.fromHeight(44),
+                              ),
+                              icon: const Icon(FLucideIcons.plus, size: 18),
+                              label: const Text('Add Experience'),
+                            ),
+                            const SizedBox(height: 24),
+                            SectionLabel('Skills'),
+                            const SizedBox(height: 12),
+                            _SkillsEditor(
+                              skills: _skills,
+                              controller: _skillInput,
+                              onAdd: _addSkill,
+                              onRemove: _removeSkill,
+                            ),
+                            const SizedBox(height: 24),
+                            LinksSection(
+                              portfolioControllers: _portfolioControllers,
+                              onAdd: _addPortfolioLink,
+                              onRemove: _removePortfolioLink,
+                            ),
+                            const SizedBox(height: 24),
+                            SaveProfileButton(onSave: _save),
+                          ],
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 );
-              }),
-              const SizedBox(height: 20),
-              BasicInfoSection(
-                nameCtrl: _name,
-                roleCtrl: _role,
-                aboutCtrl: _about,
-              ),
-              const SizedBox(height: 24),
-              SectionLabel('Experience'),
-              const SizedBox(height: 12),
-              ...List.generate(_expControllers.length, (i) {
-                return _ExperienceCard(
-                  index: i,
-                  controllers: _expControllers[i],
-                  onRemove: () => _removeExperience(i),
-                );
-              }),
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                onPressed: _addExperience,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.primary),
-                  shape: const StadiumBorder(),
-                  minimumSize: const Size.fromHeight(44),
-                ),
-                icon: const Icon(FLucideIcons.plus, size: 18),
-                label: const Text('Add Experience'),
-              ),
-              const SizedBox(height: 24),
-              SectionLabel('Skills'),
-              const SizedBox(height: 12),
-              _SkillsEditor(
-                skills: _skills,
-                controller: _skillInput,
-                onAdd: _addSkill,
-                onRemove: _removeSkill,
-              ),
-              const SizedBox(height: 24),
-              LinksSection(
-                portfolioControllers: _portfolioControllers,
-                onAdd: _addPortfolioLink,
-                onRemove: _removePortfolioLink,
-              ),
-              const SizedBox(height: 24),
-              SaveProfileButton(onSave: _save),
-            ],
-          ),
+              },
+            ),
+            Positioned(top: 0, left: 0, right: 0, child: header),
+          ],
         ),
       ),
     );
@@ -406,6 +494,174 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 }
 
 enum _AvatarPhotoAction { choose, remove }
+
+class _CollapsingEditProfileHeader extends StatelessWidget {
+  const _CollapsingEditProfileHeader({
+    required this.progress,
+    required this.onBack,
+    required this.onSave,
+  });
+
+  final ValueListenable<double> progress;
+  final VoidCallback onBack;
+  final VoidCallback onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<double>(
+      valueListenable: progress,
+      builder: (context, value, _) {
+        final theme = FTheme.of(context);
+        final safeTop = MediaQuery.paddingOf(context).top;
+        final eased = Curves.easeOutCubic.transform(value);
+        final height = safeTop + 150 - (76 * eased);
+
+        return RepaintBoundary(
+          child: SizedBox(
+            height: height,
+            child: ClipRect(
+              child: Padding(
+                padding: EdgeInsets.only(top: safeTop),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: 64,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Align(
+                            alignment: Alignment(-eased, 0),
+                            child: Transform.translate(
+                              offset: Offset(62 * eased, 0),
+                              child: Text(
+                                'Edit Profile',
+                                maxLines: 1,
+                                style: theme.typography.body.xl.copyWith(
+                                  color: theme.colors.foreground,
+                                  fontSize: 31 - (7 * eased),
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.5 + (0.2 * eased),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: _EditProfileHeaderAction(
+                              tooltip: 'Back',
+                              icon: FLucideIcons.chevronLeft,
+                              onPressed: onBack,
+                              progress: eased,
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: _EditProfileHeaderAction(
+                              tooltip: 'Save profile',
+                              icon: FLucideIcons.check,
+                              label: 'Save',
+                              onPressed: onSave,
+                              progress: eased,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _EditProfileHeaderAction extends StatelessWidget {
+  const _EditProfileHeaderAction({
+    required this.tooltip,
+    required this.icon,
+    required this.onPressed,
+    required this.progress,
+    this.label,
+  });
+
+  final String tooltip;
+  final IconData icon;
+  final VoidCallback onPressed;
+  final double progress;
+  final String? label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = FTheme.of(context).colors;
+    final expand = label == null
+        ? 0.0
+        : Curves.easeOutCubic.transform(progress);
+    final textOpacity = Curves.easeIn.transform(
+      ((expand - 0.2) / 0.8).clamp(0.0, 1.0),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Tooltip(
+        message: tooltip,
+        child: SizedBox(
+          width: lerpDouble(44, label == null ? 44 : 100, expand)!,
+          height: 44,
+          child: Material(
+            color: colors.background.withValues(
+              alpha: 0.58 + (0.32 * progress),
+            ),
+            borderRadius: BorderRadius.circular(22),
+            child: InkWell(
+              onTap: onPressed,
+              borderRadius: BorderRadius.circular(22),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 44,
+                    child: Center(
+                      child: Icon(icon, size: 20, color: colors.foreground),
+                    ),
+                  ),
+                  if (label != null)
+                    ClipRect(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: expand,
+                        child: Opacity(
+                          opacity: textOpacity,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 15),
+                            child: Text(
+                              label!,
+                              maxLines: 1,
+                              style: TextStyle(
+                                color: colors.foreground,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Experience card (one per entry in the list)

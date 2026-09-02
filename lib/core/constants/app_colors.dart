@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 /// Shared colors derived from the shadcn OKLCH theme documented in README.
 abstract final class AppColors {
   static const primary = Color(0xFF0A0A0A);
-  static const primaryForeground = Color(0xFFFFF7ED);
+  static const primaryForeground = Color(0xFFFFFFFF);
   static const headerStart = Color(0xFF0A0A0A);
   static const headerEnd = Color(0xFF171717);
 
-  // Legacy names retained for existing feature code; these now map to the
-  // supplied orange chart scale instead of the previous purple palette.
-  static const accentPurple = Color(0xFFF54900);
-  static const accentPurpleDark = Color(0xFFCA3500);
+  // Legacy names retained for existing feature code; both now map into the
+  // Jobodia blue scale.
+  static const accentPurple = Color(0xFF378FE9);
+  static const accentPurpleDark = Color(0xFF0A66C2);
 
   static const background = Color(0xFFFFFFFF);
   static const surface = Color(0xFFFFFFFF);
@@ -20,37 +20,41 @@ abstract final class AppColors {
   static const error = Color(0xFFDF2225);
 
   // ── Brand and semantic tokens ───────────────────────────────────
-  /// Primary brand color converted from `oklch(76.8% 0.233 130.85)`.
-  static const brandPrimary = Color(0xFF7CCF00);
+  /// Primary Jobodia brand color, inspired by LinkedIn blue.
+  static const brandPrimary = Color(0xFF0A66C2);
+
+  /// Lighter and darker brand steps for gradients and elevated states.
+  static const brandLight = Color(0xFF70B5F9);
+  static const brandDark = Color(0xFF004182);
 
   /// Backward-compatible alias used throughout existing feature widgets.
   static const brandTeal = brandPrimary;
 
-  static const chart1 = Color(0xFFFFB86A);
-  static const chart2 = Color(0xFFFF6900);
-  static const chart3 = Color(0xFFF54900);
-  static const chart4 = Color(0xFFCA3500);
-  static const chart5 = Color(0xFF9F2D00);
+  static const chart1 = Color(0xFFA8D4F5);
+  static const chart2 = brandLight;
+  static const chart3 = Color(0xFF378FE9);
+  static const chart4 = brandPrimary;
+  static const chart5 = brandDark;
 
   /// Success / positive state.
-  static const success = brandPrimary;
+  static const success = Color(0xFF15803D);
 
   /// Warning / attention state.
-  static const warning = chart1;
+  static const warning = Color(0xFFF59E0B);
 
   /// Informational state kept blue for conventional semantic recognition.
-  static const info = Color(0xFF3B82F6);
+  static const info = chart3;
 
   /// High-contrast outgoing chat gradient drawn from the chart scale.
   static const chatOutgoingStart = chart4;
   static const chatOutgoingEnd = chart5;
 
   /// Deep action color used by the compact chat composer send control.
-  static const chatComposerAction = Color(0xFF2D0738);
+  static const chatComposerAction = brandDark;
 
-  /// Legacy onboarding CTA tokens mapped to the new warm chart scale.
-  static const onboardingCtaLight = chart2;
-  static const onboardingCtaDark = chart4;
+  /// Onboarding CTA tokens mapped to the Jobodia blue scale.
+  static const onboardingCtaLight = brandPrimary;
+  static const onboardingCtaDark = brandDark;
 
   /// Gradient pairings derived from the supplied chart scale.
   static const cardGradients = <List<Color>>[
@@ -138,9 +142,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
     divider: Color(0xFFE5E5E5),
     iconPrimary: Color(0xFF0A0A0A),
     iconMuted: Color(0xFF737373),
-    success: Color(0xFF7CCF00),
-    warning: Color(0xFFFFB86A),
-    info: Color(0xFF3B82F6),
+    success: Color(0xFF15803D),
+    warning: Color(0xFFF59E0B),
+    info: Color(0xFF378FE9),
     error: Color(0xFFDF2225),
   );
 
@@ -155,9 +159,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
     divider: Color(0x1AFFFFFF),
     iconPrimary: Color(0xFFFAFAFA),
     iconMuted: Color(0xFFA1A1A1),
-    success: Color(0xFF7CCF00),
-    warning: Color(0xFFFFB86A),
-    info: Color(0xFF3B82F6),
+    success: Color(0xFF4ADE80),
+    warning: Color(0xFFFBBF24),
+    info: Color(0xFF70B5F9),
     error: Color(0xFFFF6467),
   );
 

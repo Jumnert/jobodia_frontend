@@ -9,6 +9,8 @@ import 'package:jobodia_frontend/core/utils/localized_time_ago.dart';
 import 'package:jobodia_frontend/features/home/model/job_feed_model.dart';
 import 'package:jobodia_frontend/features/home/controller/home_controller.dart';
 import 'package:jobodia_frontend/features/job_detail/controller/job_detail_controller.dart';
+import 'package:jobodia_frontend/features/job_detail/view/widgets/animated_match_badge.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 /// Opens a draggable, scrollable job preview as a Forui modal sheet.
 ///
@@ -297,7 +299,6 @@ class _SheetHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    final colors = FTheme.of(context).colors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -329,34 +330,22 @@ class _SheetHeader extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            ClipOval(
-              child: Material(
-                color: colors.primary.withValues(
-                  alpha: context.isDark ? 0.14 : 0.1,
-                ),
-                child: InkWell(
-                  onTap: onClose,
-                  child: SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: Icon(
-                      FLucideIcons.x,
-                      size: 18,
-                      color: colors.primary.withValues(alpha: 0.82),
-                    ),
-                  ),
-                ),
-              ),
+            GlassIconButton(
+              size: 40,
+              iconSize: 18,
+              useOwnLayer: true,
+              semanticLabel: 'Close',
+              onPressed: onClose,
+              icon: Icon(FLucideIcons.x, color: palette.iconPrimary),
             ),
           ],
         ),
         if (source.matchPercent > 0) ...[
           const SizedBox(height: 12),
-          FBadge(
-            variant: FBadgeVariant.primary,
-            child: Text(
-              'match_percent'.trParams({'percent': '${source.matchPercent}'}),
-            ),
+          AnimatedMatchBadge(
+            text: 'match_percent'.trParams({
+              'percent': '${source.matchPercent}',
+            }),
           ),
         ],
       ],

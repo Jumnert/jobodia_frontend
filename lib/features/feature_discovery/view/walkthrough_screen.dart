@@ -4,7 +4,18 @@ import 'package:forui/forui.dart';
 import 'package:get/get.dart';
 import 'package:jobodia_frontend/core/constants/app_colors.dart';
 import 'package:jobodia_frontend/features/feature_discovery/controller/feature_discovery_controller.dart';
+import 'package:jobodia_frontend/features/role/controller/role_controller.dart';
 
+/// Anchors for the first-time feature hint shown above the main navigation.
+///
+/// Keeping these keys outside the navigation widget lets the overlay measure
+/// the real control the user should use, rather than showing a mock version.
+abstract final class FeatureTourTargets {
+  static final postJob = GlobalKey(debugLabel: 'feature-tour-post-job');
+  static final aiAssistant = GlobalKey(debugLabel: 'feature-tour-ai-assistant');
+}
+
+/// A short, role-aware first-time hint that spotlights one useful action.
 class WalkthroughScreen extends StatefulWidget {
   const WalkthroughScreen({super.key});
 
@@ -13,388 +24,220 @@ class WalkthroughScreen extends StatefulWidget {
 }
 
 class _WalkthroughScreenState extends State<WalkthroughScreen> {
-  final PageController _pageController = PageController();
-  int _currentIndex = 0;
-
-  static const _pages = <_WalkthroughPageData>[
-    _WalkthroughPageData(
-      eyebrow: 'walkthrough_eyebrow_welcome',
-      title: 'walkthrough_title_welcome',
-      description: 'walkthrough_desc_welcome',
-      icon: FLucideIcons.compass,
-      color: AppColors.brandTeal,
-      highlights: [
-        'walkthrough_highlight_jobs',
-        'walkthrough_highlight_growth',
-      ],
-    ),
-    _WalkthroughPageData(
-      eyebrow: 'walkthrough_eyebrow_ai',
-      title: 'walkthrough_title_ai',
-      description: 'walkthrough_desc_ai',
-      icon: FLucideIcons.bot,
-      color: AppColors.brandTeal,
-      highlights: [
-        'walkthrough_highlight_guidance',
-        'walkthrough_highlight_steps',
-      ],
-    ),
-    _WalkthroughPageData(
-      eyebrow: 'walkthrough_eyebrow_cv',
-      title: 'walkthrough_title_cv',
-      description: 'walkthrough_desc_cv',
-      icon: FLucideIcons.fileText,
-      color: AppColors.info,
-      highlights: [
-        'walkthrough_highlight_builder',
-        'walkthrough_highlight_professional',
-      ],
-    ),
-    _WalkthroughPageData(
-      eyebrow: 'walkthrough_eyebrow_interview',
-      title: 'walkthrough_title_interview',
-      description: 'walkthrough_desc_interview',
-      icon: FLucideIcons.bookOpen,
-      color: AppColors.warning,
-      highlights: [
-        'walkthrough_highlight_practice',
-        'walkthrough_highlight_confidence',
-      ],
-    ),
-    _WalkthroughPageData(
-      eyebrow: 'walkthrough_eyebrow_insights',
-      title: 'walkthrough_title_insights',
-      description: 'walkthrough_desc_insights',
-      icon: FLucideIcons.chartLine,
-      color: AppColors.brandTeal,
-      highlights: [
-        'walkthrough_highlight_market',
-        'walkthrough_highlight_skills',
-      ],
-    ),
-  ];
-
-  bool get _isFirstPage => _currentIndex == 0;
-  bool get _isLastPage => _currentIndex == _pages.length - 1;
+  Rect? _targetBounds;
+  late final _FeatureTourData _feature = _FeatureTourData.forCurrentRole();
 
   @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _measureTarget());
+  }
+
+  void _measureTarget([int attempt = 0]) {
+    if (!mounted) return;
+
+    final renderObject = _feature.targetKey.currentContext?.findRenderObject();
+    if (renderObject is RenderBox && renderObject.hasSize) {
+      setState(
+        () => _targetBounds =
+            renderObject.localToGlobal(Offset.zero) & renderObject.size,
+      );
+      return;
+    }
+
+    // The navigation can still be laying out when this dialog first opens.
+    if (attempt < 12) {
+      Future<void>.delayed(
+        const Duration(milliseconds: 100),
+        () => _measureTarget(attempt + 1),
+      );
+    }
   }
 
   void _finish() {
+    HapticFeedback.selectionClick();
     Get.find<FeatureDiscoveryController>().markWalkthroughSeen();
     Get.back<void>();
   }
 
-  Future<void> _nextPage() async {
-    HapticFeedback.selectionClick();
-    if (_isLastPage) {
-      _finish();
-      return;
-    }
-    await _pageController.nextPage(
-      duration: const Duration(milliseconds: 420),
-      curve: Curves.easeOutCubic,
-    );
-  }
-
-  Future<void> _previousPage() async {
-    if (_isFirstPage) return;
-    HapticFeedback.selectionClick();
-    await _pageController.previousPage(
-      duration: const Duration(milliseconds: 420),
-      curve: Curves.easeOutCubic,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
     final theme = FTheme.of(context);
+    final size = MediaQuery.sizeOf(context);
+    final target = _targetBounds;
+    final spotlight = target?.inflate(8);
+    final cardBottom = target == null
+        ? 116.0
+        : (size.height - target.top + 18).clamp(96.0, size.height - 230.0);
 
     return Scaffold(
-      backgroundColor: palette.scaffold,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 12, 0),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 11,
-                      vertical: 7,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.brandTeal.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      '${(_currentIndex + 1).toString().padLeft(2, '0')} / ${_pages.length.toString().padLeft(2, '0')}',
-                      style: theme.typography.body.xs.copyWith(
-                        color: AppColors.brandTeal,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  FButton(
-                    variant: FButtonVariant.ghost,
-                    onPress: _finish,
-                    child: Text('skip'.tr),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                physics: const BouncingScrollPhysics(),
-                onPageChanged: (index) => setState(() {
-                  _currentIndex = index;
-                }),
-                itemCount: _pages.length,
-                itemBuilder: (context, index) => _WalkthroughPage(
-                  data: _pages[index],
-                  active: index == _currentIndex,
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: 1),
+              duration: const Duration(milliseconds: 340),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, _) => CustomPaint(
+                painter: _SpotlightBarrierPainter(
+                  spotlight: spotlight,
+                  opacity: 0.78 * value,
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 18),
-              child: Column(
-                children: [
-                  _ProgressIndicator(
-                    count: _pages.length,
-                    currentIndex: _currentIndex,
+          ),
+          if (spotlight != null)
+            Positioned(
+              left: spotlight.left,
+              top: spotlight.top,
+              width: spotlight.width,
+              height: spotlight.height,
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.info.withValues(alpha: 0.68),
+                        blurRadius: 22,
+                        spreadRadius: 2,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 22),
-                  Row(
+                ),
+              ),
+            ),
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: cardBottom,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.94, end: 1),
+              duration: const Duration(milliseconds: 360),
+              curve: Curves.easeOutBack,
+              builder: (context, value, child) => Opacity(
+                opacity: value.clamp(0.0, 1.0),
+                child: Transform.scale(scale: value, child: child),
+              ),
+              child: Material(
+                color: palette.surface,
+                elevation: 0,
+                borderRadius: BorderRadius.circular(32),
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(32),
+                    border: Border.all(
+                      color: AppColors.info.withValues(alpha: 0.34),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.22),
+                        blurRadius: 28,
+                        offset: const Offset(0, 12),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (!_isFirstPage) ...[
-                        Expanded(
-                          child: FButton(
-                            variant: FButtonVariant.outline,
-                            onPress: _previousPage,
-                            prefix: const Icon(
-                              FLucideIcons.arrowLeft,
-                              size: 18,
-                            ),
-                            child: Text('back'.tr),
-                          ),
+                      Text(
+                        _feature.title.tr,
+                        style: theme.typography.display.md.copyWith(
+                          color: palette.textPrimary,
+                          fontWeight: FontWeight.w800,
                         ),
-                        const SizedBox(width: 10),
-                      ],
-                      Expanded(
-                        flex: _isFirstPage ? 2 : 1,
+                      ),
+                      const SizedBox(height: 7),
+                      Text(
+                        _feature.description.tr,
+                        style: theme.typography.body.sm.copyWith(
+                          color: palette.textSecondary,
+                          height: 1.42,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
                         child: FButton(
-                          onPress: _nextPage,
-                          suffix: Icon(
-                            _isLastPage
-                                ? FLucideIcons.check
-                                : FLucideIcons.arrowRight,
-                            size: 18,
-                          ),
-                          child: Text(
-                            _isLastPage ? 'start_exploring'.tr : 'next'.tr,
-                          ),
+                          onPress: _finish,
+                          child: Text('feature_tour_got_it'.tr),
                         ),
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _WalkthroughPage extends StatelessWidget {
-  const _WalkthroughPage({required this.data, required this.active});
-
-  final _WalkthroughPageData data;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    final theme = FTheme.of(context);
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final compact = constraints.maxHeight < 510;
-        final visualSize = compact ? 56.0 : 64.0;
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              AnimatedScale(
-                scale: active ? 1 : 0.96,
-                duration: const Duration(milliseconds: 260),
-                curve: Curves.easeOutCubic,
-                child: _FeatureVisual(
-                  icon: data.icon,
-                  color: data.color,
-                  size: visualSize,
-                ),
-              ),
-              SizedBox(height: compact ? 18 : 22),
-              Text(
-                data.eyebrow.tr,
-                textAlign: TextAlign.center,
-                style: theme.typography.body.xs.copyWith(
-                  color: data.color,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.5,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                data.title.tr,
-                textAlign: TextAlign.center,
-                style: theme.typography.display.lg.copyWith(
-                  color: palette.textPrimary,
-                  fontWeight: FontWeight.w800,
-                  height: 1.12,
-                ),
-              ),
-              const SizedBox(height: 13),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 390),
-                child: Text(
-                  data.description.tr,
-                  textAlign: TextAlign.center,
-                  style: theme.typography.body.md.copyWith(
-                    color: palette.textSecondary,
-                    height: 1.5,
-                  ),
-                ),
-              ),
-              SizedBox(height: compact ? 16 : 24),
-              Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 12,
-                runSpacing: 8,
-                children: data.highlights
-                    .map(
-                      (highlight) => _FeatureHighlight(
-                        label: highlight,
-                        color: data.color,
-                      ),
-                    )
-                    .toList(),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _FeatureVisual extends StatelessWidget {
-  const _FeatureVisual({
-    required this.icon,
-    required this.color,
-    required this.size,
-  });
-
-  final IconData icon;
-  final Color color;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(icon, color: color, size: size * 0.46),
-    );
-  }
-}
-
-class _FeatureHighlight extends StatelessWidget {
-  const _FeatureHighlight({required this.label, required this.color});
-
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = FTheme.of(context);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(FLucideIcons.check, color: color, size: 15),
-        const SizedBox(width: 5),
-        Text(
-          label.tr,
-          style: theme.typography.body.sm.copyWith(
-            color: context.palette.textSecondary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ProgressIndicator extends StatelessWidget {
-  const _ProgressIndicator({required this.count, required this.currentIndex});
-
-  final int count;
-  final int currentIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: List.generate(count, (index) {
-        final active = index <= currentIndex;
-        return Expanded(
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 320),
-            curve: Curves.easeOutCubic,
-            height: 4,
-            margin: EdgeInsets.only(right: index == count - 1 ? 0 : 6),
-            decoration: BoxDecoration(
-              color: active ? AppColors.brandTeal : context.palette.border,
-              borderRadius: BorderRadius.circular(99),
-            ),
-          ),
-        );
-      }),
-    );
-  }
-}
-
-class _WalkthroughPageData {
-  const _WalkthroughPageData({
-    required this.eyebrow,
+class _FeatureTourData {
+  const _FeatureTourData({
+    required this.targetKey,
     required this.title,
     required this.description,
-    required this.icon,
-    required this.color,
-    required this.highlights,
   });
 
-  final String eyebrow;
+  final GlobalKey targetKey;
   final String title;
   final String description;
-  final IconData icon;
-  final Color color;
-  final List<String> highlights;
+
+  factory _FeatureTourData.forCurrentRole() {
+    final isEmployer =
+        Get.isRegistered<RoleController>() &&
+        Get.find<RoleController>().role.value == UserRole.employer;
+
+    return isEmployer
+        ? _FeatureTourData(
+            targetKey: FeatureTourTargets.postJob,
+            title: 'feature_tour_employer_title',
+            description: 'feature_tour_employer_description',
+          )
+        : _FeatureTourData(
+            targetKey: FeatureTourTargets.aiAssistant,
+            title: 'feature_tour_job_seeker_title',
+            description: 'feature_tour_job_seeker_description',
+          );
+  }
+}
+
+class _SpotlightBarrierPainter extends CustomPainter {
+  const _SpotlightBarrierPainter({
+    required this.spotlight,
+    required this.opacity,
+  });
+
+  final Rect? spotlight;
+  final double opacity;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final area = Offset.zero & size;
+    canvas.saveLayer(area, Paint());
+    canvas.drawRect(
+      area,
+      Paint()..color = Colors.black.withValues(alpha: opacity),
+    );
+
+    if (spotlight case final hole?) {
+      final roundedHole = RRect.fromRectAndRadius(
+        hole,
+        const Radius.circular(18),
+      );
+      canvas.drawRRect(roundedHole, Paint()..blendMode = BlendMode.clear);
+    }
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _SpotlightBarrierPainter oldDelegate) =>
+      oldDelegate.spotlight != spotlight || oldDelegate.opacity != opacity;
 }
